@@ -40,14 +40,37 @@ impl CPU {
 
     /// add register specified to a
     pub fn add_r(&mut self, r : u8) {
+        let overflow = self.r.a as u16 + r as u16 > 0xFF;
         self.r.a = self.r.a.wrapping_add(r);
         self.r.f = 0;
-        let overflow = self.r.a as u16 + r as u16 > 0xFF;
+
         // check overflow
         self.r.f |= if overflow {0x10} else {0};
         // check zero
         self.r.f |= if self.r.a == 0 {0x80} else {0};
 
+        // ticks
+        self.r.m = 1;
+        self.r.t = 4;
+    }
+
+    /// compare register r to a
+    pub fn cmp_r(&mut self, r : u8) {
+        // copy of A to check underflow
+        let mut tmp = self.r.a as i16;
+        tmp -= r as i16;
+
+        self.r.f |= 0x40;   //subtraction flag
+        self.r.f |= if self.r.a == 0 {0x80} else {0}; // zero flag
+        self.r.f |= if tmp < 0 {0x10} else {0}; // carry flag
+
+        // ticks
+        self.r.m = 1;
+        self.r.t = 4;
+    }
+
+    /// NO-OP, only updates clock
+    pub fn nop(&mut self) {
         // ticks
         self.r.m = 1;
         self.r.t = 4;
@@ -96,4 +119,19 @@ fn add_to_acc() {
     cpu.add_r(e);
     assert_eq!(cpu.r.a, 19);
     assert_eq!(cpu.r.f, 0x10);
+}
+
+
+#[test]
+fn compare_to_acc() {
+    let mut cpu = CPU::new();
+
+    cpu.r.a = 10;
+    cpu.r.e = 10;
+
+    let e = cpu.r.e;
+
+    cpu.cmp_r(e);
+    assert_eq!(cpu.r.a, 10);
+    assert_eq!(cpu.r.f, 0x40);
 }
