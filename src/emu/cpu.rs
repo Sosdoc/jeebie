@@ -1,3 +1,5 @@
+use emu::mem;
+
 #[derive(Debug)]
 struct Clock {
     m : u16,
@@ -75,6 +77,36 @@ impl CPU {
         self.r.m = 1;
         self.r.t = 4;
     }
+
+    /// executes the instruction
+    pub fn dispatch(&mut self, opcode : u8) {
+
+        match opcode {
+            0x0 => self.nop(),
+            _ => self.nop()
+        }
+
+    }
+
+    /// reads instructions and executes them
+    pub fn fetch_and_exec() {
+        let mut cpu = CPU::new();
+
+        loop {
+            // fetch
+            let opcode = mem::read_b(cpu.r.pc);
+            // execute
+            cpu.dispatch(opcode);
+            // increase PC
+            cpu.r.pc = cpu.r.pc.wrapping_add(1);
+            // adds clock ticks corresponding to previous instruction
+            cpu.c.m = cpu.c.m.wrapping_add(cpu.r.m);
+            cpu.c.t = cpu.c.t.wrapping_add(cpu.c.t);
+
+        }
+    }
+
+
 
 }
 
