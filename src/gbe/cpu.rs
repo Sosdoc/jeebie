@@ -1,11 +1,12 @@
-use gbe::memory;
+use std::rc::Rc;
+use std::cell::RefCell;
 
+use gbe::memory::{MMU};
 use gbe::registers::*;
 
-
-#[derive(Debug)]
 pub struct CPU {
     pub r: Registers,
+    pub memory: Rc<RefCell<MMU>>,
 }
 
 impl CPU {
@@ -19,7 +20,11 @@ impl CPU {
             pc: Register16::new(0),
             sp: Register16::new(0),
         };
-        CPU { r: r }
+
+        // TODO: this should be created only once and cloned for every struct
+        let mmu = Rc::new(RefCell::new(MMU::new()));
+
+        CPU { r: r, memory: mmu }
     }
 
     /// executes the instruction
@@ -33,15 +38,18 @@ impl CPU {
 
         loop {
             // fetch
-            let opcode = memory::read_b(cpu.r.pc.get());
+            // the block is needed so that the borrow of cpu.memory ends
+            // before dispatch, which will mutably borrow cpu
+            let opcode = {
+                let mem = cpu.memory.borrow();
+                mem.read_b(cpu.r.pc.get())
+            };
+
             // execute
             cpu.dispatch(opcode);
             // increase PC
             cpu.r.pc.increase();
-            // adds clock ticks corresponding to previous instruction
-            // cpu.c.m = cpu.c.m.wrapping_add(cpu.r.m);
-            // cpu.c.t = cpu.c.t.wrapping_add(cpu.c.t);
-
+            // TODO: compute clock timings
         }
     }
 
