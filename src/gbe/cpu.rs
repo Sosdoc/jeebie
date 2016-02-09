@@ -4,6 +4,7 @@ use std::cell::RefCell;
 use gbe::memory::MMU;
 use gbe::registers::*;
 
+#[derive(Debug)]
 pub struct CPU {
     pub r: Registers,
     pub memory: Rc<RefCell<MMU>>,
@@ -52,9 +53,5 @@ impl CPU {
             cpu.r.pc.increase();
             // TODO: compute clock timings
         }
-    }
-
-    pub fn ld_rr(reg1: &mut Register8, reg2: &Register8) {
-        reg1.set(reg2.get());
     }
 }
