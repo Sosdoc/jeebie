@@ -1,6 +1,6 @@
 use gbe::cpu::*;
 
-//- LD register to register
+// - LD register to register
 
 pub fn LDrr_bb(cpu: &mut CPU) {
     let v = cpu.r.bc.get_high();
@@ -210,6 +210,160 @@ pub fn LDrr_aa(cpu: &mut CPU) {
     let v = cpu.r.af.get_high();
     cpu.r.af.set_high(v);
 }
+
+/// Load in register from addr in HL
+
+pub fn LDrHLm_b(cpu: &mut CPU) {
+    let m = cpu.memory.borrow();
+    cpu.r.bc.set_high(m.read_b(cpu.r.hl.get()));
+}
+
+pub fn LDrHLm_c(cpu: &mut CPU) {
+    let m = cpu.memory.borrow();
+    cpu.r.bc.set_low(m.read_b(cpu.r.hl.get()));
+}
+
+pub fn LDrHLm_d(cpu: &mut CPU) {
+    let m = cpu.memory.borrow();
+    cpu.r.de.set_high(m.read_b(cpu.r.hl.get()));
+}
+
+pub fn LDrHLm_e(cpu: &mut CPU) {
+    let m = cpu.memory.borrow();
+    cpu.r.de.set_low(m.read_b(cpu.r.hl.get()));
+}
+
+pub fn LDrHLm_h(cpu: &mut CPU) {
+    let value = {
+        let m = cpu.memory.borrow();
+        m.read_b(cpu.r.hl.get())
+    };
+    cpu.r.hl.set_high(value);
+}
+
+pub fn LDrHLm_l(cpu: &mut CPU) {
+    let value = {
+        let m = cpu.memory.borrow();
+        m.read_b(cpu.r.hl.get())
+    };
+    cpu.r.hl.set_low(value);
+}
+
+pub fn LDrHLm_a(cpu: &mut CPU) {
+    let m = cpu.memory.borrow();
+    cpu.r.af.set_high(m.read_b(cpu.r.hl.get()));
+}
+
+// write register in memory at addr in HL
+
+pub fn LDHLmr_b(cpu: &mut CPU) {
+    let addr = {cpu.r.hl.get()};
+    let data = {cpu.r.bc.get_high()};
+    let mut m = cpu.memory.borrow_mut();
+    m.write_b(addr, data);
+}
+
+pub fn LDHLmr_c(cpu: &mut CPU) {
+    let addr = {cpu.r.hl.get()};
+    let data = {cpu.r.bc.get_low()};
+    let mut m = cpu.memory.borrow_mut();
+    m.write_b(addr, data);
+}
+
+pub fn LDHLmr_d(cpu: &mut CPU) {
+    let addr = {cpu.r.hl.get()};
+    let data = {cpu.r.de.get_high()};
+    let mut m = cpu.memory.borrow_mut();
+    m.write_b(addr, data);
+}
+
+pub fn LDHLmr_e(cpu: &mut CPU) {
+    let addr = {cpu.r.hl.get()};
+    let data = {cpu.r.de.get_low()};
+    let mut m = cpu.memory.borrow_mut();
+    m.write_b(addr, data);
+}
+
+pub fn LDHLmr_h(cpu: &mut CPU) {
+    let addr = {cpu.r.hl.get()};
+    let data = {cpu.r.hl.get_high()};
+    let mut m = cpu.memory.borrow_mut();
+    m.write_b(addr, data);
+}
+
+pub fn LDHLmr_l(cpu: &mut CPU) {
+    let addr = {cpu.r.hl.get()};
+    let data = {cpu.r.hl.get_low()};
+    let mut m = cpu.memory.borrow_mut();
+    m.write_b(addr, data);
+}
+
+pub fn LDHLmr_a(cpu: &mut CPU) {
+    let addr = {cpu.r.hl.get()};
+    let data = {cpu.r.af.get_high()};
+    let mut m = cpu.memory.borrow_mut();
+    m.write_b(addr, data);
+}
+
+/// read from memory at addr in PC to register
+
+pub fn LDrn_b(cpu: &mut CPU) {
+    let value = {
+        let m = cpu.memory.borrow();
+        m.read_b(cpu.r.pc.get())
+    };
+    cpu.r.bc.set_high(value);
+}
+
+pub fn LDrn_c(cpu: &mut CPU) {
+    let value = {
+        let m = cpu.memory.borrow();
+        m.read_b(cpu.r.pc.get())
+    };
+    cpu.r.bc.set_low(value);
+}
+
+pub fn LDrn_d(cpu: &mut CPU) {
+    let value = {
+        let m = cpu.memory.borrow();
+        m.read_b(cpu.r.pc.get())
+    };
+    cpu.r.de.set_high(value);
+}
+
+pub fn LDrn_e(cpu: &mut CPU) {
+    let value = {
+        let m = cpu.memory.borrow();
+        m.read_b(cpu.r.pc.get())
+    };
+    cpu.r.de.set_low(value);
+}
+
+pub fn LDrn_h(cpu: &mut CPU) {
+    let value = {
+        let m = cpu.memory.borrow();
+        m.read_b(cpu.r.pc.get())
+    };
+    cpu.r.hl.set_high(value);
+}
+
+pub fn LDrn_l(cpu: &mut CPU) {
+    let value = {
+        let m = cpu.memory.borrow();
+        m.read_b(cpu.r.pc.get())
+    };
+    cpu.r.hl.set_low(value);
+}
+
+pub fn LDrn_a(cpu: &mut CPU) {
+    let value = {
+        let m = cpu.memory.borrow();
+        m.read_b(cpu.r.pc.get())
+    };
+    cpu.r.af.set_high(value);
+}
+
+
 
 /// NO-OP, only updates clock
 pub fn nop(cpu: &mut CPU) {

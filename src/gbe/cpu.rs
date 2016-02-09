@@ -1,7 +1,7 @@
 use std::rc::Rc;
 use std::cell::RefCell;
 
-use gbe::memory::{MMU};
+use gbe::memory::MMU;
 use gbe::registers::*;
 
 pub struct CPU {
@@ -24,13 +24,14 @@ impl CPU {
         // TODO: this should be created only once and cloned for every struct
         let mmu = Rc::new(RefCell::new(MMU::new()));
 
-        CPU { r: r, memory: mmu }
+        CPU {
+            r: r,
+            memory: mmu,
+        }
     }
 
     /// executes the instruction
-    pub fn dispatch(&mut self, opcode: u8) {
-
-    }
+    pub fn dispatch(&mut self, opcode: u8) {}
 
     /// reads instructions and executes them
     pub fn fetch_and_exec() {

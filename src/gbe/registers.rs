@@ -4,7 +4,6 @@ pub struct Register8 {
 }
 
 impl Register8 {
-
     pub fn new(v: u8) -> Register8 {
         Register8 { value: v }
     }
@@ -14,7 +13,7 @@ impl Register8 {
     }
 
     pub fn set(&mut self, value: u8) {
-        self.value = value;
+        self.value = value;        
     }
 
     pub fn increase(&mut self) {
@@ -29,7 +28,6 @@ pub struct Register16 {
 }
 
 impl Register16 {
-
     pub fn new(v: u16) -> Register16 {
         let low = (v & 0x00FF) as u8;
         let high = ((v & 0xFF00) >> 8) as u8;
@@ -41,7 +39,7 @@ impl Register16 {
     }
 
     pub fn increase(&mut self) {
-        //self.value.wrapping_add(1);
+        // self.value.wrapping_add(1);
     }
 
     pub fn get_low(&self) -> u8 {
@@ -103,7 +101,7 @@ impl Registers {
     /// sets bit 7 of flags to 1
     pub fn set_zero_flag(&mut self) {
         let f = self.af.get_low();
-        self.af.set_low( f | 0x80 );
+        self.af.set_low(f | 0x80);
     }
 
     // /// sets bit 6 of flags to 1
@@ -140,5 +138,4 @@ impl Registers {
     // pub fn clear_carry_flag(&mut self) {
     //     self.af.set_low(self.af.get_low() & 0xEF);
     // }
-
 }

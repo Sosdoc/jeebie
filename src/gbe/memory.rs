@@ -16,7 +16,7 @@ impl MMU {
 
     /// reads a byte at the memory address specified
     pub fn read_b(&self, addr : u16) -> u8 {
-        self.data[addr as usize]
+        self.data[addr as usize]        
     }
 
     pub fn write_b(&mut self, addr : u16, data : u8) {
