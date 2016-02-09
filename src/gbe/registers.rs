@@ -13,7 +13,7 @@ impl Register8 {
     }
 
     pub fn set(&mut self, value: u8) {
-        self.value = value;        
+        self.value = value;
     }
 
     pub fn increase(&mut self) {
@@ -39,7 +39,8 @@ impl Register16 {
     }
 
     pub fn increase(&mut self) {
-        // self.value.wrapping_add(1);
+        let new_value = self.get().wrapping_add(1);
+        self.set(new_value);
     }
 
     pub fn get_low(&self) -> u8 {
@@ -60,6 +61,14 @@ impl Register16 {
 
     pub fn get(&self) -> u16 {
         ((self.high.get() as u16) << 8) | self.low.get() as u16
+    }
+
+    pub fn set(&mut self, v: u16) {
+        let low = (v & 0x00FF) as u8;
+        let high = (v >> 8) as u8;
+
+        self.set_low(low);
+        self.set_high(high);
     }
 }
 
@@ -98,44 +107,44 @@ impl Registers {
         (self.af.get_low() & 0x10) == 0x10
     }
 
-    /// sets bit 7 of flags to 1
-    pub fn set_zero_flag(&mut self) {
+    /// sets bit 7 of flags to the specified bool value
+    pub fn set_zero_flag(&mut self, flag: bool) {
         let f = self.af.get_low();
-        self.af.set_low(f | 0x80);
+
+        match flag {
+            true => self.af.set_low(f | 0x80),
+            false => self.af.set_low(f & 0x7F),
+        };
     }
 
-    // /// sets bit 6 of flags to 1
-    // pub fn set_add_sub_flag(&mut self) {
-    //     self.af.set_low(self.af.get_low() | 0x40);
-    // }
-    //
-    // /// sets bit 5 of flags to 1
-    // pub fn set_half_carry_flag(&mut self) {
-    //     self.af.set_low(self.af.get_low() | 0x20);
-    // }
-    //
-    // /// sets bit 4 of flags to 1
-    // pub fn set_carry_flag(&mut self) {
-    //     self.af.set_low(self.af.get_low() | 0x10);
-    // }
-    //
-    // /// clears bit 7 of flags
-    // pub fn clear_zero_flag(&mut self) {
-    //     self.af.set_low(self.af.get_low() & 0x7F);
-    // }
-    //
-    // /// clears bit 6 of flags
-    // pub fn clear_add_sub_flag(&mut self) {
-    //     self.af.set_low(self.af.get_low() & 0xBF);
-    // }
-    //
-    // /// clears bit 5 of flags
-    // pub fn clear_half_carry_flag(&mut self) {
-    //     self.af.set_low(self.af.get_low() & 0xDF);
-    // }
-    //
-    // /// clears bit 4 of flags
-    // pub fn clear_carry_flag(&mut self) {
-    //     self.af.set_low(self.af.get_low() & 0xEF);
-    // }
+    /// sets bit 6 of flags to the specified bool value
+    pub fn set_add_sub_flag(&mut self, flag: bool) {
+        let f = {self.af.get_low()};
+
+        match flag {
+            true => self.af.set_low(f | 0x40),
+            false => self.af.set_low(f & 0xBF),
+        };
+    }
+
+    /// sets bit 5 of flags to the specified bool value
+    pub fn set_half_carry_flag(&mut self, flag: bool) {
+        let f = {self.af.get_low()};
+
+        match flag {
+            true => self.af.set_low(f | 0x20),
+            false => self.af.set_low(f & 0xDF),
+        };
+    }
+
+    /// sets bit 4 of flags to the specified bool value
+    pub fn set_carry_flag(&mut self, flag: bool) {
+        let f = {self.af.get_low()};
+
+        match flag {
+            true => self.af.set_low(f | 0x10),
+            false => self.af.set_low(f & 0xEF),
+        };
+    }
+
 }
