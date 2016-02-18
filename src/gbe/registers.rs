@@ -1,6 +1,15 @@
-#[derive(Debug)]
+use std::fmt;
+
+/// An 8 bit register. This struct simply wraps an u8 value, it is also meant to offer simple
+/// arithmetic operations with wrapping in case of overflows.
 pub struct Register8 {
     value: u8,
+}
+
+impl fmt::Debug for Register8 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "0x{:02X}", self.value)
+    }
 }
 
 impl Register8 {
@@ -21,10 +30,18 @@ impl Register8 {
     }
 }
 
-#[derive(Debug)]
+/// A 16 bit register. It is composed of 2 Register8 structs, making the high and low parts of the
+/// 16 bits. The struct also offers the ability to get/set individual 8 bit registers or act as a
+/// whole u16 number.
 pub struct Register16 {
     pub low: Register8,
     pub high: Register8,
+}
+
+impl fmt::Debug for Register16 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "0x{:04X}", self.get())
+    }
 }
 
 impl Register16 {
@@ -56,11 +73,13 @@ impl Register16 {
     }
 }
 
-
+/// The main registers in a gameboy CPU.
+/// Registers are 16 bit wide and can be accessed as L(low) and H(high).
+/// Register AF is used for (A) accumulator and (F) flags
+/// This struct also offers convenience methods to get and set individual flags.
 #[derive(Debug)]
 pub struct Registers {
-    // registers are 16 bit wide and can be accessed as L(low) and H(high)
-    // register AF is used for (A) accumulator and (F) flags
+
     pub af: Register16,
     pub bc: Register16,
     pub de: Register16,
