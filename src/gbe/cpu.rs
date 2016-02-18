@@ -6,8 +6,8 @@ use gbe::registers::*;
 
 #[derive(Debug)]
 pub struct CPU {
-    pub r: Registers,
-    pub memory: Rc<RefCell<MMU>>,
+    pub reg: Registers,
+    pub mem: Rc<RefCell<MMU>>,
 }
 
 impl CPU {
@@ -25,10 +25,7 @@ impl CPU {
         // TODO: this should be created only once and cloned for every struct
         let mmu = Rc::new(RefCell::new(MMU::new()));
 
-        CPU {
-            r: r,
-            memory: mmu,
-        }
+        CPU { reg: r, mem: mmu }
     }
 
     /// executes the instruction
@@ -43,15 +40,19 @@ impl CPU {
             // the block is needed so that the borrow of cpu.memory ends
             // before dispatch, which will mutably borrow cpu
             let opcode = {
-                let mem = cpu.memory.borrow();
-                mem.read_b(cpu.r.pc.get())
+                let mem = cpu.mem.borrow();
+                mem.read_b(cpu.reg.pc.get())
             };
 
             // execute
             cpu.dispatch(opcode);
             // increase PC
-            cpu.r.pc.increase();
+            cpu.reg.pc.increase();
             // TODO: compute clock timings
         }
+    }
+
+    pub fn LD_nn_n(reg1: &mut Register8, value: u8) {
+        reg1.set(value);
     }
 }

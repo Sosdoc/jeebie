@@ -2,3 +2,9 @@
 name = "gbe"
 version = "0.1.0"
 authors = ["Valerio Pipolo <valep27@gmail.com>"]
+
+[dependencies]
+clippy = {version = "*", optional = true}
+
+[features]
+default=[]
