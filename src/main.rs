@@ -4,7 +4,6 @@
 mod gbe;
 
 use gbe::cpu::*;
-use gbe::instr::*;
 
 fn main() {
     println!("Hello, cpu!");

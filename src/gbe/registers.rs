@@ -113,41 +113,41 @@ impl Registers {
     /// sets bit 7 of flags to the specified bool value
     pub fn set_zero_flag(&mut self, flag: bool) {
         let f = self.af.low.get();
-
-        match flag {
-            true => self.af.low.set(f | 0x80),
-            false => self.af.low.set(f & 0x7F),
-        };
+        if flag {
+            self.af.low.set(f | 0x80);
+        } else {
+            self.af.low.set(f & 0x7F);
+        }
     }
 
     /// sets bit 6 of flags to the specified bool value
     pub fn set_add_sub_flag(&mut self, flag: bool) {
         let f = {self.af.low.get()};
-
-        match flag {
-            true => self.af.low.set(f | 0x40),
-            false => self.af.low.set(f & 0xBF),
-        };
+        if flag {
+            self.af.low.set(f | 0x40);
+        } else {
+            self.af.low.set(f & 0xBF);
+        }
     }
 
     /// sets bit 5 of flags to the specified bool value
     pub fn set_half_carry_flag(&mut self, flag: bool) {
         let f = {self.af.low.get()};
-
-        match flag {
-            true => self.af.low.set(f | 0x20),
-            false => self.af.low.set(f & 0xDF),
-        };
+        if flag {
+            self.af.low.set(f | 0x20);
+        } else {
+            self.af.low.set(f & 0xDF);
+        }
     }
 
     /// sets bit 4 of flags to the specified bool value
     pub fn set_carry_flag(&mut self, flag: bool) {
         let f = {self.af.low.get()};
-
-        match flag {
-            true => self.af.low.set(f | 0x10),
-            false => self.af.low.set(f & 0xEF),
-        };
+        if flag {
+            self.af.low.set(f | 0x10);
+        } else {
+            self.af.low.set(f & 0xEF);
+        }
     }
 
 }
