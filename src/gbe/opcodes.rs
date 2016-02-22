@@ -5,7 +5,7 @@ pub type Opcode = fn(&mut CPU) -> ();
 
 pub static OPCODE_TABLE : [Opcode; 256] = [
     // 00
-    nop,    LDrr_bb,    LDrr_bc,    LDrr_bd,
+    nop,    nop,    nop,    nop,
     nop,    nop,    nop,    nop,
     nop,    nop,    nop,    nop,
     nop,    nop,    nop,    nop,
