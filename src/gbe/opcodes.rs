@@ -1,9 +1,10 @@
 use gbe::instr::nop;
 use gbe::cpu::CPU;
 
-pub type Opcode = fn(&mut CPU) -> ();
+/// The type of functions that implement an opcode.
+pub type OpcodeFunc = fn(&mut CPU) -> ();
 
-pub static OPCODE_TABLE : [Opcode; 256] = [
+pub static OPCODE_TABLE : [OpcodeFunc; 256] = [
     // 00
     nop,    nop,    nop,    nop,
     nop,    nop,    nop,    nop,
