@@ -1,4 +1,4 @@
-use gbe::instr::*;
+use gbe::instr::nop;
 use gbe::cpu::CPU;
 
 pub type Opcode = fn(&mut CPU) -> ();

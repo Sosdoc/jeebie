@@ -11,6 +11,6 @@ fn main() {
     let mut cpu = CPU::new();
     println!("{:?}", cpu);
 
-    gbe::instr::LD_HLm_a(&mut cpu);
+    gbe::instr::load::LD_HLm_a(&mut cpu);
     println!("{:?}", cpu);
 }

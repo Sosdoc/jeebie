@@ -1,4 +1,4 @@
-use gbe::cpu::*;
+use gbe::cpu::CPU;
 
 // LD B,n 06 8
 pub fn LD_B_n(cpu: &mut CPU) {
@@ -453,10 +453,4 @@ pub fn LD_c_mem_a(cpu: &mut CPU) {
     let addr = 0xFF00 & (cpu.reg.bc.low.get() as u16);
     let value = cpu.reg.af.high.get();
     cpu.mem.borrow_mut().write_b(addr, value);
-}
-
-/// NO-OP, only updates clock
-pub fn nop(cpu: &mut CPU) {
-    // cpu.reg.m = 1;
-    // cpu.reg.t = 4;
 }
