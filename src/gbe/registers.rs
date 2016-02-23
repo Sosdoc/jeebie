@@ -88,7 +88,7 @@ impl Register16 {
 
 /// The main registers in a gameboy CPU.
 /// Registers are 16 bit wide and can be accessed as L(low) and H(high).
-/// Register AF is used for (A) accumulator and (F) flags
+/// Register AF is used for (A) accumulator and (F) flags.
 /// This struct also offers convenience methods to get and set individual flags.
 #[derive(Debug)]
 pub struct Registers {
@@ -101,70 +101,49 @@ pub struct Registers {
     pub sp: Register16, // stack pointer
 }
 
+/// The four flags and their respective bit values. Bits 0-3 are unused.
+pub enum Flags {
+    /// This bit is set when the result of a math operation
+    /// is zero or two values match when using the CP
+    /// instruction.
+    Zero        = 0b10000000,
+
+    /// This bit is set if a subtraction was performed in the
+    /// last math instruction.
+    Sub         = 0b01000000,
+
+    /// This bit is set if a carry occurred from the lower
+    /// nibble in the last math operation.
+    Carry       = 0b00100000,
+
+    /// This bit is set if a carry occurred from the last
+    /// math operation or if register A is the smaller value
+    /// when executing the CP instruction.
+    HalfCarry   = 0b00010000,
+}
+
 impl Registers {
-    /// true if bit 7 of flags is 1
-    pub fn zero_flag(&self) -> bool {
-        (self.af.low.get() & 0x80) == 0x80
+
+    /// Clears all flag values by resetting the F register to 0.
+    pub fn clear_all_flags(&mut self) {
+        self.af.low.set(0);
     }
 
-    /// true if bit 6 of flags is 1
-    pub fn add_sub_flag(&self) -> bool {
-        (self.af.low.get() & 0x40) == 0x40
+    /// Sets the selected flag to 1.
+    pub fn set_flag(&mut self, flag: Flags) {
+        let new_flags = self.af.low.get() | (flag as u8);
+        self.af.low.set(new_flags);
     }
 
-    /// true if bit 5 of flags is 1
-    pub fn half_carry_flag(&self) -> bool {
-        (self.af.low.get() & 0x20) == 0x20
+    /// Clears the selected flag.
+    pub fn clear_flag(&mut self, flag: Flags) {
+        let new_flags = self.af.low.get() & !(flag as u8);
+        self.af.low.set(new_flags);
     }
 
-    /// true if bit 4 of flags is 1
-    pub fn carry_flag(&self) -> bool {
-        (self.af.low.get() & 0x10) == 0x10
-    }
-
-    /// sets bit 7 of flags to the specified bool value
-    pub fn set_zero_flag(&mut self, flag: bool) {
-        let f = self.af.low.get();
-        if flag {
-            self.af.low.set(f | 0x80);
-        } else {
-            self.af.low.set(f & 0x7F);
-        }
-    }
-
-    /// sets bit 6 of flags to the specified bool value
-    pub fn set_add_sub_flag(&mut self, flag: bool) {
-        let f = {
-            self.af.low.get()
-        };
-        if flag {
-            self.af.low.set(f | 0x40);
-        } else {
-            self.af.low.set(f & 0xBF);
-        }
-    }
-
-    /// sets bit 5 of flags to the specified bool value
-    pub fn set_half_carry_flag(&mut self, flag: bool) {
-        let f = {
-            self.af.low.get()
-        };
-        if flag {
-            self.af.low.set(f | 0x20);
-        } else {
-            self.af.low.set(f & 0xDF);
-        }
-    }
-
-    /// sets bit 4 of flags to the specified bool value
-    pub fn set_carry_flag(&mut self, flag: bool) {
-        let f = {
-            self.af.low.get()
-        };
-        if flag {
-            self.af.low.set(f | 0x10);
-        } else {
-            self.af.low.set(f & 0xEF);
-        }
+    /// Returns true if the selected flag is set.
+    pub fn is_set(&self, flag: Flags) -> bool {
+        let flag_value = flag as u8;
+        (self.af.low.get() & flag_value) == flag_value
     }
 }
