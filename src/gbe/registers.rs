@@ -25,8 +25,14 @@ impl Register8 {
         self.value = value;
     }
 
-    pub fn increase(&mut self) {
-        self.value.wrapping_add(1);
+    /// adds the value with wrapping semantics
+    pub fn add(&mut self, value: u8) {
+        self.value.wrapping_add(value);
+    }
+
+    /// adds the value with wrapping semantics
+    pub fn sub(&mut self, value: u8) {
+        self.value.wrapping_sub(value);
     }
 }
 
@@ -55,8 +61,15 @@ impl Register16 {
         }
     }
 
-    pub fn increase(&mut self) {
-        let new_value = self.get().wrapping_add(1);
+    /// adds the value with wrapping semantics
+    pub fn add(&mut self, value: u16) {
+        let new_value = self.get().wrapping_add(value);
+        self.set(new_value);
+    }
+
+    /// adds the value with wrapping semantics
+    pub fn sub(&mut self, value: u16) {
+        let new_value = self.get().wrapping_sub(value);
         self.set(new_value);
     }
 
@@ -79,7 +92,6 @@ impl Register16 {
 /// This struct also offers convenience methods to get and set individual flags.
 #[derive(Debug)]
 pub struct Registers {
-
     pub af: Register16,
     pub bc: Register16,
     pub de: Register16,
@@ -122,7 +134,9 @@ impl Registers {
 
     /// sets bit 6 of flags to the specified bool value
     pub fn set_add_sub_flag(&mut self, flag: bool) {
-        let f = {self.af.low.get()};
+        let f = {
+            self.af.low.get()
+        };
         if flag {
             self.af.low.set(f | 0x40);
         } else {
@@ -132,7 +146,9 @@ impl Registers {
 
     /// sets bit 5 of flags to the specified bool value
     pub fn set_half_carry_flag(&mut self, flag: bool) {
-        let f = {self.af.low.get()};
+        let f = {
+            self.af.low.get()
+        };
         if flag {
             self.af.low.set(f | 0x20);
         } else {
@@ -142,12 +158,13 @@ impl Registers {
 
     /// sets bit 4 of flags to the specified bool value
     pub fn set_carry_flag(&mut self, flag: bool) {
-        let f = {self.af.low.get()};
+        let f = {
+            self.af.low.get()
+        };
         if flag {
             self.af.low.set(f | 0x10);
         } else {
             self.af.low.set(f & 0xEF);
         }
     }
-
 }

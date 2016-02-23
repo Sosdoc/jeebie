@@ -454,3 +454,16 @@ pub fn LD_c_mem_a(cpu: &mut CPU) {
     let value = cpu.reg.af.high.get();
     cpu.mem.borrow_mut().write_b(addr, value);
 }
+
+// LDD A,(HL) 3A 8
+// equivalent to LD A,(HL) -> DEC HL
+pub fn LDD_a_HLm(cpu: &mut CPU) {
+    LD_a_HLm(cpu);
+    cpu.reg.hl.sub(1);
+}
+
+// LDD (HL),A 32 8
+pub fn LDD_HLm_a(cpu: &mut CPU) {
+    LD_HLm_a(cpu)
+    cpu.reg.hl.sub(1);
+}

@@ -47,7 +47,7 @@ impl CPU {
             // execute
             cpu.dispatch(opcode);
             // increase PC
-            cpu.reg.pc.increase();
+            cpu.reg.pc.add(1);
             // TODO: compute clock timings
         }
     }
