@@ -464,6 +464,86 @@ pub fn LDD_a_HLm(cpu: &mut CPU) {
 
 // LDD (HL),A 32 8
 pub fn LDD_HLm_a(cpu: &mut CPU) {
-    LD_HLm_a(cpu)
+    LD_HLm_a(cpu);
     cpu.reg.hl.sub(1);
+}
+
+// LDI A,(HL) 2A 8
+pub fn LDI_a_HLm(cpu: &mut CPU) {
+    LD_a_HLm(cpu);
+    cpu.reg.hl.add(1);
+}
+
+// LDI (HL),A 22 8
+pub fn LDI_HLm_a(cpu: &mut CPU) {
+    LD_HLm_a(cpu);
+    cpu.reg.hl.add(1);
+}
+
+// LDH ($FF00+n),A E0 12
+pub fn LDH_nm_a(cpu: &mut CPU) {
+    let addr = 0xFF00 & (cpu.reg.pc.low.get() as u16);
+    let value = cpu.reg.af.high.get();
+    cpu.mem.borrow_mut().write_b(addr, value);
+}
+
+// LDH A,($FF00+n) F0 12
+pub fn LDH_a_nm(cpu: &mut CPU) {
+    let addr = 0xFF00 & (cpu.reg.pc.low.get() as u16);
+    let value = cpu.mem.borrow().read_b(addr);
+    cpu.reg.af.high.set(value);
+}
+
+// *** 16-bit loads ***
+
+// LD BC,nn 01 12
+pub fn LD_bc_nn(cpu: &mut CPU) {
+    let immediate = cpu.reg.pc.get();
+    cpu.reg.bc.set(immediate);
+}
+
+// LD DE,nn 11 12
+pub fn LD_de_nn(cpu: &mut CPU) {
+    let immediate = cpu.reg.pc.get();
+    cpu.reg.de.set(immediate);
+}
+
+// LD HL,nn 21 12
+pub fn LD_hl_nn(cpu: &mut CPU) {
+    let immediate = cpu.reg.pc.get();
+    cpu.reg.hl.set(immediate);
+}
+
+// LD SP,nn 31 12
+pub fn LD_sp_nn(cpu: &mut CPU) {
+    let immediate = cpu.reg.pc.get();
+    cpu.reg.sp.set(immediate);
+}
+
+// LD SP,HL F9 8
+pub fn LD_sp_hl(cpu: &mut CPU) {
+    cpu.reg.sp.set(cpu.reg.hl.get());
+}
+
+// LDHL SP,n F8 12
+// affects flags: ZNHC
+pub fn LDHL_sp_n(cpu: &mut CPU) {
+    let immediate = cpu.reg.pc.low.get();
+    let value = cpu.reg.sp.get().wrapping_add(immediate as u16);
+
+    cpu.reg.hl.set(value);
+    // TODO: flags
+}
+
+
+// LD (nn),SP 08 20
+// write 2 bytes (SP) at address nn
+pub fn LD_nnm_sp(cpu: &mut CPU) {
+    let low_val = cpu.reg.sp.low.get();
+    let high_val = cpu.reg.sp.high.get();
+    let addr_low = cpu.reg.pc.get();
+    let addr_high = addr_low.wrapping_add(1);
+
+    cpu.mem.borrow_mut().write_b(addr_low, low_val);
+    cpu.mem.borrow_mut().write_b(addr_high, high_val);
 }
