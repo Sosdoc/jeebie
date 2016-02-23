@@ -56,6 +56,30 @@ impl CPU {
         reg1.set(value);
     }
 
+    // Computes the flags
+    pub fn compute_flags_add8(&mut self, lhs: u8, rhs: u8) -> u8 {
+        let result = lhs.wrapping_add(rhs);
+
+        self.reg.clear_all_flags();
+
+        if result == 0 {
+            self.reg.set_flag(Flags::Zero);
+        }
+
+        // checked add returns None if add overflows
+        if let None = lhs.checked_add(rhs) {
+            self.reg.set_flag(Flags::Carry);
+        }
+
+        let low_result = (rhs & 0x0F) + (lhs & 0x0F);
+        // check if bit 4 is set
+        if (low_result >> 4) == 1 {
+            self.reg.set_flag(Flags::HalfCarry);
+        }
+
+        result
+    }
+
     /// Pushes on the stack a 16-bit register value,
     /// it decrements SP and pushes the LSB before the MSB.
     pub fn push_stack(&mut self, reg: u16) {
