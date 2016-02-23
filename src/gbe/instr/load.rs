@@ -2,32 +2,38 @@ use gbe::cpu::CPU;
 
 // LD B,n 06 8
 pub fn LD_B_n(cpu: &mut CPU) {
-    CPU::LD_nn_n(&mut cpu.reg.bc.high, cpu.reg.pc.low.get());
+    let n = cpu.get_immediate8();
+    CPU::LD_nn_n(&mut cpu.reg.bc.high, n);
 }
 
 // LD C,n 0E 8
 pub fn LD_C_n(cpu: &mut CPU) {
-    CPU::LD_nn_n(&mut cpu.reg.bc.low, cpu.reg.pc.low.get());
+    let n = cpu.get_immediate8();
+    CPU::LD_nn_n(&mut cpu.reg.bc.low, n);
 }
 
 // LD D,n 16 8
 pub fn LD_D_n(cpu: &mut CPU) {
-    CPU::LD_nn_n(&mut cpu.reg.de.high, cpu.reg.pc.low.get());
+    let n = cpu.get_immediate8();
+    CPU::LD_nn_n(&mut cpu.reg.de.high, n);
 }
 
 // LD E,n 1E 8
 pub fn LD_E_n(cpu: &mut CPU) {
-    CPU::LD_nn_n(&mut cpu.reg.de.low, cpu.reg.pc.low.get());
+    let n = cpu.get_immediate8();
+    CPU::LD_nn_n(&mut cpu.reg.de.low, n);
 }
 
 // LD H,n 26 8
 pub fn LD_H_n(cpu: &mut CPU) {
-    CPU::LD_nn_n(&mut cpu.reg.hl.high, cpu.reg.pc.low.get());
+    let n = cpu.get_immediate8();
+    CPU::LD_nn_n(&mut cpu.reg.hl.high, n);
 }
 
 // LD L,n 2E 8
 pub fn LD_L_n(cpu: &mut CPU) {
-    CPU::LD_nn_n(&mut cpu.reg.hl.low, cpu.reg.pc.low.get());
+    let n = cpu.get_immediate8();
+    CPU::LD_nn_n(&mut cpu.reg.hl.low, n);
 }
 
 // LD A,A 7F 4
@@ -373,7 +379,7 @@ pub fn LD_HLm_l(cpu: &mut CPU) {
 // LD (HL),n 36 12
 pub fn LD_HLm_n(cpu: &mut CPU) {
     let addr = cpu.reg.hl.get();
-    let data = cpu.reg.pc.low.get();
+    let data = cpu.get_immediate8();
     let mut m = cpu.mem.borrow_mut();
     m.write_b(addr, data);
 }
@@ -408,10 +414,8 @@ pub fn LD_a_HLm(cpu: &mut CPU) {
 
 // LD A,(nn) FA 16
 pub fn LD_a_nnm(cpu: &mut CPU) {
-    let m = cpu.mem.borrow();
-    // immediate value (pc) is used as address
-    let addr = cpu.reg.pc.get();
-    cpu.reg.af.high.set(m.read_b(addr));
+    let addr = cpu.get_immediate16();
+    cpu.reg.af.high.set(cpu.mem.borrow().read_b(addr));
 }
 
 // LD A,# 3E 8
@@ -434,7 +438,7 @@ pub fn LD_DEm_A(cpu: &mut CPU) {
 // LD (nn),A EA 16
 pub fn LD_nnm_A(cpu: &mut CPU) {
     let value = cpu.reg.af.high.get();
-    let addr = cpu.reg.pc.get();
+    let addr = cpu.get_immediate16();
     cpu.mem.borrow_mut().write_b(addr, value);
 }
 
@@ -498,25 +502,25 @@ pub fn LDH_a_nm(cpu: &mut CPU) {
 
 // LD BC,nn 01 12
 pub fn LD_bc_nn(cpu: &mut CPU) {
-    let immediate = cpu.reg.pc.get();
+    let immediate = cpu.get_immediate16();
     cpu.reg.bc.set(immediate);
 }
 
 // LD DE,nn 11 12
 pub fn LD_de_nn(cpu: &mut CPU) {
-    let immediate = cpu.reg.pc.get();
+    let immediate = cpu.get_immediate16();
     cpu.reg.de.set(immediate);
 }
 
 // LD HL,nn 21 12
 pub fn LD_hl_nn(cpu: &mut CPU) {
-    let immediate = cpu.reg.pc.get();
+    let immediate = cpu.get_immediate16();
     cpu.reg.hl.set(immediate);
 }
 
 // LD SP,nn 31 12
 pub fn LD_sp_nn(cpu: &mut CPU) {
-    let immediate = cpu.reg.pc.get();
+    let immediate = cpu.get_immediate16();
     cpu.reg.sp.set(immediate);
 }
 
@@ -525,10 +529,10 @@ pub fn LD_sp_hl(cpu: &mut CPU) {
     cpu.reg.sp.set(cpu.reg.hl.get());
 }
 
-// LDHL SP,n F8 12
+// LD HL, SP+n F8 12
 // affects flags: ZNHC
 pub fn LDHL_sp_n(cpu: &mut CPU) {
-    let immediate = cpu.reg.pc.low.get();
+    let immediate = cpu.get_immediate8();
     let value = cpu.reg.sp.get().wrapping_add(immediate as u16);
 
     cpu.reg.hl.set(value);
@@ -539,10 +543,9 @@ pub fn LDHL_sp_n(cpu: &mut CPU) {
 // LD (nn),SP 08 20
 // write 2 bytes (SP) at address nn
 pub fn LD_nnm_sp(cpu: &mut CPU) {
-    // TODO fix immediate value decoding
     let low_val = cpu.reg.sp.low.get();
     let high_val = cpu.reg.sp.high.get();
-    let addr_low = cpu.reg.pc.get();
+    let addr_low = cpu.get_immediate16();
     let addr_high = addr_low.wrapping_add(1);
 
     cpu.mem.borrow_mut().write_b(addr_low, low_val);
