@@ -55,4 +55,22 @@ impl CPU {
     pub fn LD_nn_n(reg1: &mut Register8, value: u8) {
         reg1.set(value);
     }
+
+    /// Retrieves an immediate 8-bit value.
+    /// Immediates are retrieved by reading at the address in the PC register.
+    pub fn get_immediate8(&mut self) -> u8 {
+        let value = self.mem.borrow().read_b(self.reg.pc.get());
+        self.reg.pc.add(1);
+        
+        value
+    }
+
+    /// Retrieves an immediate 16-bit value.
+    /// 16-bit immediates are read as two 8-bit immediates, the first being the LSB.
+    pub fn get_immediate16(&mut self) -> u16 {
+        let low = self.get_immediate8();
+        let high = self.get_immediate8();
+
+        (high as u16) & (low as u16)
+    }
 }

@@ -539,6 +539,7 @@ pub fn LDHL_sp_n(cpu: &mut CPU) {
 // LD (nn),SP 08 20
 // write 2 bytes (SP) at address nn
 pub fn LD_nnm_sp(cpu: &mut CPU) {
+    // TODO fix immediate value decoding
     let low_val = cpu.reg.sp.low.get();
     let high_val = cpu.reg.sp.high.get();
     let addr_low = cpu.reg.pc.get();
