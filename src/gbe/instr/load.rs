@@ -420,7 +420,11 @@ pub fn LD_a_nnm(cpu: &mut CPU) {
 }
 
 // LD A,# 3E 8
-// TODO: implement this?
+// load address in PC and put the data in A
+pub fn LD_a_n(cpu: &mut CPU) {
+    let value = cpu.mem.borrow().read_b(cpu.reg.pc.get());
+    cpu.reg.af.high.set(value);
+}
 
 // LD (BC),A 02 8
 pub fn LD_BCm_A(cpu: &mut CPU) {
@@ -537,7 +541,7 @@ pub fn LDHL_sp_n(cpu: &mut CPU) {
     let result = cpu.reg.sp.get().wrapping_add(immediate as u16);
 
     cpu.reg.hl.set(result);
-    
+
     // TODO: check that flags conditions are correct (test maybe?)
     cpu.reg.clear_all_flags();
 

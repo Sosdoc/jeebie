@@ -56,12 +56,37 @@ impl CPU {
         reg1.set(value);
     }
 
+    /// Pushes on the stack a 16-bit register value,
+    /// it decrements SP and pushes the LSB before the MSB.
+    pub fn push_stack(&mut self, reg: u16) {
+        self.reg.sp.sub(1);
+        let addr = self.reg.sp.get();
+        let low = (reg & 0x00FF) as u8;
+        self.mem.borrow_mut().write_b(addr, low);
+
+        self.reg.sp.sub(1);
+        let addr = self.reg.sp.get();
+        let high = ((reg >> 8) & 0x00FF) as u8;
+        self.mem.borrow_mut().write_b(addr, high);
+    }
+
+    /// Pops a 16-bit value from the stack, MSB first, returning the u16 value.
+    pub fn pop_stack(&mut self) -> u16 {
+        let high = self.mem.borrow().read_b(self.reg.sp.get());
+        self.reg.sp.add(1);
+
+        let low = self.mem.borrow().read_b(self.reg.sp.get());
+        self.reg.sp.add(1);
+
+        ((high as u16) << 8) & (low as u16)
+    }
+
     /// Retrieves an immediate 8-bit value.
     /// Immediates are retrieved by reading at the address in the PC register.
     pub fn get_immediate8(&mut self) -> u8 {
         let value = self.mem.borrow().read_b(self.reg.pc.get());
         self.reg.pc.add(1);
-        
+
         value
     }
 
