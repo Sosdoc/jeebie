@@ -1,4 +1,5 @@
 use gbe::cpu::CPU;
+use gbe::registers::Flags;
 
 // LD B,n 06 8
 pub fn LD_B_n(cpu: &mut CPU) {
@@ -533,21 +534,29 @@ pub fn LD_sp_hl(cpu: &mut CPU) {
 // affects flags: ZNHC
 pub fn LDHL_sp_n(cpu: &mut CPU) {
     let immediate = cpu.get_immediate8();
-    let value = cpu.reg.sp.get().wrapping_add(immediate as u16);
+    let result = cpu.reg.sp.get().wrapping_add(immediate as u16);
 
-    cpu.reg.hl.set(value);
-    // TODO: flags
+    cpu.reg.hl.set(result);
+    
+    // TODO: check that flags conditions are correct (test maybe?)
+    cpu.reg.clear_all_flags();
+
+    if ((cpu.reg.sp.get() ^ (immediate as u16) ^ result) & 0x100) == 0x100 {
+        cpu.reg.set_flag(Flags::Carry)
+    }
+
+    if ((cpu.reg.sp.get() ^ (immediate as u16) ^ result) & 0x10) == 0x10 {
+        cpu.reg.set_flag(Flags::HalfCarry)
+    }
+
 }
-
 
 // LD (nn),SP 08 20
 // write 2 bytes (SP) at address nn
 pub fn LD_nnm_sp(cpu: &mut CPU) {
-    let low_val = cpu.reg.sp.low.get();
-    let high_val = cpu.reg.sp.high.get();
     let addr_low = cpu.get_immediate16();
     let addr_high = addr_low.wrapping_add(1);
 
-    cpu.mem.borrow_mut().write_b(addr_low, low_val);
-    cpu.mem.borrow_mut().write_b(addr_high, high_val);
+    cpu.mem.borrow_mut().write_b(addr_low, cpu.reg.sp.low.get());
+    cpu.mem.borrow_mut().write_b(addr_high, cpu.reg.sp.high.get());
 }
