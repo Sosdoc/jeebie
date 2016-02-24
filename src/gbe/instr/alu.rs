@@ -325,3 +325,58 @@ pub fn AND_n(cpu: &mut CPU) {
     let rhs = cpu.get_immediate8();
     cpu.compute_and(rhs);
 }
+
+
+// OR A B7 4
+pub fn OR_a(cpu: &mut CPU) {
+    let rhs = cpu.reg.af.high.get();
+    cpu.compute_or(rhs);
+}
+
+// OR B B0 4
+pub fn OR_b(cpu: &mut CPU) {
+    let rhs = cpu.reg.bc.high.get();
+    cpu.compute_or(rhs);
+}
+
+// OR C B1 4
+pub fn OR_c(cpu: &mut CPU) {
+    let rhs = cpu.reg.bc.low.get();
+    cpu.compute_or(rhs);
+}
+
+// OR D B2 4
+pub fn OR_d(cpu: &mut CPU) {
+    let rhs = cpu.reg.de.high.get();
+    cpu.compute_or(rhs);
+}
+
+// OR E B3 4
+pub fn OR_e(cpu: &mut CPU) {
+    let rhs = cpu.reg.de.low.get();
+    cpu.compute_or(rhs);
+}
+
+// OR H B4 4
+pub fn OR_h(cpu: &mut CPU) {
+    let rhs = cpu.reg.hl.high.get();
+    cpu.compute_or(rhs);
+}
+
+// OR L B5 4
+pub fn OR_l(cpu: &mut CPU) {
+    let rhs = cpu.reg.hl.low.get();
+    cpu.compute_or(rhs);
+}
+
+// OR (HL) B6 8
+pub fn OR_hlm(cpu: &mut CPU) {
+    let rhs = cpu.mem.borrow().read_b(cpu.reg.hl.get());
+    cpu.compute_or(rhs);
+}
+
+// OR # F6 8
+pub fn OR_n(cpu: &mut CPU) {
+    let rhs = cpu.get_immediate8();
+    cpu.compute_or(rhs);
+}
