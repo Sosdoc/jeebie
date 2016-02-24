@@ -106,24 +106,24 @@ impl CPU {
     }
 
     // Computes the flags for a CP instruction.
-    // this has the same effect as a SUB, but the result discarded.
+    // this has the same effect on flags as a SUB, but the result is discarded.
     pub fn compute_cp(&mut self, rhs: u8)  {
         let lhs = self.reg.af.high.get();
-        let result = lhs.wrapping_sub(rhs);
-
         self.reg.clear_all_flags();
+        self.reg.set_flag(Flags::Sub);
 
-        if result == 0 {
+        // Same as A - n
+        if lhs == rhs {
             self.reg.set_flag(Flags::Zero);
         }
 
-        self.reg.set_flag(Flags::Sub);
-
-        if let None = lhs.checked_sub(rhs) {
+        // if A < n
+        if lhs < rhs {
             self.reg.set_flag(Flags::Carry);
         }
 
-        if let None = (lhs & 0xF).checked_sub(rhs & 0xF) {
+        // if 4 low bits of A < 4 low bits of n
+        if (lhs & 0xF) < (rhs & 0xF) {
             self.reg.set_flag(Flags::HalfCarry);
         }
     }
