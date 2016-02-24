@@ -175,8 +175,35 @@ impl CPU {
     }
 
     /// Computes flags after an INC instruction based on the final value.
+    /// Carry flag is left untouched, so no clearing all of them.
     pub fn compute_inc_flags(&mut self, increased_value: u8) {
-        // TODO complete this
+        self.reg.clear_flag(Flags::Sub);
+
+        if increased_value == 0 {
+            self.reg.set_flag(Flags::Zero);
+        }
+
+        // TODO: this condition sucks
+        // set HC if bit 0-3 were 1 before adding
+        if (increased_value.wrapping_sub(1) & 0x0F) == 0x0F {
+            self.reg.set_flag(Flags::HalfCarry);
+        }
+    }
+
+    /// Computes flags after a DEC instruction based on the final value.
+    /// Carry flag is left untouched, so no clearing all of them.
+    pub fn compute_dec_flags(&mut self, decreased_value: u8) {
+        self.reg.set_flag(Flags::Sub);
+
+        if decreased_value == 0 {
+            self.reg.set_flag(Flags::Zero);
+        }
+
+        // HC is set if bit 4 was borrowed
+        // this happens only when bit 0-3 are all 0 before decrementing.
+        if (decreased_value.wrapping_add(1) & 0x0F) == 0x00 {
+            self.reg.set_flag(Flags::HalfCarry);
+        }
     }
 
     /// Pushes on the stack a 16-bit register value,

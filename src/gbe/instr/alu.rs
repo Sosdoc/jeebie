@@ -496,38 +496,113 @@ pub fn INC_a(cpu: &mut CPU) {
     cpu.compute_inc_flags(result);
 }
 
-// TODO: implement INC
 // INC B 04 4
 pub fn INC_b(cpu: &mut CPU) {
-
+    cpu.reg.af.high.add(1);
+    let result = cpu.reg.bc.high.get();
+    cpu.compute_inc_flags(result);
 }
 
 // INC C 0C 4
 pub fn INC_c(cpu: &mut CPU) {
-
+    cpu.reg.af.high.add(1);
+    let result = cpu.reg.bc.low.get();
+    cpu.compute_inc_flags(result);
 }
 
 // INC D 14 4
 pub fn INC_d(cpu: &mut CPU) {
-
+    cpu.reg.af.high.add(1);
+    let result = cpu.reg.de.high.get();
+    cpu.compute_inc_flags(result);
 }
 
 // INC E 1C 4
 pub fn INC_e(cpu: &mut CPU) {
-
+    cpu.reg.af.high.add(1);
+    let result = cpu.reg.de.low.get();
+    cpu.compute_inc_flags(result);
 }
 
 // INC H 24 4
 pub fn INC_h(cpu: &mut CPU) {
-
+    cpu.reg.af.high.add(1);
+    let result = cpu.reg.hl.high.get();
+    cpu.compute_inc_flags(result);
 }
 
 // INC L 2C 4
 pub fn INC_l(cpu: &mut CPU) {
-
+    cpu.reg.af.high.add(1);
+    let result = cpu.reg.hl.low.get();
+    cpu.compute_inc_flags(result);
 }
 
 // INC (HL) 34 12
 pub fn INC_hlm(cpu: &mut CPU) {
+    let addr = cpu.reg.hl.get();
+    let value = cpu.mem.borrow().read_b(addr);
 
+    let result = value.wrapping_add(1);
+    cpu.mem.borrow_mut().write_b(addr, result);
+    cpu.compute_inc_flags(result);
+}
+
+// DEC A 3D 4
+pub fn DEC_a(cpu: &mut CPU) {
+    cpu.reg.af.high.sub(1);
+    let result = cpu.reg.af.high.get();
+    cpu.compute_dec_flags(result);
+}
+
+// DEC B 05 4
+pub fn DEC_b(cpu: &mut CPU) {
+    cpu.reg.af.high.sub(1);
+    let result = cpu.reg.bc.high.get();
+    cpu.compute_dec_flags(result);
+}
+
+// DEC C 0D 4
+pub fn DEC_c(cpu: &mut CPU) {
+    cpu.reg.af.high.sub(1);
+    let result = cpu.reg.bc.low.get();
+    cpu.compute_dec_flags(result);
+}
+
+// DEC D 15 4
+pub fn DEC_d(cpu: &mut CPU) {
+    cpu.reg.af.high.sub(1);
+    let result = cpu.reg.de.high.get();
+    cpu.compute_dec_flags(result);
+}
+
+// DEC E 1D 4
+pub fn DEC_e(cpu: &mut CPU) {
+    cpu.reg.af.high.sub(1);
+    let result = cpu.reg.de.low.get();
+    cpu.compute_dec_flags(result);
+}
+
+// DEC H 25 4
+pub fn DEC_h(cpu: &mut CPU) {
+    cpu.reg.af.high.sub(1);
+    let result = cpu.reg.hl.high.get();
+    cpu.compute_dec_flags(result);
+}
+
+// DEC L 2D 4
+pub fn DEC_l(cpu: &mut CPU) {
+    cpu.reg.af.high.sub(1);
+    let result = cpu.reg.hl.low.get();
+    cpu.compute_dec_flags(result);
+}
+
+// DEC (HL) 35 12
+pub fn DEC_hlm(cpu: &mut CPU) {
+    let addr = cpu.reg.hl.get();
+    let value = cpu.mem.borrow().read_b(addr);
+
+    let result = value.wrapping_sub(1);
+    cpu.mem.borrow_mut().write_b(addr, result);
+    cpu.compute_dec_flags(result);
 }
