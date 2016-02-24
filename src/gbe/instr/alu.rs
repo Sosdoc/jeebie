@@ -270,3 +270,58 @@ pub fn SBC_a_n(cpu: &mut CPU) {
     let rhs = cpu.get_immediate8();
     cpu.compute_sub(lhs, rhs.wrapping_sub(1));
 }
+
+
+// AND A A7 4
+pub fn AND_a(cpu: &mut CPU) {
+    let rhs = cpu.reg.af.high.get();
+    cpu.compute_and(rhs);
+}
+
+// AND B A0 4
+pub fn AND_b(cpu: &mut CPU) {
+    let rhs = cpu.reg.bc.high.get();
+    cpu.compute_and(rhs);
+}
+
+// AND C A1 4
+pub fn AND_c(cpu: &mut CPU) {
+    let rhs = cpu.reg.bc.low.get();
+    cpu.compute_and(rhs);
+}
+
+// AND D A2 4
+pub fn AND_d(cpu: &mut CPU) {
+    let rhs = cpu.reg.de.high.get();
+    cpu.compute_and(rhs);
+}
+
+// AND E A3 4
+pub fn AND_e(cpu: &mut CPU) {
+    let rhs = cpu.reg.de.low.get();
+    cpu.compute_and(rhs);
+}
+
+// AND H A4 4
+pub fn AND_h(cpu: &mut CPU) {
+    let rhs = cpu.reg.hl.high.get();
+    cpu.compute_and(rhs);
+}
+
+// AND L A5 4
+pub fn AND_l(cpu: &mut CPU) {
+    let rhs = cpu.reg.hl.low.get();
+    cpu.compute_and(rhs);
+}
+
+// AND (HL) A6 8
+pub fn AND_hlm(cpu: &mut CPU) {
+    let rhs = cpu.mem.borrow().read_b(cpu.reg.hl.get());
+    cpu.compute_and(rhs);
+}
+
+// AND # E6 8
+pub fn AND_n(cpu: &mut CPU) {
+    let rhs = cpu.get_immediate8();
+    cpu.compute_and(rhs);
+}

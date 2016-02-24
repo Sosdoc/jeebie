@@ -105,6 +105,22 @@ impl CPU {
         self.reg.af.high.set(result);
     }
 
+    // Computes the flags and result for an AND instruction.
+    // lhs is always the register A
+    pub fn compute_and(&mut self, rhs: u8) {
+        let result = self.reg.af.high.get() & rhs;
+
+        // HC flag is always set, other flags always cleared except zero.
+        self.reg.clear_all_flags();
+        self.reg.set_flag(Flags::HalfCarry);
+
+        if result == 0 {
+            self.reg.set_flag(Flags::Zero);
+        }
+
+        self.reg.af.high.set(result);
+    }
+
     /// Pushes on the stack a 16-bit register value,
     /// it decrements SP and pushes the LSB before the MSB.
     pub fn push_stack(&mut self, reg: u16) {
