@@ -174,6 +174,11 @@ impl CPU {
         self.reg.af.high.set(result);
     }
 
+    /// Computes flags after an INC instruction based on the final value.
+    pub fn compute_inc_flags(&mut self, increased_value: u8) {
+        // TODO complete this
+    }
+
     /// Pushes on the stack a 16-bit register value,
     /// it decrements SP and pushes the LSB before the MSB.
     pub fn push_stack(&mut self, reg: u16) {

@@ -488,3 +488,46 @@ pub fn CP_n(cpu: &mut CPU) {
     let rhs = cpu.get_immediate8();
     cpu.compute_cp(rhs);
 }
+
+// INC A 3C 4
+pub fn INC_a(cpu: &mut CPU) {
+    cpu.reg.af.high.add(1);
+    let result = cpu.reg.af.high.get();
+    cpu.compute_inc_flags(result);
+}
+
+// TODO: implement INC
+// INC B 04 4
+pub fn INC_b(cpu: &mut CPU) {
+
+}
+
+// INC C 0C 4
+pub fn INC_c(cpu: &mut CPU) {
+
+}
+
+// INC D 14 4
+pub fn INC_d(cpu: &mut CPU) {
+
+}
+
+// INC E 1C 4
+pub fn INC_e(cpu: &mut CPU) {
+
+}
+
+// INC H 24 4
+pub fn INC_h(cpu: &mut CPU) {
+
+}
+
+// INC L 2C 4
+pub fn INC_l(cpu: &mut CPU) {
+
+}
+
+// INC (HL) 34 12
+pub fn INC_hlm(cpu: &mut CPU) {
+
+}
