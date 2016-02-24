@@ -56,8 +56,8 @@ impl CPU {
         reg1.set(value);
     }
 
-    // Computes the flags
-    pub fn compute_flags_add8(&mut self, lhs: u8, rhs: u8) -> u8 {
+    // Computes the flags and result for an ADD instruction.
+    pub fn compute_add(&mut self, lhs: u8, rhs: u8) {
         let result = lhs.wrapping_add(rhs);
 
         self.reg.clear_all_flags();
@@ -77,7 +77,32 @@ impl CPU {
             self.reg.set_flag(Flags::HalfCarry);
         }
 
-        result
+        self.reg.af.high.set(result);
+    }
+
+    // Computes the flags and result for a SUB instruction.
+    pub fn compute_sub(&mut self, lhs: u8, rhs: u8)  {
+        let result = lhs.wrapping_sub(rhs);
+
+        self.reg.clear_all_flags();
+
+        if result == 0 {
+            self.reg.set_flag(Flags::Zero);
+        }
+
+        self.reg.set_flag(Flags::Sub);
+
+        // checked sub returns None if sub borrows (carry flag)
+        if let None = lhs.checked_sub(rhs) {
+            self.reg.set_flag(Flags::Carry);
+        }
+
+        // same as carry flag but values limited to their 4 low bits (half carry flag)
+        if let None = (lhs & 0xF).checked_sub(rhs & 0xF) {
+            self.reg.set_flag(Flags::HalfCarry);
+        }
+
+        self.reg.af.high.set(result);
     }
 
     /// Pushes on the stack a 16-bit register value,
