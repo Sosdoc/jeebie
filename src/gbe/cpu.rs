@@ -105,6 +105,29 @@ impl CPU {
         self.reg.af.high.set(result);
     }
 
+    // Computes the flags for a CP instruction.
+    // this has the same effect as a SUB, but the result discarded.
+    pub fn compute_cp(&mut self, lhs: u8, rhs: u8)  {
+        let result = lhs.wrapping_sub(rhs);
+
+        self.reg.clear_all_flags();
+
+        if result == 0 {
+            self.reg.set_flag(Flags::Zero);
+        }
+
+        self.reg.set_flag(Flags::Sub);
+
+
+        if let None = lhs.checked_sub(rhs) {
+            self.reg.set_flag(Flags::Carry);
+        }
+
+        if let None = (lhs & 0xF).checked_sub(rhs & 0xF) {
+            self.reg.set_flag(Flags::HalfCarry);
+        }
+    }
+
     // Computes the flags and result for an AND instruction.
     // lhs is always the register A
     pub fn compute_and(&mut self, rhs: u8) {
@@ -125,6 +148,21 @@ impl CPU {
     // lhs is always the register A
     pub fn compute_or(&mut self, rhs: u8) {
         let result = self.reg.af.high.get() | rhs;
+
+        // all flags are cleared except zero.
+        self.reg.clear_all_flags();
+
+        if result == 0 {
+            self.reg.set_flag(Flags::Zero);
+        }
+
+        self.reg.af.high.set(result);
+    }
+
+    // Computes the flags and result for an XOR instruction.
+    // lhs is always the register A
+    pub fn compute_xor(&mut self, rhs: u8) {
+        let result = self.reg.af.high.get() ^ rhs;
 
         // all flags are cleared except zero.
         self.reg.clear_all_flags();

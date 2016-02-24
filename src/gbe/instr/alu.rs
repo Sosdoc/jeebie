@@ -380,3 +380,111 @@ pub fn OR_n(cpu: &mut CPU) {
     let rhs = cpu.get_immediate8();
     cpu.compute_or(rhs);
 }
+
+// XOR A AF 4
+pub fn XOR_a(cpu: &mut CPU) {
+    let rhs = cpu.reg.af.high.get();
+    cpu.compute_xor(rhs);
+}
+
+// XOR B A8 4
+pub fn XOR_b(cpu: &mut CPU) {
+    let rhs = cpu.reg.bc.high.get();
+    cpu.compute_xor(rhs);
+}
+
+// XOR C A9 4
+pub fn XOR_c(cpu: &mut CPU) {
+    let rhs = cpu.reg.bc.low.get();
+    cpu.compute_xor(rhs);
+}
+
+// XOR D AA 4
+pub fn XOR_d(cpu: &mut CPU) {
+    let rhs = cpu.reg.de.high.get();
+    cpu.compute_xor(rhs);
+}
+
+// XOR E AB 4
+pub fn XOR_e(cpu: &mut CPU) {
+    let rhs = cpu.reg.de.low.get();
+    cpu.compute_xor(rhs);
+}
+
+// XOR H AC 4
+pub fn XOR_h(cpu: &mut CPU) {
+    let rhs = cpu.reg.hl.high.get();
+    cpu.compute_xor(rhs);
+}
+
+// XOR L AD 4
+pub fn XOR_l(cpu: &mut CPU) {
+    let rhs = cpu.reg.hl.low.get();
+    cpu.compute_xor(rhs);
+}
+
+// XOR (HL) AE 8
+pub fn XOR_hlm(cpu: &mut CPU) {
+    let rhs = cpu.mem.borrow().read_b(cpu.reg.hl.get());
+    cpu.compute_xor(rhs);
+}
+
+// XOR * EE 8
+pub fn XOR_n(cpu: &mut CPU) {
+    let rhs = cpu.get_immediate8();
+    cpu.compute_xor(rhs);
+}
+
+// CP A BF 4
+pub fn CP_a(cpu: &mut CPU) {
+    let rhs = cpu.reg.af.high.get();
+    cpu.compute_cp(rhs);
+}
+
+// CP B B8 4
+pub fn CP_b(cpu: &mut CPU) {
+    let rhs = cpu.reg.bc.high.get();
+    cpu.compute_cp(rhs);
+}
+
+// CP C B9 4
+pub fn CP_c(cpu: &mut CPU) {
+    let rhs = cpu.reg.bc.low.get();
+    cpu.compute_cp(rhs);
+}
+
+// CP D BA 4
+pub fn CP_d(cpu: &mut CPU) {
+    let rhs = cpu.reg.de.high.get();
+    cpu.compute_cp(rhs);
+}
+
+// CP E BB 4
+pub fn CP_e(cpu: &mut CPU) {
+    let rhs = cpu.reg.de.low.get();
+    cpu.compute_cp(rhs);
+}
+
+// CP H BC 4
+pub fn CP_h(cpu: &mut CPU) {
+    let rhs = cpu.reg.hl.high.get();
+    cpu.compute_cp(rhs);
+}
+
+// CP L BD 4
+pub fn CP_l(cpu: &mut CPU) {
+    let rhs = cpu.reg.hl.low.get();
+    cpu.compute_cp(rhs);
+}
+
+// CP (HL) BE 8
+pub fn CP_hlm(cpu: &mut CPU) {
+    let rhs = cpu.mem.borrow().read_b(cpu.reg.hl.get());
+    cpu.compute_cp(rhs);
+}
+
+// CP # FE 8
+pub fn CP_n(cpu: &mut CPU) {
+    let rhs = cpu.get_immediate8();
+    cpu.compute_cp(rhs);
+}
