@@ -56,7 +56,30 @@ impl CPU {
         reg1.set(value);
     }
 
-    // Computes the flags and result for an ADD instruction.
+    // Computes the flags and result for a 16-bit ADD instruction.
+    pub fn compute_add16(&mut self, rhs: u16) {
+        let lhs = self.reg.hl.get();
+        let result = lhs.wrapping_add(rhs);
+
+        // flag zero is not affected, sub is reset
+        self.reg.clear_flag(Flags::Sub);
+
+        // checked add returns None if add overflows (carry from bit 15)
+        if let None = lhs.checked_add(rhs) {
+            self.reg.set_flag(Flags::Carry);
+        }
+
+        // halfcarry is set if bit 11 has carry
+        // sum the 12 LSb and check bit 12
+        let low_result = (rhs & 0xFFF) + (lhs & 0xFFF);
+        if (low_result >> 12) == 1 {
+            self.reg.set_flag(Flags::HalfCarry);
+        }
+
+        self.reg.hl.set(result);
+    }
+
+    // Computes the flags and result for an 8-bit ADD instruction.
     pub fn compute_add(&mut self, lhs: u8, rhs: u8) {
         let result = lhs.wrapping_add(rhs);
 
