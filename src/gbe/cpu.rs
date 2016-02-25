@@ -56,6 +56,19 @@ impl CPU {
         reg1.set(value);
     }
 
+    // Swaps low and high nibble of an 8 bit value and sets flags.
+    // Returns the result of the swap operation.
+    pub fn compute_swap(&mut self, value: u8) -> u8 {
+        let result = (value << 4) | (value >> 4);
+        
+        self.reg.clear_all_flags();
+        if result == 0 {
+            self.reg.set_flag(Flags::Zero);
+        }
+
+        result
+    }
+
     // Computes the flags and result for a 16-bit ADD instruction.
     pub fn compute_add16(&mut self, rhs: u16) {
         let lhs = self.reg.hl.get();
