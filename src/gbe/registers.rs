@@ -106,24 +106,23 @@ pub enum Flags {
     /// This bit is set when the result of a math operation
     /// is zero or two values match when using the CP
     /// instruction.
-    Zero        = 0b10000000,
+    Zero = 0b10000000,
 
     /// This bit is set if a subtraction was performed in the
     /// last math instruction.
-    Sub         = 0b01000000,
+    Sub = 0b01000000,
 
     /// This bit is set if a carry occurred from the lower
     /// nibble in the last math operation.
-    Carry       = 0b00100000,
+    Carry = 0b00100000,
 
     /// This bit is set if a carry occurred from the last
     /// math operation or if register A is the smaller value
     /// when executing the CP instruction.
-    HalfCarry   = 0b00010000,
+    HalfCarry = 0b00010000,
 }
 
 impl Registers {
-
     /// Clears all flag values by resetting the F register to 0.
     pub fn clear_all_flags(&mut self) {
         self.af.low.set(0);

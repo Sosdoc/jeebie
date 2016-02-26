@@ -68,7 +68,11 @@ pub fn ADD_a_n(cpu: &mut CPU) {
 
 // ADC A,A 8F 4
 pub fn ADC_a_a(cpu: &mut CPU) {
-    let carry = if cpu.reg.is_set(Flags::Carry) {1} else {0};
+    let carry = if cpu.reg.is_set(Flags::Carry) {
+        1
+    } else {
+        0
+    };
     let lhs = cpu.reg.af.high.get();
     let rhs = cpu.reg.af.high.get();
     cpu.compute_add(lhs, rhs.wrapping_add(1));
@@ -76,7 +80,11 @@ pub fn ADC_a_a(cpu: &mut CPU) {
 
 // ADC A,B 88 4
 pub fn ADC_a_b(cpu: &mut CPU) {
-    let carry = if cpu.reg.is_set(Flags::Carry) {1} else {0};
+    let carry = if cpu.reg.is_set(Flags::Carry) {
+        1
+    } else {
+        0
+    };
     let lhs = cpu.reg.af.high.get();
     let rhs = cpu.reg.bc.high.get();
     cpu.compute_add(lhs, rhs.wrapping_add(1));
@@ -84,7 +92,11 @@ pub fn ADC_a_b(cpu: &mut CPU) {
 
 // ADC A,C 89 4
 pub fn ADC_a_c(cpu: &mut CPU) {
-    let carry = if cpu.reg.is_set(Flags::Carry) {1} else {0};
+    let carry = if cpu.reg.is_set(Flags::Carry) {
+        1
+    } else {
+        0
+    };
     let lhs = cpu.reg.af.high.get();
     let rhs = cpu.reg.bc.low.get();
     cpu.compute_add(lhs, rhs.wrapping_add(1));
@@ -92,7 +104,11 @@ pub fn ADC_a_c(cpu: &mut CPU) {
 
 // ADC A,D 8A 4
 pub fn ADC_a_d(cpu: &mut CPU) {
-    let carry = if cpu.reg.is_set(Flags::Carry) {1} else {0};
+    let carry = if cpu.reg.is_set(Flags::Carry) {
+        1
+    } else {
+        0
+    };
     let lhs = cpu.reg.af.high.get();
     let rhs = cpu.reg.de.high.get();
     cpu.compute_add(lhs, rhs.wrapping_add(1));
@@ -100,7 +116,11 @@ pub fn ADC_a_d(cpu: &mut CPU) {
 
 // ADC A,E 8B 4
 pub fn ADC_a_e(cpu: &mut CPU) {
-    let carry = if cpu.reg.is_set(Flags::Carry) {1} else {0};
+    let carry = if cpu.reg.is_set(Flags::Carry) {
+        1
+    } else {
+        0
+    };
     let lhs = cpu.reg.af.high.get();
     let rhs = cpu.reg.de.low.get();
     cpu.compute_add(lhs, rhs.wrapping_add(1));
@@ -108,7 +128,11 @@ pub fn ADC_a_e(cpu: &mut CPU) {
 
 // ADC A,H 8C 4
 pub fn ADC_a_h(cpu: &mut CPU) {
-    let carry = if cpu.reg.is_set(Flags::Carry) {1} else {0};
+    let carry = if cpu.reg.is_set(Flags::Carry) {
+        1
+    } else {
+        0
+    };
     let lhs = cpu.reg.af.high.get();
     let rhs = cpu.reg.hl.high.get();
     cpu.compute_add(lhs, rhs.wrapping_add(1));
@@ -116,7 +140,11 @@ pub fn ADC_a_h(cpu: &mut CPU) {
 
 // ADC A,L 8D 4
 pub fn ADC_a_l(cpu: &mut CPU) {
-    let carry = if cpu.reg.is_set(Flags::Carry) {1} else {0};
+    let carry = if cpu.reg.is_set(Flags::Carry) {
+        1
+    } else {
+        0
+    };
     let lhs = cpu.reg.af.high.get();
     let rhs = cpu.reg.hl.low.get();
     cpu.compute_add(lhs, rhs.wrapping_add(1));
@@ -124,7 +152,11 @@ pub fn ADC_a_l(cpu: &mut CPU) {
 
 // ADC A,(HL) 8E 8
 pub fn ADC_a_hlm(cpu: &mut CPU) {
-    let carry = if cpu.reg.is_set(Flags::Carry) {1} else {0};
+    let carry = if cpu.reg.is_set(Flags::Carry) {
+        1
+    } else {
+        0
+    };
     let lhs = cpu.reg.af.high.get();
     let rhs = cpu.mem.read_b(cpu.reg.hl.get());
     cpu.compute_add(lhs, rhs.wrapping_add(1));
@@ -132,7 +164,11 @@ pub fn ADC_a_hlm(cpu: &mut CPU) {
 
 // ADC A,# CE 8
 pub fn ADC_a_n(cpu: &mut CPU) {
-    let carry = if cpu.reg.is_set(Flags::Carry) {1} else {0};
+    let carry = if cpu.reg.is_set(Flags::Carry) {
+        1
+    } else {
+        0
+    };
     let lhs = cpu.reg.af.high.get();
     let rhs = cpu.get_immediate8();
     cpu.compute_add(lhs, rhs.wrapping_add(1));
@@ -203,7 +239,11 @@ pub fn SUB_a_n(cpu: &mut CPU) {
 
 // SBC A,A 9F 4
 pub fn SBC_a_a(cpu: &mut CPU) {
-    let carry = if cpu.reg.is_set(Flags::Carry) {1} else {0};
+    let carry = if cpu.reg.is_set(Flags::Carry) {
+        1
+    } else {
+        0
+    };
     let lhs = cpu.reg.af.high.get();
     let rhs = cpu.reg.af.high.get();
     cpu.compute_sub(lhs, rhs.wrapping_sub(1));
@@ -211,7 +251,11 @@ pub fn SBC_a_a(cpu: &mut CPU) {
 
 // SBC A,B 98 4
 pub fn SBC_a_b(cpu: &mut CPU) {
-    let carry = if cpu.reg.is_set(Flags::Carry) {1} else {0};
+    let carry = if cpu.reg.is_set(Flags::Carry) {
+        1
+    } else {
+        0
+    };
     let lhs = cpu.reg.af.high.get();
     let rhs = cpu.reg.bc.high.get();
     cpu.compute_sub(lhs, rhs.wrapping_sub(1));
@@ -219,7 +263,11 @@ pub fn SBC_a_b(cpu: &mut CPU) {
 
 // SBC A,C 99 4
 pub fn SBC_a_c(cpu: &mut CPU) {
-    let carry = if cpu.reg.is_set(Flags::Carry) {1} else {0};
+    let carry = if cpu.reg.is_set(Flags::Carry) {
+        1
+    } else {
+        0
+    };
     let lhs = cpu.reg.af.high.get();
     let rhs = cpu.reg.bc.low.get();
     cpu.compute_sub(lhs, rhs.wrapping_sub(1));
@@ -227,7 +275,11 @@ pub fn SBC_a_c(cpu: &mut CPU) {
 
 // SBC A,D 9A 4
 pub fn SBC_a_d(cpu: &mut CPU) {
-    let carry = if cpu.reg.is_set(Flags::Carry) {1} else {0};
+    let carry = if cpu.reg.is_set(Flags::Carry) {
+        1
+    } else {
+        0
+    };
     let lhs = cpu.reg.af.high.get();
     let rhs = cpu.reg.de.high.get();
     cpu.compute_sub(lhs, rhs.wrapping_sub(1));
@@ -235,7 +287,11 @@ pub fn SBC_a_d(cpu: &mut CPU) {
 
 // SBC A,E 9B 4
 pub fn SBC_a_e(cpu: &mut CPU) {
-    let carry = if cpu.reg.is_set(Flags::Carry) {1} else {0};
+    let carry = if cpu.reg.is_set(Flags::Carry) {
+        1
+    } else {
+        0
+    };
     let lhs = cpu.reg.af.high.get();
     let rhs = cpu.reg.de.low.get();
     cpu.compute_sub(lhs, rhs.wrapping_sub(1));
@@ -243,7 +299,11 @@ pub fn SBC_a_e(cpu: &mut CPU) {
 
 // SBC A,H 9C 4
 pub fn SBC_a_h(cpu: &mut CPU) {
-    let carry = if cpu.reg.is_set(Flags::Carry) {1} else {0};
+    let carry = if cpu.reg.is_set(Flags::Carry) {
+        1
+    } else {
+        0
+    };
     let lhs = cpu.reg.af.high.get();
     let rhs = cpu.reg.hl.high.get();
     cpu.compute_sub(lhs, rhs.wrapping_sub(1));
@@ -251,7 +311,11 @@ pub fn SBC_a_h(cpu: &mut CPU) {
 
 // SBC A,L 9D 4
 pub fn SBC_a_l(cpu: &mut CPU) {
-    let carry = if cpu.reg.is_set(Flags::Carry) {1} else {0};
+    let carry = if cpu.reg.is_set(Flags::Carry) {
+        1
+    } else {
+        0
+    };
     let lhs = cpu.reg.af.high.get();
     let rhs = cpu.reg.hl.low.get();
     cpu.compute_sub(lhs, rhs.wrapping_sub(1));
@@ -259,7 +323,11 @@ pub fn SBC_a_l(cpu: &mut CPU) {
 
 // SBC A,(HL) 9E 8
 pub fn SBC_a_hlm(cpu: &mut CPU) {
-    let carry = if cpu.reg.is_set(Flags::Carry) {1} else {0};
+    let carry = if cpu.reg.is_set(Flags::Carry) {
+        1
+    } else {
+        0
+    };
     let lhs = cpu.reg.af.high.get();
     let rhs = cpu.mem.read_b(cpu.reg.hl.get());
     cpu.compute_sub(lhs, rhs.wrapping_sub(1));
@@ -267,7 +335,11 @@ pub fn SBC_a_hlm(cpu: &mut CPU) {
 
 // SBC A,# ?? ? --- manual has no opcode for this... leave it
 pub fn SBC_a_n(cpu: &mut CPU) {
-    let carry = if cpu.reg.is_set(Flags::Carry) {1} else {0};
+    let carry = if cpu.reg.is_set(Flags::Carry) {
+        1
+    } else {
+        0
+    };
     let lhs = cpu.reg.af.high.get();
     let rhs = cpu.get_immediate8();
     cpu.compute_sub(lhs, rhs.wrapping_sub(1));

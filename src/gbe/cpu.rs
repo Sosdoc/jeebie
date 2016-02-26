@@ -18,7 +18,7 @@ impl CPU {
             pc: Register16::new(0),
             sp: Register16::new(0),
         };
-        
+
         let mmu = MMU::new();
 
         CPU { reg: r, mem: mmu }
@@ -112,7 +112,7 @@ impl CPU {
     }
 
     // Computes the flags and result for a SUB instruction.
-    pub fn compute_sub(&mut self, lhs: u8, rhs: u8)  {
+    pub fn compute_sub(&mut self, lhs: u8, rhs: u8) {
         let result = lhs.wrapping_sub(rhs);
 
         self.reg.clear_all_flags();
@@ -138,7 +138,7 @@ impl CPU {
 
     // Computes the flags for a CP instruction.
     // this has the same effect on flags as a SUB, but the result is discarded.
-    pub fn compute_cp(&mut self, rhs: u8)  {
+    pub fn compute_cp(&mut self, rhs: u8) {
         let lhs = self.reg.af.high.get();
         self.reg.clear_all_flags();
         self.reg.set_flag(Flags::Sub);
