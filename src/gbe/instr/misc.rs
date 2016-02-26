@@ -2,6 +2,9 @@
 
 use gbe::cpu::CPU;
 
+/// 'NOP' 00 4
+pub fn nop(cpu: &mut CPU) {}
+
 // 'SWAP A' CB 37 8
 pub fn SWAP_a(cpu: &mut CPU) {
     let value = cpu.reg.af.high.get();

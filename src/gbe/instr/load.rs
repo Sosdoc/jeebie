@@ -417,7 +417,6 @@ pub fn LD_a_nnm(cpu: &mut CPU) {
 }
 
 // 'LD A,#' 3E 8
-// load address in PC and put the data in A
 pub fn LD_a_n(cpu: &mut CPU) {
     let value = cpu.mem.read_b(cpu.reg.pc.get());
     cpu.reg.af.high.set(value);
@@ -445,8 +444,6 @@ pub fn LD_nnm_A(cpu: &mut CPU) {
 }
 
 // 'LD A,(C)' F2 8
-// Put value at address $FF00 + register C into A.
-// Same as: LD A,($FF00+C)
 pub fn LD_a_c_mem(cpu: &mut CPU) {
     let addr = 0xFF00 & (cpu.reg.bc.low.get() as u16);
     let value = cpu.mem.read_b(addr);
@@ -454,7 +451,6 @@ pub fn LD_a_c_mem(cpu: &mut CPU) {
 }
 
 // 'LD ($FF00+C),A' E2 8
-// Put value of A at address $FF00 + register C.
 pub fn LD_c_mem_a(cpu: &mut CPU) {
     let addr = 0xFF00 & (cpu.reg.bc.low.get() as u16);
     let value = cpu.reg.af.high.get();
@@ -462,7 +458,6 @@ pub fn LD_c_mem_a(cpu: &mut CPU) {
 }
 
 // 'LDD A,(HL)' 3A 8
-// equivalent to LD A,(HL) -> DEC HL
 pub fn LDD_a_HLm(cpu: &mut CPU) {
     LD_a_HLm(cpu);
     cpu.reg.hl.sub(1);
@@ -532,7 +527,6 @@ pub fn LD_sp_hl(cpu: &mut CPU) {
 }
 
 // 'LD HL,SP+n' F8 12
-// affects flags: ZNHC
 pub fn LDHL_sp_n(cpu: &mut CPU) {
     let immediate = cpu.get_immediate8();
     let result = cpu.reg.sp.get().wrapping_add(immediate as u16);
@@ -553,7 +547,6 @@ pub fn LDHL_sp_n(cpu: &mut CPU) {
 }
 
 // 'LD (nn),SP' 08 20
-// write 2 bytes (SP) at address nn
 pub fn LD_nnm_sp(cpu: &mut CPU) {
     let addr_low = cpu.get_immediate16();
     let addr_high = addr_low.wrapping_add(1);
