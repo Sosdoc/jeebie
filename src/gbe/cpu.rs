@@ -1,13 +1,10 @@
-use std::rc::Rc;
-use std::cell::RefCell;
-
 use gbe::memory::MMU;
 use gbe::registers::*;
 
 #[derive(Debug)]
 pub struct CPU {
     pub reg: Registers,
-    pub mem: Rc<RefCell<MMU>>,
+    pub mem: MMU,
 }
 
 impl CPU {
@@ -21,9 +18,8 @@ impl CPU {
             pc: Register16::new(0),
             sp: Register16::new(0),
         };
-
-        // TODO: this should be created only once and cloned for every struct
-        let mmu = Rc::new(RefCell::new(MMU::new()));
+        
+        let mmu = MMU::new();
 
         CPU { reg: r, mem: mmu }
     }
@@ -40,8 +36,7 @@ impl CPU {
             // the block is needed so that the borrow of cpu.memory ends
             // before dispatch, which will mutably borrow cpu
             let opcode = {
-                let mem = cpu.mem.borrow();
-                mem.read_b(cpu.reg.pc.get())
+                cpu.mem.read_b(cpu.reg.pc.get())
             };
 
             // execute
@@ -60,7 +55,7 @@ impl CPU {
     // Returns the result of the swap operation.
     pub fn compute_swap(&mut self, value: u8) -> u8 {
         let result = (value << 4) | (value >> 4);
-        
+
         self.reg.clear_all_flags();
         if result == 0 {
             self.reg.set_flag(Flags::Zero);
@@ -248,20 +243,20 @@ impl CPU {
         self.reg.sp.sub(1);
         let addr = self.reg.sp.get();
         let low = (reg & 0x00FF) as u8;
-        self.mem.borrow_mut().write_b(addr, low);
+        self.mem.write_b(addr, low);
 
         self.reg.sp.sub(1);
         let addr = self.reg.sp.get();
         let high = ((reg >> 8) & 0x00FF) as u8;
-        self.mem.borrow_mut().write_b(addr, high);
+        self.mem.write_b(addr, high);
     }
 
     /// Pops a 16-bit value from the stack, MSB first, returning the u16 value.
     pub fn pop_stack(&mut self) -> u16 {
-        let high = self.mem.borrow().read_b(self.reg.sp.get());
+        let high = self.mem.read_b(self.reg.sp.get());
         self.reg.sp.add(1);
 
-        let low = self.mem.borrow().read_b(self.reg.sp.get());
+        let low = self.mem.read_b(self.reg.sp.get());
         self.reg.sp.add(1);
 
         ((high as u16) << 8) & (low as u16)
@@ -270,7 +265,7 @@ impl CPU {
     /// Retrieves an immediate 8-bit value.
     /// Immediates are retrieved by reading at the address in the PC register.
     pub fn get_immediate8(&mut self) -> u8 {
-        let value = self.mem.borrow().read_b(self.reg.pc.get());
+        let value = self.mem.read_b(self.reg.pc.get());
         self.reg.pc.add(1);
 
         value

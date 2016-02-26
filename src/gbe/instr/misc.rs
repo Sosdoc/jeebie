@@ -54,7 +54,7 @@ pub fn SWAP_l(cpu: &mut CPU) {
 // SWAP (HL) CB 36 16
 pub fn SWAP_hl(cpu: &mut CPU) {
     let addr = cpu.reg.hl.get();
-    let value = cpu.mem.borrow().read_b(addr);
+    let value = cpu.mem.read_b(addr);
     let res = cpu.compute_swap(value);
-    cpu.mem.borrow_mut().write_b(addr, res);
+    cpu.mem.write_b(addr, res);
 }

@@ -55,7 +55,7 @@ pub fn ADD_a_l(cpu: &mut CPU) {
 // ADD A,(HL) 86 8
 pub fn ADD_a_hlm(cpu: &mut CPU) {
     let lhs = cpu.reg.af.high.get();
-    let rhs = cpu.mem.borrow().read_b(cpu.reg.hl.get());
+    let rhs = cpu.mem.read_b(cpu.reg.hl.get());
     cpu.compute_add(lhs, rhs);
 }
 
@@ -126,7 +126,7 @@ pub fn ADC_a_l(cpu: &mut CPU) {
 pub fn ADC_a_hlm(cpu: &mut CPU) {
     let carry = if cpu.reg.is_set(Flags::Carry) {1} else {0};
     let lhs = cpu.reg.af.high.get();
-    let rhs = cpu.mem.borrow().read_b(cpu.reg.hl.get());
+    let rhs = cpu.mem.read_b(cpu.reg.hl.get());
     cpu.compute_add(lhs, rhs.wrapping_add(1));
 }
 
@@ -190,7 +190,7 @@ pub fn SUB_a_L(cpu: &mut CPU) {
 // SUB (HL) 96 8
 pub fn SUB_a_hlm(cpu: &mut CPU) {
     let lhs = cpu.reg.af.high.get();
-    let rhs = cpu.mem.borrow().read_b(cpu.reg.hl.get());
+    let rhs = cpu.mem.read_b(cpu.reg.hl.get());
     cpu.compute_sub(lhs, rhs);
 }
 
@@ -261,7 +261,7 @@ pub fn SBC_a_l(cpu: &mut CPU) {
 pub fn SBC_a_hlm(cpu: &mut CPU) {
     let carry = if cpu.reg.is_set(Flags::Carry) {1} else {0};
     let lhs = cpu.reg.af.high.get();
-    let rhs = cpu.mem.borrow().read_b(cpu.reg.hl.get());
+    let rhs = cpu.mem.read_b(cpu.reg.hl.get());
     cpu.compute_sub(lhs, rhs.wrapping_sub(1));
 }
 
@@ -318,7 +318,7 @@ pub fn AND_l(cpu: &mut CPU) {
 
 // AND (HL) A6 8
 pub fn AND_hlm(cpu: &mut CPU) {
-    let rhs = cpu.mem.borrow().read_b(cpu.reg.hl.get());
+    let rhs = cpu.mem.read_b(cpu.reg.hl.get());
     cpu.compute_and(rhs);
 }
 
@@ -373,7 +373,7 @@ pub fn OR_l(cpu: &mut CPU) {
 
 // OR (HL) B6 8
 pub fn OR_hlm(cpu: &mut CPU) {
-    let rhs = cpu.mem.borrow().read_b(cpu.reg.hl.get());
+    let rhs = cpu.mem.read_b(cpu.reg.hl.get());
     cpu.compute_or(rhs);
 }
 
@@ -427,7 +427,7 @@ pub fn XOR_l(cpu: &mut CPU) {
 
 // XOR (HL) AE 8
 pub fn XOR_hlm(cpu: &mut CPU) {
-    let rhs = cpu.mem.borrow().read_b(cpu.reg.hl.get());
+    let rhs = cpu.mem.read_b(cpu.reg.hl.get());
     cpu.compute_xor(rhs);
 }
 
@@ -481,7 +481,7 @@ pub fn CP_l(cpu: &mut CPU) {
 
 // CP (HL) BE 8
 pub fn CP_hlm(cpu: &mut CPU) {
-    let rhs = cpu.mem.borrow().read_b(cpu.reg.hl.get());
+    let rhs = cpu.mem.read_b(cpu.reg.hl.get());
     cpu.compute_cp(rhs);
 }
 
@@ -543,10 +543,10 @@ pub fn INC_l(cpu: &mut CPU) {
 // INC (HL) 34 12
 pub fn INC_hlm(cpu: &mut CPU) {
     let addr = cpu.reg.hl.get();
-    let value = cpu.mem.borrow().read_b(addr);
+    let value = cpu.mem.read_b(addr);
 
     let result = value.wrapping_add(1);
-    cpu.mem.borrow_mut().write_b(addr, result);
+    cpu.mem.write_b(addr, result);
     cpu.compute_inc_flags(result);
 }
 
@@ -602,9 +602,9 @@ pub fn DEC_l(cpu: &mut CPU) {
 // DEC (HL) 35 12
 pub fn DEC_hlm(cpu: &mut CPU) {
     let addr = cpu.reg.hl.get();
-    let value = cpu.mem.borrow().read_b(addr);
+    let value = cpu.mem.read_b(addr);
 
     let result = value.wrapping_sub(1);
-    cpu.mem.borrow_mut().write_b(addr, result);
+    cpu.mem.write_b(addr, result);
     cpu.compute_dec_flags(result);
 }

@@ -110,8 +110,8 @@ pub fn LD_b_a(cpu: &mut CPU) {
 
 // LD B,(HL) 46 8
 pub fn LD_b_HLm(cpu: &mut CPU) {
-    let m = cpu.mem.borrow();
-    cpu.reg.bc.high.set(m.read_b(cpu.reg.hl.get()));
+
+    cpu.reg.bc.high.set(cpu.mem.read_b(cpu.reg.hl.get()));
 }
 
 // LD C,B 48 4
@@ -153,8 +153,7 @@ pub fn LD_c_a(cpu: &mut CPU) {
 
 // LD C,(HL) 4E 8
 pub fn LD_c_HLm(cpu: &mut CPU) {
-    let m = cpu.mem.borrow();
-    cpu.reg.bc.low.set(m.read_b(cpu.reg.hl.get()));
+    cpu.reg.bc.low.set(cpu.mem.read_b(cpu.reg.hl.get()));
 }
 
 // LD D,B 50 4
@@ -195,8 +194,7 @@ pub fn LD_d_a(cpu: &mut CPU) {
 
 // LD D,(HL) 56 8
 pub fn LD_d_HLm(cpu: &mut CPU) {
-    let m = cpu.mem.borrow();
-    cpu.reg.de.high.set(m.read_b(cpu.reg.hl.get()));
+    cpu.reg.de.high.set(cpu.mem.read_b(cpu.reg.hl.get()));
 }
 
 // LD E,B 58 4
@@ -233,8 +231,8 @@ pub fn LD_e_l(cpu: &mut CPU) {
 
 // LD E,(HL) 5E 8
 pub fn LD_e_HLm(cpu: &mut CPU) {
-    let m = cpu.mem.borrow();
-    cpu.reg.de.low.set(m.read_b(cpu.reg.hl.get()));
+
+    cpu.reg.de.low.set(cpu.mem.read_b(cpu.reg.hl.get()));
 }
 
 // LD E,A 5F 4
@@ -276,8 +274,8 @@ pub fn LD_h_l(cpu: &mut CPU) {
 
 // LD H,(HL) 66 8
 pub fn LD_h_HLm(cpu: &mut CPU) {
-    let m = cpu.mem.borrow();
-    let value = m.read_b(cpu.reg.hl.get());
+
+    let value = cpu.mem.read_b(cpu.reg.hl.get());
     cpu.reg.hl.high.set(value);
 }
 
@@ -324,8 +322,8 @@ pub fn LD_l_a(cpu: &mut CPU) {
 
 // LD L,(HL) 6E 8
 pub fn LD_l_HLm(cpu: &mut CPU) {
-    let m = cpu.mem.borrow();
-    let value = m.read_b(cpu.reg.hl.get());
+
+    let value = cpu.mem.read_b(cpu.reg.hl.get());
     cpu.reg.hl.low.set(value);
 }
 
@@ -333,96 +331,95 @@ pub fn LD_l_HLm(cpu: &mut CPU) {
 pub fn LD_HLm_b(cpu: &mut CPU) {
     let addr = cpu.reg.hl.get();
     let data = cpu.reg.bc.high.get();
-    let mut m = cpu.mem.borrow_mut();
-    m.write_b(addr, data);
+
+    cpu.mem.write_b(addr, data);
 }
 
 // LD (HL),C 71 8
 pub fn LD_HLm_c(cpu: &mut CPU) {
     let addr = cpu.reg.hl.get();
     let data = cpu.reg.bc.low.get();
-    let mut m = cpu.mem.borrow_mut();
-    m.write_b(addr, data);
+
+    cpu.mem.write_b(addr, data);
 }
 
 // LD (HL),D 72 8
 pub fn LD_HLm_d(cpu: &mut CPU) {
     let addr = cpu.reg.hl.get();
     let data = cpu.reg.de.high.get();
-    let mut m = cpu.mem.borrow_mut();
-    m.write_b(addr, data);
+
+    cpu.mem.write_b(addr, data);
 }
 
 // LD (HL),E 73 8
 pub fn LD_HLm_e(cpu: &mut CPU) {
     let addr = cpu.reg.hl.get();
     let data = cpu.reg.de.low.get();
-    let mut m = cpu.mem.borrow_mut();
-    m.write_b(addr, data);
+
+    cpu.mem.write_b(addr, data);
 }
 
 // LD (HL),H 74 8
 pub fn LD_HLm_h(cpu: &mut CPU) {
     let addr = cpu.reg.hl.get();
     let data = cpu.reg.hl.high.get();
-    let mut m = cpu.mem.borrow_mut();
-    m.write_b(addr, data);
+
+    cpu.mem.write_b(addr, data);
 }
 
 // LD (HL),L 75 8
 pub fn LD_HLm_l(cpu: &mut CPU) {
     let addr = cpu.reg.hl.get();
     let data = cpu.reg.hl.low.get();
-    let mut m = cpu.mem.borrow_mut();
-    m.write_b(addr, data);
+
+    cpu.mem.write_b(addr, data);
 }
 
 // LD (HL),n 36 12
 pub fn LD_HLm_n(cpu: &mut CPU) {
     let addr = cpu.reg.hl.get();
     let data = cpu.get_immediate8();
-    let mut m = cpu.mem.borrow_mut();
-    m.write_b(addr, data);
+
+    cpu.mem.write_b(addr, data);
 }
 
 // LD (HL),A 77 8
 pub fn LD_HLm_a(cpu: &mut CPU) {
     let addr = cpu.reg.hl.get();
     let data = cpu.reg.af.high.get();
-    let mut m = cpu.mem.borrow_mut();
-    m.write_b(addr, data);
+
+    cpu.mem.write_b(addr, data);
 }
 
 // LD A,(BC) 0A 8
 pub fn LD_a_BCm(cpu: &mut CPU) {
     let addr = cpu.reg.bc.get();
-    let data = cpu.mem.borrow().read_b(addr);
+    let data = cpu.mem.read_b(addr);
     cpu.reg.af.high.set(data);
 }
 
 // LD A,(DE) 1A 8
 pub fn LD_a_DEm(cpu: &mut CPU) {
     let addr = cpu.reg.de.get();
-    let data = cpu.mem.borrow().read_b(addr);
+    let data = cpu.mem.read_b(addr);
     cpu.reg.af.high.set(data);
 }
 
 // LD A,(HL) 7E 8
 pub fn LD_a_HLm(cpu: &mut CPU) {
-    let m = cpu.mem.borrow();
-    cpu.reg.af.high.set(m.read_b(cpu.reg.hl.get()));
+    cpu.reg.af.high.set(cpu.mem.read_b(cpu.reg.hl.get()));
 }
 
 // LD A,(nn) FA 16
 pub fn LD_a_nnm(cpu: &mut CPU) {
     let addr = cpu.get_immediate16();
-    cpu.reg.af.high.set(cpu.mem.borrow().read_b(addr));
+    cpu.reg.af.high.set(cpu.mem.read_b(addr));
 }
 
 // LD A,# 3E 8
 // load address in PC and put the data in A
 pub fn LD_a_n(cpu: &mut CPU) {
-    let value = cpu.mem.borrow().read_b(cpu.reg.pc.get());
+    let value = cpu.mem.read_b(cpu.reg.pc.get());
     cpu.reg.af.high.set(value);
 }
 
@@ -430,21 +427,21 @@ pub fn LD_a_n(cpu: &mut CPU) {
 pub fn LD_BCm_A(cpu: &mut CPU) {
     let value = cpu.reg.af.high.get();
     let addr = cpu.reg.bc.get();
-    cpu.mem.borrow_mut().write_b(addr, value);
+    cpu.mem.write_b(addr, value);
 }
 
 // LD (DE),A 12 8
 pub fn LD_DEm_A(cpu: &mut CPU) {
     let value = cpu.reg.af.high.get();
     let addr = cpu.reg.de.get();
-    cpu.mem.borrow_mut().write_b(addr, value);
+    cpu.mem.write_b(addr, value);
 }
 
 // LD (nn),A EA 16
 pub fn LD_nnm_A(cpu: &mut CPU) {
     let value = cpu.reg.af.high.get();
     let addr = cpu.get_immediate16();
-    cpu.mem.borrow_mut().write_b(addr, value);
+    cpu.mem.write_b(addr, value);
 }
 
 // LD A,(C) F2 8
@@ -452,7 +449,7 @@ pub fn LD_nnm_A(cpu: &mut CPU) {
 // Same as: LD A,($FF00+C)
 pub fn LD_a_c_mem(cpu: &mut CPU) {
     let addr = 0xFF00 & (cpu.reg.bc.low.get() as u16);
-    let value = cpu.mem.borrow().read_b(addr);
+    let value = cpu.mem.read_b(addr);
     cpu.reg.af.high.set(value);
 }
 
@@ -461,7 +458,7 @@ pub fn LD_a_c_mem(cpu: &mut CPU) {
 pub fn LD_c_mem_a(cpu: &mut CPU) {
     let addr = 0xFF00 & (cpu.reg.bc.low.get() as u16);
     let value = cpu.reg.af.high.get();
-    cpu.mem.borrow_mut().write_b(addr, value);
+    cpu.mem.write_b(addr, value);
 }
 
 // LDD A,(HL) 3A 8
@@ -493,13 +490,13 @@ pub fn LDI_HLm_a(cpu: &mut CPU) {
 pub fn LDH_nm_a(cpu: &mut CPU) {
     let addr = 0xFF00 & (cpu.reg.pc.low.get() as u16);
     let value = cpu.reg.af.high.get();
-    cpu.mem.borrow_mut().write_b(addr, value);
+    cpu.mem.write_b(addr, value);
 }
 
 // LDH A,($FF00+n) F0 12
 pub fn LDH_a_nm(cpu: &mut CPU) {
     let addr = 0xFF00 & (cpu.reg.pc.low.get() as u16);
-    let value = cpu.mem.borrow().read_b(addr);
+    let value = cpu.mem.read_b(addr);
     cpu.reg.af.high.set(value);
 }
 
@@ -561,6 +558,6 @@ pub fn LD_nnm_sp(cpu: &mut CPU) {
     let addr_low = cpu.get_immediate16();
     let addr_high = addr_low.wrapping_add(1);
 
-    cpu.mem.borrow_mut().write_b(addr_low, cpu.reg.sp.low.get());
-    cpu.mem.borrow_mut().write_b(addr_high, cpu.reg.sp.high.get());
+    cpu.mem.write_b(addr_low, cpu.reg.sp.low.get());
+    cpu.mem.write_b(addr_high, cpu.reg.sp.high.get());
 }
