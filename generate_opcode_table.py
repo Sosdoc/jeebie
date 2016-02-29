@@ -19,13 +19,14 @@ MODULE_IMPORT = u'use gbe::instr::{0}::*;\n'
 
 FILE_HEADER = (u'\nuse gbe::cpu::CPU;\n'
                u'/// The type of functions that implement an opcode.\n'
-               u'pub type OpcodeFunc = fn(&mut CPU) -> ();\n')
+               u'pub type OpcodeFunc = fn(&mut CPU) -> ();\n\n'
+               u'fn missing(cpu: &mut CPU) { unimplemented!(); }\n')
 
 TABLE_DECL = u'\n\npub static {0}_TABLE : [OpcodeFunc; 256] = [\n'
 
-TABLE_ROW = u'    {:>26}, {:>26}, {:>26}, {:>26},\n'
+TABLE_ROW = u'    {:>13}, {:>13}, {:>13}, {:>13},\n'
 
-UNINMPLEMENTED = u'panic!("Not implemented.")'
+UNINMPLEMENTED = u'missing'
 
 
 def process_opcode_file(file_name):
