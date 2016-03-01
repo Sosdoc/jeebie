@@ -33,12 +33,7 @@ impl CPU {
 
         loop {
             // fetch
-            // the block is needed so that the borrow of cpu.memory ends
-            // before dispatch, which will mutably borrow cpu
-            let opcode = {
-                cpu.mem.read_b(cpu.reg.pc.get())
-            };
-
+            let opcode = cpu.mem.read_b(cpu.reg.pc.get());
             // execute
             cpu.dispatch(opcode);
             // increase PC
