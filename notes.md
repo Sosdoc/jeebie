@@ -67,3 +67,45 @@ Some things to note from the mapping:
 - Some cartridges offer extra switchable RAM to be used.
 
 [cpuman]: http://marc.rawer.de/Gameboy/Docs/GBCPUman.pdf
+
+
+## Emulator implementation
+
+This section contains details, thoughts and whatever else is relevant to the
+actual implementation of the emulator.
+
+First things first, the objective in this implementation is to stick at all
+times to a Rust implementation, other languages are fine as long as *they only
+support development and are not actually part of emulator code*.
+
+**Why this choice?**
+
+It's mostly a personal preference, but one perk of keeping it pure Rust means
+that a simple `cargo build` command can get all dependencies after a checkout.
+Other than that, I'd like to use Rust wherever possible to keep learning about
+it.
+
+### Tools, IDE or lack thereof
+
+For development, the installation of rust I personally use is handled by
+multirust. It's a great tool for trying out beta and nightly builds withouth
+fussing too much with your environment.
+
+Still, my objective is to keep the emulator buildable **at all times** on the
+latest Rust stable release. Nightly is only used optionally if possible, for
+things like clippy.
+
+I use Atom as an editor. While it isn't exactly where I'd want it to be in terms
+of performance, the support for Rust (via plugins) is currently one of the best
+around.
+
+Plugins I use (and recommend) for Rust:
+
+- Linter and linter-rust: make sure to set it to `cargo check`, it will report compiler warnings and errors on save, which in Rust are extremely helpful;
+- Racer: an autocompletion plugin, it might not work perfectly but is better than nothing! Install racer via `cargo install` and make sure to clone the rustc github repository;
+- Atom beautify: requires rustfmt (`cargo install` saves the day), note that not all files are formatted via rustfmt, but it's great for fixing indentation!
+
+Racer is a bit of a sore spot as it can't always give information (it can't do
+much with a `RefCell` for example), fortunately, rustc will include full
+support for autocompletion (and IDEs) later on, check on https://areweideyet.com/
+to know about current progress.
