@@ -8,3 +8,4 @@ pub mod opcodes;
 pub mod registers;
 pub mod instr;
 pub mod cart;
+pub mod frontend;
