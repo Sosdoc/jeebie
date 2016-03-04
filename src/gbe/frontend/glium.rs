@@ -89,7 +89,7 @@ impl GliumFrontend {
             program: program,
 
             should_run: true,
-            tex_size: (160, 144),
+            tex_size: size,
         }
     }
 
@@ -97,7 +97,6 @@ impl GliumFrontend {
         let mut target = self.display.draw();
         target.clear_color(0.0, 0.0, 0.0, 1.0);
 
-        //let image = RawImage2d::from_raw_rgba(data, self.tex_size);
         let texture = Texture2d::new(&self.display, image).unwrap();
 
         let uniforms = uniform! {
@@ -126,10 +125,10 @@ impl GliumFrontend {
 
 
 impl GpuFrontend for GliumFrontend {
-    fn display_frame(&mut self, framebuffer: Vec<(u8, u8, u8)>) {
+    fn display_frame(&mut self, framebuffer: &[(u8, u8, u8)]) {
 
         let image = RawImage2d {
-            data: Cow::Borrowed(framebuffer.as_slice()), // moo
+            data: Cow::Borrowed(framebuffer), // moo
             width: self.tex_size.0,
             height: self.tex_size.1,
             format: ClientFormat::U8U8U8,
