@@ -19,6 +19,16 @@ fn main() {
     println!("{:?}", cpu);
 
     // TODO: remove after testing this thing.
-    let mut front = gbe::frontend::glium::GliumFrontend::new();
-    front.display_frame(vec![]);
+    let mut front = gbe::frontend::glium::GliumFrontend::new_with_size((160, 144));
+
+    let tex_size = (160 * 144) as usize;
+
+    while front.should_run {
+        let mut fb = Vec::with_capacity(tex_size);
+        for _ in 0..tex_size {
+            fb.push((0, 255, 0));
+        }
+        front.display_frame(fb);
+        front.update();
+    }
 }
