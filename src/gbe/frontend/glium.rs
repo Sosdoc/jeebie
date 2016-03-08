@@ -1,7 +1,8 @@
 use glium::{DisplayBuild, Surface, VertexBuffer, Program};
-use glium::backend::glutin_backend::GlutinFacade;
+use glium::Display;
 use glium::texture::{RawImage2d, Texture2d, ClientFormat};
 use glium::{glutin, index, uniforms};
+
 
 use std::borrow::Cow;
 
@@ -19,12 +20,13 @@ struct Vertex {
 }
 
 pub struct GliumFrontend {
-    display: GlutinFacade,
+    display: Box<Display>,
     vertex_buffer: VertexBuffer<Vertex>,
     indices: index::NoIndices,
     program: Program,
 
     pub should_run: bool,
+    texture: Texture2d,
     tex_size: (u32, u32),
 }
 
@@ -79,17 +81,18 @@ impl GliumFrontend {
            }
         "#;
 
-        let program = Program::from_source(&display, vertex_shader_src, fragment_shader_src, None)
-                          .unwrap();
+        let program = Program::from_source(&display, vertex_shader_src, fragment_shader_src, None).unwrap();
+        let texture = Texture2d::empty(&display, size.0, size.1).unwrap();
 
         GliumFrontend {
-            display: display,
+            display: Box::new(display),
             vertex_buffer: vertex_buffer,
             indices: indices,
             program: program,
 
             should_run: true,
             tex_size: size,
+            texture: texture,
         }
     }
 
@@ -97,10 +100,10 @@ impl GliumFrontend {
         let mut target = self.display.draw();
         target.clear_color(0.0, 0.0, 0.0, 1.0);
 
-        let texture = Texture2d::new(&self.display, image).unwrap();
+        //let texture = Texture2d::new(&*self.display, image).unwrap();
 
         let uniforms = uniform! {
-            tex: &texture,
+            tex: &self.texture,
         };
 
         target.draw(&self.vertex_buffer,
