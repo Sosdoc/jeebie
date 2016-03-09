@@ -49,10 +49,7 @@ impl MMU {
             // Internal RAM, 8kB
             0xC000...0xDFFF => self.data[addr as usize],
             // Echo of internal RAM, this is less than 8k, up to 0xFDFF,
-            0xE000...0xFDFF => {
-                // TODO: change address to go to actual RAM location
-                0
-            }
+            0xE000...0xFDFF => self.data[(addr - 0x2000) as usize],
             // Sprite attribute memory, 160B
             0xFE00...0xFE9F => 0,
             // empty
@@ -64,7 +61,7 @@ impl MMU {
             // Interrupt Enable register
             0xFFFF => 0,
 
-            _ => self.data[addr as usize],
+            _ => panic!("tried to write at unkown address: {:4X}", addr)
         }
     }
 
