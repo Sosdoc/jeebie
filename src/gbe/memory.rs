@@ -56,7 +56,7 @@ impl MMU {
             0xFEA0...0xFEFF | 0xFF4C...0xFF7F => 0,
             // I/O ports
             0xFF00...0xFF4B => 0,
-            // More internal RAM
+            // High RAM (zero page), used with LDH instructions
             0xFF80...0xFFFE => 0,
             // Interrupt Enable register
             0xFFFF => 0,
