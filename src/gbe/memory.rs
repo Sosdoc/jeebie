@@ -1,3 +1,13 @@
+/// The memory module.
+/// This module declares a single struct, the Memory Management Unit (MMU). 
+/// The MMU holds all components that are addressable via memory, instead of having
+/// a single Memory object holding all data and shared among components.
+/// This approach simplifies design and avoids having to resort to `Rc` pointers or
+/// adding lifetime specifications to every struct.
+/// 
+/// Each component (GPU, I/O registers, Cartridges) keeps its own data, the MMU simply
+/// accesses it according to the memory mapping.
+
 use std::fmt;
 use std::cell::Cell;
 
@@ -61,7 +71,7 @@ impl MMU {
             // Interrupt Enable register
             0xFFFF => 0,
 
-            _ => panic!("tried to write at unkown address: {:4X}", addr)
+            _ => panic!("tried to write at unkown address: {:4X}", addr),
         }
     }
 
