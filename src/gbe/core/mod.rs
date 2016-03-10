@@ -1,4 +1,4 @@
 pub mod cpu;
 
 #[cfg(test)]
-mod tests;
+mod cpu_test;
