@@ -64,7 +64,6 @@ impl GPU {
     }
 }
 
-
 enum Mode {
     OAMRead,
     VRAMRead,
@@ -73,6 +72,15 @@ enum Mode {
 }
 
 /// The memory owned by the GPU
+/// The main VRAM (`data`) is used for the following values:
+///     8000-87FF	Tile set #1: tiles 0-127
+///     8800-8FFF	Tile set #1: tiles 128-255 Tile set #0: tiles -1 to -128
+///     9000-97FF	Tile set #0: tiles 0-127
+///     9800-9BFF	Tile map #0
+///     9C00-9FFF	Tile map #1
+///
+/// The rest of the memory (`oam`) is used for sprite data and addressed separately
+/// from FE00 to FE9F.
 struct VideoMemory {
     data: [u8; 8192],
     oam: [u8; 160],
