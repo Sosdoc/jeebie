@@ -1,4 +1,4 @@
-# Jeebie
+# Jeebie [![Build Status](https://travis-ci.org/Sosdoc/jeebie.svg?branch=master)](https://travis-ci.org/Sosdoc/jeebie)
 A gameboy emulator written in Rust.
 
 ## Status
