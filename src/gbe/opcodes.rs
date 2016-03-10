@@ -4,7 +4,7 @@ use gbe::instr::load::*;
 use gbe::instr::misc::*;
 use gbe::instr::stack::*;
 
-use gbe::cpu::CPU;
+use gbe::core::cpu::CPU;
 /// The type of functions that implement an opcode.
 pub type OpcodeFunc = fn(&mut CPU) -> ();
 

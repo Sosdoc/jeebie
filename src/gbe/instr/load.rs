@@ -1,4 +1,4 @@
-use gbe::cpu::CPU;
+use gbe::core::cpu::CPU;
 use gbe::registers::Flags;
 
 // 'LD B,n' 06 8

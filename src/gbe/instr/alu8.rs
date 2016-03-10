@@ -1,6 +1,6 @@
 /// Module for 8 bit arithmetic (ALU instructions)
 
-use gbe::cpu::CPU;
+use gbe::core::cpu::CPU;
 use gbe::registers::Flags;
 
 // 'ADD A,A' 87 4

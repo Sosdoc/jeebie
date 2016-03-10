@@ -1,6 +1,6 @@
 /// Module for 16 bit arithmetic (ALU instructions)
 
-use gbe::cpu::CPU;
+use gbe::core::cpu::CPU;
 use gbe::registers::Flags;
 
 // 'ADD HL,BC' 09 8

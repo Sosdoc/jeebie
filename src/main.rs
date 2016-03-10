@@ -6,7 +6,7 @@ extern crate glium;
 
 mod gbe;
 
-use gbe::cpu::*;
+use gbe::core::cpu::*;
 use gbe::frontend::GpuFrontend;
 
 fn main() {
