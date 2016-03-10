@@ -1,5 +1,5 @@
-use gbe::memory::MMU;
-use gbe::registers::*;
+use jeebie::memory::MMU;
+use jeebie::registers::*;
 
 #[derive(Debug)]
 pub struct CPU {

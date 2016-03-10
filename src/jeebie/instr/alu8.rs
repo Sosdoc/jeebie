@@ -1,7 +1,7 @@
 /// Module for 8 bit arithmetic (ALU instructions)
 
-use gbe::core::cpu::CPU;
-use gbe::registers::Flags;
+use jeebie::core::cpu::CPU;
+use jeebie::registers::Flags;
 
 // 'ADD A,A' 87 4
 pub fn ADD_a_a(cpu: &mut CPU) {

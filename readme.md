@@ -1,4 +1,4 @@
-# RGBE
+# Jeebie
 A gameboy emulator written in Rust.
 
 Sources used for development include:

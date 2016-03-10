@@ -4,22 +4,22 @@
 #[macro_use]
 extern crate glium;
 
-mod gbe;
+mod jeebie;
 
-use gbe::core::cpu::*;
-use gbe::frontend::GpuFrontend;
+use jeebie::core::cpu::*;
+use jeebie::frontend::GpuFrontend;
 
 fn main() {
+    // TODO: make a proper main
     println!("Hello, cpu!");
 
     let mut cpu = CPU::new();
     println!("{:?}", cpu);
 
-    gbe::instr::load::LD_HLm_a(&mut cpu);
+    jeebie::instr::load::LD_HLm_a(&mut cpu);
     println!("{:?}", cpu);
 
-    // TODO: remove after testing this thing.
-    let mut front = gbe::frontend::glium::GliumFrontend::new_with_size((160, 144));
+    let mut front = jeebie::frontend::glium::GliumFrontend::new_with_size((160, 144));
 
     let tex_size = (160 * 144) as usize;
     let mut fb = Vec::with_capacity(tex_size);

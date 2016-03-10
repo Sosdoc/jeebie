@@ -6,7 +6,7 @@ use glium::{glutin, index, uniforms};
 
 use std::borrow::Cow;
 
-use gbe::frontend::GpuFrontend;
+use jeebie::frontend::GpuFrontend;
 
 // TODO: this is pretty much the tutorial for glium
 // some stuff that needs to be done:

@@ -1,10 +1,10 @@
-use gbe::instr::alu16::*;
-use gbe::instr::alu8::*;
-use gbe::instr::load::*;
-use gbe::instr::misc::*;
-use gbe::instr::stack::*;
+use jeebie::instr::alu16::*;
+use jeebie::instr::alu8::*;
+use jeebie::instr::load::*;
+use jeebie::instr::misc::*;
+use jeebie::instr::stack::*;
 
-use gbe::core::cpu::CPU;
+use jeebie::core::cpu::CPU;
 /// The type of functions that implement an opcode.
 pub type OpcodeFunc = fn(&mut CPU) -> ();
 

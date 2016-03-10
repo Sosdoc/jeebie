@@ -1,7 +1,7 @@
 /// Module for 16 bit arithmetic (ALU instructions)
 
-use gbe::core::cpu::CPU;
-use gbe::registers::Flags;
+use jeebie::core::cpu::CPU;
+use jeebie::registers::Flags;
 
 // 'ADD HL,BC' 09 8
 pub fn ADD_hl_bc(cpu: &mut CPU) {

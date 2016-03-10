@@ -1,5 +1,5 @@
-use gbe::core::cpu::CPU;
-use gbe::registers::*;
+use jeebie::core::cpu::CPU;
+use jeebie::registers::*;
 
 #[test]
 fn compute_add_8_bit() {

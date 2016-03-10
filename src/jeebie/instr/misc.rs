@@ -1,6 +1,6 @@
 /// Module for miscellaneous instructions
 
-use gbe::core::cpu::CPU;
+use jeebie::core::cpu::CPU;
 
 /// 'NOP' 00 4
 pub fn nop(cpu: &mut CPU) {}

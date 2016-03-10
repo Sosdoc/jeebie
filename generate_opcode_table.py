@@ -15,9 +15,9 @@ CODES = {}
 CB_CODES = {}
 MODULES = []
 
-MODULE_IMPORT = u'use gbe::instr::{0}::*;\n'
+MODULE_IMPORT = u'use jeebie::instr::{0}::*;\n'
 
-FILE_HEADER = (u'\nuse gbe::core::cpu::CPU;\n'
+FILE_HEADER = (u'\nuse jeebie::core::cpu::CPU;\n'
                u'/// The type of functions that implement an opcode.\n'
                u'pub type OpcodeFunc = fn(&mut CPU) -> ();\n\n'
                u'fn missing(cpu: &mut CPU) { unimplemented!(); }\n')
@@ -101,8 +101,8 @@ def func_cb(opcode):
 
 if __name__ == "__main__":
 
-    for src_file in glob.glob('src/gbe/instr/*.rs'):
+    for src_file in glob.glob('src/jeebie/instr/*.rs'):
         process_opcode_file(src_file)
 
-    with open('src/gbe/opcodes.rs', 'w') as out_file:
+    with open('src/jeebie/opcodes.rs', 'w') as out_file:
         out_file.writelines(build_output())

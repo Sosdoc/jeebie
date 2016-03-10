@@ -1,4 +1,4 @@
-use gbe::core::cpu::CPU;
+use jeebie::core::cpu::CPU;
 
 // 'PUSH AF' F5 16
 pub fn PUSH_af(cpu: &mut CPU) {

@@ -1,5 +1,5 @@
 [root]
-name = "gbe"
+name = "jeebie"
 version = "0.1.0"
 dependencies = [
  "clippy 0.0.42 (registry+https://github.com/rust-lang/crates.io-index)",

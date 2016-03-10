@@ -54,7 +54,7 @@ Echo of 8kB Internal RAM
 8kB Video RAM
 --------------------------- 8000 --
 16kB switchable ROM bank |
---------------------------- 4000 |= 32kB Cartrigbe
+--------------------------- 4000 |= 32kB Cartrijeebie
 16kB ROM bank #0 |
 --------------------------- 0000 --
 ```
