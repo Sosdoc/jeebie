@@ -9,16 +9,7 @@ pub struct CPU {
 
 impl CPU {
     pub fn new() -> CPU {
-
-        let r = Registers {
-            af: Register16::new(0),
-            bc: Register16::new(0),
-            de: Register16::new(0),
-            hl: Register16::new(0),
-            pc: Register16::new(0),
-            sp: Register16::new(0),
-        };
-
+        let r = Registers::new();
         let mmu = MMU::new();
 
         CPU { reg: r, mem: mmu }
@@ -33,17 +24,13 @@ impl CPU {
 
         loop {
             // fetch
-            let opcode = cpu.mem.read_b(cpu.reg.pc.get());
+            let opcode = cpu.mem.read_b(cpu.reg.pc);
             // execute
             cpu.dispatch(opcode);
             // increase PC
-            cpu.reg.pc.add(1);
+            cpu.reg.pc.wrapping_add(1);
             // TODO: compute clock timings
         }
-    }
-
-    pub fn LD_nn_n(reg1: &mut Register8, value: u8) {
-        reg1.set(value);
     }
 
     // Swaps low and high nibble of an 8 bit value and sets flags.
@@ -59,9 +46,15 @@ impl CPU {
         result
     }
 
+    pub fn load_rr(&mut self, reg1: Register8, reg2: Register8) {
+        self.set8(reg1, self.get8(reg2));
+    }
+
     // Computes the flags and result for a 16-bit ADD instruction.
-    pub fn compute_add16(&mut self, rhs: u16) {
-        let lhs = self.reg.hl.get();
+    // The result is put in the specified `reg1`.
+    pub fn compute_add16(&mut self, reg1: Register16, reg2: Register16) {
+        let lhs = self.get16(reg1);
+        let rhs = self.get16(reg2);
         let result = lhs.wrapping_add(rhs);
 
         // flag zero is not affected, sub is reset
@@ -79,11 +72,13 @@ impl CPU {
             self.reg.set_flag(Flags::HalfCarry);
         }
 
-        self.reg.hl.set(result);
+        self.set16(reg1, result);
     }
 
     // Computes the flags and result for an 8-bit ADD instruction.
-    pub fn compute_add(&mut self, lhs: u8, rhs: u8) {
+    pub fn compute_add(&mut self, reg1: Register8, reg2: Register8) {
+        let lhs = self.get8(reg1);
+        let rhs = self.get8(reg2);
         let result = lhs.wrapping_add(rhs);
 
         self.reg.clear_all_flags();
@@ -103,11 +98,20 @@ impl CPU {
             self.reg.set_flag(Flags::HalfCarry);
         }
 
-        self.reg.af.high.set(result);
+        self.set8(Register8::A, result);
+    }
+
+    pub fn compute_adc(&mut self, reg1: Register8, reg2: Register8) {
+        let carry = if self.reg.is_set(Flags::Carry) { 1 } else { 0 };
+        let reg2 = Register8::Value8(self.get8(reg2).wrapping_add(carry));
+        self.compute_add(reg1, reg2);
     }
 
     // Computes the flags and result for a SUB instruction.
-    pub fn compute_sub(&mut self, lhs: u8, rhs: u8) {
+    // Left hand operator is always register A
+    pub fn compute_sub(&mut self, reg: Register8) {
+        let lhs = self.get8(Register8::A);
+        let rhs = self.get8(reg);
         let result = lhs.wrapping_sub(rhs);
 
         self.reg.clear_all_flags();
@@ -128,13 +132,21 @@ impl CPU {
             self.reg.set_flag(Flags::HalfCarry);
         }
 
-        self.reg.af.high.set(result);
+        self.set8(Register8::A, result);
+    }
+
+    pub fn compute_sbc(&mut self, reg: Register8) {
+        let carry = if self.reg.is_set(Flags::Carry) { 1 } else { 0 };
+        let reg = Register8::Value8(self.get8(reg).wrapping_sub(carry));
+        self.compute_sub(reg);
     }
 
     // Computes the flags for a CP instruction.
     // this has the same effect on flags as a SUB, but the result is discarded.
-    pub fn compute_cp(&mut self, rhs: u8) {
-        let lhs = self.reg.af.high.get();
+    pub fn compute_cp(&mut self, reg: Register8) {
+        let lhs = self.get8(Register8::A);
+        let rhs = self.get8(reg);
+
         self.reg.clear_all_flags();
         self.reg.set_flag(Flags::Sub);
 
@@ -156,8 +168,10 @@ impl CPU {
 
     // Computes the flags and result for an AND instruction.
     // lhs is always the register A
-    pub fn compute_and(&mut self, rhs: u8) {
-        let result = self.reg.af.high.get() & rhs;
+    pub fn compute_and(&mut self, reg: Register8) {
+        let lhs = self.get8(Register8::A);
+        let rhs = self.get8(reg);
+        let result = lhs & rhs;
 
         // HC flag is always set, other flags always cleared except zero.
         self.reg.clear_all_flags();
@@ -167,13 +181,15 @@ impl CPU {
             self.reg.set_flag(Flags::Zero);
         }
 
-        self.reg.af.high.set(result);
+        self.set8(Register8::A, result);
     }
 
     // Computes the flags and result for an OR instruction.
     // lhs is always the register A
-    pub fn compute_or(&mut self, rhs: u8) {
-        let result = self.reg.af.high.get() | rhs;
+    pub fn compute_or(&mut self, reg: Register8) {
+        let lhs = self.get8(Register8::A);
+        let rhs = self.get8(reg);
+        let result = lhs | rhs;
 
         // all flags are cleared except zero.
         self.reg.clear_all_flags();
@@ -182,13 +198,15 @@ impl CPU {
             self.reg.set_flag(Flags::Zero);
         }
 
-        self.reg.af.high.set(result);
+        self.set8(Register8::A, result);
     }
 
     // Computes the flags and result for an XOR instruction.
     // lhs is always the register A
-    pub fn compute_xor(&mut self, rhs: u8) {
-        let result = self.reg.af.high.get() ^ rhs;
+    pub fn compute_xor(&mut self, reg: Register8) {
+        let lhs = self.get8(Register8::A);
+        let rhs = self.get8(reg);
+        let result = lhs ^ rhs;
 
         // all flags are cleared except zero.
         self.reg.clear_all_flags();
@@ -197,62 +215,81 @@ impl CPU {
             self.reg.set_flag(Flags::Zero);
         }
 
-        self.reg.af.high.set(result);
+        self.set8(Register8::A, result);
     }
 
-    /// Computes flags after an INC instruction based on the final value.
-    /// Carry flag is left untouched, so no clearing all of them.
-    pub fn compute_inc_flags(&mut self, increased_value: u8) {
+    /// Computes an INC instruction.
+    /// Carry flag is left untouched, so they are not cleared.
+    pub fn compute_inc(&mut self, reg: Register8) {
+        let result = self.get8(reg).wrapping_add(1);
         self.reg.clear_flag(Flags::Sub);
 
-        if increased_value == 0 {
+        if result == 0 {
             self.reg.set_flag(Flags::Zero);
         }
 
-        // TODO: this condition sucks
         // set HC if bit 0-3 were 1 before adding
-        if (increased_value.wrapping_sub(1) & 0x0F) == 0x0F {
+        if (result.wrapping_sub(1) & 0x0F) == 0x0F {
             self.reg.set_flag(Flags::HalfCarry);
         }
+
+        self.set8(reg, result);
+    }
+
+    /// Computes an INC instruction on a 16 bit register.
+    /// Flags are not affected.
+    pub fn compute_inc16(&mut self, reg: Register16) {
+        self.set16(reg, self.get16(reg).wrapping_add(1));
+    }
+
+    /// Computes an INC instruction on a 16 bit register.
+    /// Flags are not affected.
+    pub fn compute_dec16(&mut self, reg: Register16) {
+        self.set16(reg, self.get16(reg).wrapping_sub(1));
     }
 
     /// Computes flags after a DEC instruction based on the final value.
     /// Carry flag is left untouched, so no clearing all of them.
-    pub fn compute_dec_flags(&mut self, decreased_value: u8) {
+    pub fn compute_dec(&mut self, reg: Register8) {
+        let result = self.get8(reg).wrapping_sub(1);
         self.reg.set_flag(Flags::Sub);
 
-        if decreased_value == 0 {
+        if result == 0 {
             self.reg.set_flag(Flags::Zero);
         }
 
         // HC is set if bit 4 was borrowed
         // this happens only when bit 0-3 are all 0 before decrementing.
-        if (decreased_value.wrapping_add(1) & 0x0F) == 0x00 {
+        if (result.wrapping_add(1) & 0x0F) == 0x00 {
             self.reg.set_flag(Flags::HalfCarry);
         }
+
+        self.set8(reg, result);
     }
 
     /// Pushes on the stack a 16-bit register value,
     /// it decrements SP and pushes the LSB before the MSB.
-    pub fn push_stack(&mut self, reg: u16) {
-        self.reg.sp.sub(1);
-        let addr = self.reg.sp.get();
-        let low = (reg & 0x00FF) as u8;
+    pub fn push_stack(&mut self, reg: Register16) {
+        let value = self.get16(reg);
+
+        self.reg.sp.wrapping_sub(1);
+        let addr = self.reg.sp;
+        let low = (value & 0x00FF) as u8;
         self.mem.write_b(addr, low);
 
-        self.reg.sp.sub(1);
-        let addr = self.reg.sp.get();
-        let high = ((reg >> 8) & 0x00FF) as u8;
+        self.reg.sp.wrapping_sub(1);
+        let addr = self.reg.sp;
+        let high = ((value >> 8) & 0x00FF) as u8;
         self.mem.write_b(addr, high);
     }
 
     /// Pops a 16-bit value from the stack, MSB first, returning the u16 value.
     pub fn pop_stack(&mut self) -> u16 {
-        let high = self.mem.read_b(self.reg.sp.get());
-        self.reg.sp.add(1);
+        let high = self.mem.read_b(self.reg.sp);
+        self.reg.sp.wrapping_add(1);
 
-        let low = self.mem.read_b(self.reg.sp.get());
-        self.reg.sp.add(1);
+        let low = self.mem.read_b(self.reg.sp);
+        self.reg.sp.wrapping_add(1);
 
         ((high as u16) << 8) & (low as u16)
     }
@@ -260,8 +297,8 @@ impl CPU {
     /// Retrieves an immediate 8-bit value.
     /// Immediates are retrieved by reading at the address in the PC register.
     pub fn get_immediate8(&mut self) -> u8 {
-        let value = self.mem.read_b(self.reg.pc.get());
-        self.reg.pc.add(1);
+        let value = self.mem.read_b(self.reg.pc);
+        self.reg.pc.wrapping_add(1);
 
         value
     }

@@ -2,88 +2,70 @@
 
 use jeebie::core::cpu::CPU;
 use jeebie::registers::Flags;
+use jeebie::registers::Register8::*;
+use jeebie::registers::Register16::*;
 
 // 'ADD HL,BC' 09 8
 pub fn ADD_hl_bc(cpu: &mut CPU) {
-    let rhs = cpu.reg.bc.get();
-    cpu.compute_add16(rhs);
+    cpu.compute_add16(HL, BC);
 }
 
 // 'ADD HL,DE' 19 8
 pub fn ADD_hl_de(cpu: &mut CPU) {
-    let rhs = cpu.reg.de.get();
-    cpu.compute_add16(rhs);
+    cpu.compute_add16(HL, DE);
 }
 
 // 'ADD HL,HL' 29 8
 pub fn ADD_hl_hl(cpu: &mut CPU) {
-    let rhs = cpu.reg.hl.get();
-    cpu.compute_add16(rhs);
+    cpu.compute_add16(HL, HL);
 }
 
 // 'ADD HL,SP' 39 8
 pub fn ADD_hl_sp(cpu: &mut CPU) {
-    let rhs = cpu.reg.sp.get();
-    cpu.compute_add16(rhs);
+    cpu.compute_add16(HL, SP);
 }
 
 // 'ADD SP,#' E8 16
 pub fn ADD_sp_n(cpu: &mut CPU) {
-    let value = cpu.get_immediate8() as u16;
-    let sp = cpu.reg.sp.get();
-
-    let result = sp.wrapping_add(value);
-
-    // flags
-    cpu.reg.clear_all_flags();
-
-    if let None = sp.checked_add(value) {
-        cpu.reg.set_flag(Flags::Carry);
-    }
-
-    if let None = (sp as u8).checked_add(value as u8) {
-        cpu.reg.set_flag(Flags::HalfCarry);
-    }
-
-    cpu.reg.sp.set(sp);
+    cpu.compute_add16(SP, Value16(cpu.get_immediate8() as u16));
 }
 
 // 'INC BC' 03 8
 pub fn INC_bc(cpu: &mut CPU) {
-    cpu.reg.bc.add(1);
+    cpu.compute_inc16(BC);
 }
 
 // 'INC DE' 13 8
 pub fn INC_de(cpu: &mut CPU) {
-    cpu.reg.de.add(1);
+    cpu.compute_inc16(DE);
 }
 
 // 'INC HL' 23 8
 pub fn INC_hl(cpu: &mut CPU) {
-    cpu.reg.hl.add(1);
+    cpu.compute_inc16(HL);
 }
 
 // 'INC SP' 33 8
 pub fn INC_sp(cpu: &mut CPU) {
-    cpu.reg.sp.add(1);
+    cpu.compute_inc16(SP);
 }
 
 // 'DEC BC' 0B 8
 pub fn DEC_bc(cpu: &mut CPU) {
-    cpu.reg.bc.sub(1);
+    cpu.compute_dec16(BC);
 }
 
 // 'DEC DE' 1B 8
 pub fn DEC_de(cpu: &mut CPU) {
-    cpu.reg.de.sub(1);
+    cpu.compute_dec16(DE);
 }
 
 // 'DEC HL' 2B 8
 pub fn DEC_hl(cpu: &mut CPU) {
-    cpu.reg.hl.sub(1);
+    cpu.compute_dec16(HL);
 }
 
 // 'DEC SP' 3B 8
 pub fn DEC_sp(cpu: &mut CPU) {
-    cpu.reg.sp.sub(1);
+    cpu.compute_dec16(SP);
 }
