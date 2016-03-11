@@ -1,63 +1,47 @@
 /// Module for miscellaneous instructions
-
 use jeebie::core::cpu::CPU;
+use jeebie::registers::Register8::*;
+use jeebie::registers::Register16::*;
 
 /// 'NOP' 00 4
 pub fn nop(cpu: &mut CPU) {}
 
 // 'SWAP A' CB 37 8
 pub fn SWAP_a(cpu: &mut CPU) {
-    let value = cpu.reg.af.high.get();
-    let res = cpu.compute_swap(value);
-    cpu.reg.af.high.set(res);
+    cpu.compute_swap(A);
 }
 
 // 'SWAP B' CB 30 8
 pub fn SWAP_b(cpu: &mut CPU) {
-    let value = cpu.reg.bc.high.get();
-    let res = cpu.compute_swap(value);
-    cpu.reg.bc.high.set(res);
+    cpu.compute_swap(B);
 }
 
 // 'SWAP C' CB 31 8
 pub fn SWAP_c(cpu: &mut CPU) {
-    let value = cpu.reg.bc.low.get();
-    let res = cpu.compute_swap(value);
-    cpu.reg.bc.low.set(res);
+    cpu.compute_swap(C);
 }
 
 // 'SWAP D' CB 32 8
 pub fn SWAP_d(cpu: &mut CPU) {
-    let value = cpu.reg.de.high.get();
-    let res = cpu.compute_swap(value);
-    cpu.reg.de.high.set(res);
+    cpu.compute_swap(D);
 }
 
 // 'SWAP E' CB 33 8
 pub fn SWAP_e(cpu: &mut CPU) {
-    let value = cpu.reg.de.low.get();
-    let res = cpu.compute_swap(value);
-    cpu.reg.de.low.set(res);
+    cpu.compute_swap(E);
 }
 
 // 'SWAP H' CB 34 8
 pub fn SWAP_h(cpu: &mut CPU) {
-    let value = cpu.reg.hl.high.get();
-    let res = cpu.compute_swap(value);
-    cpu.reg.hl.high.set(res);
+    cpu.compute_swap(H);
 }
 
 // 'SWAP L' CB 35 8
 pub fn SWAP_l(cpu: &mut CPU) {
-    let value = cpu.reg.hl.low.get();
-    let res = cpu.compute_swap(value);
-    cpu.reg.hl.low.set(res);
+    cpu.compute_swap(L);
 }
 
 // 'SWAP (HL)' CB 36 16
 pub fn SWAP_hl(cpu: &mut CPU) {
-    let addr = cpu.reg.hl.get();
-    let value = cpu.mem.read_b(addr);
-    let res = cpu.compute_swap(value);
-    cpu.mem.write_b(addr, res);
+    cpu.compute_swap(RegisterAddress(HL));
 }

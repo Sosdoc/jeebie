@@ -1,4 +1,3 @@
-use std::fmt;
 use jeebie::core::cpu::CPU;
 
 /// The four flags and their respective bit values. Bits 0-3 are unused.
@@ -22,13 +21,14 @@ pub enum Flags {
     HalfCarry = 0b00010000,
 }
 
+#[derive(Clone, Copy)]
 pub enum Register8 {
     A, B, C, D, E, H, L,
     RegisterAddress(Register16),
-    Address(u16),
-    HLAddr, Immediate, Value8(u8)
+    Address(u16), Immediate, Value8(u8)
 }
 
+#[derive(Clone, Copy)]
 pub enum Register16 {
     AF, BC, DE, HL, SP, PC,
     Immediate16, Value16(u16)
@@ -82,66 +82,70 @@ impl Registers {
         (self.f & flag_value) == flag_value
     }
 
-    fn as_u16(high: u8, low: u8) -> u16 {
+    fn combine_as_u16(high: u8, low: u8) -> u16 {
         ((high as u16) << 8) & (low as u16)
     }
 }
 
 impl CPU {
-    pub fn get8(&self, reg: Register8) -> u8 {
+    pub fn get8(&mut self, reg: Register8) -> u8 {
         match reg {
-            A => self.reg.a,
-            B => self.reg.b,
-            C => self.reg.c,
-            D => self.reg.d,
-            E => self.reg.e,
-            H => self.reg.h,
-            L => self.reg.l,
-            HLAddr => self.mem.read_b(self.get16(Register16::HL)),
-            Register8::RegisterAddress(r) => self.mem.read_b(self.get16(r)),
+            Register8::A => self.reg.a,
+            Register8::B => self.reg.b,
+            Register8::C => self.reg.c,
+            Register8::D => self.reg.d,
+            Register8::E => self.reg.e,
+            Register8::H => self.reg.h,
+            Register8::L => self.reg.l,
+            Register8::RegisterAddress(r) => {
+                let addr = self.get16(r);
+                self.mem.read_b(addr)
+            },
             Register8::Address(addr) => self.mem.read_b(addr),
-            Immediate => self.get_immediate8(),
+            Register8::Immediate => self.get_immediate8(),
             Register8::Value8(n) => n,
         }
     }
 
     pub fn set8(&mut self, reg: Register8, value: u8) {
         match reg {
-            A => { self.reg.a = value },
-            B => { self.reg.b = value },
-            C => { self.reg.c = value },
-            D => { self.reg.d = value },
-            E => { self.reg.e = value },
-            H => { self.reg.h = value },
-            L => { self.reg.l = value },
-            HLAddr => self.mem.write_b(self.get16(Register16::HL), value),
-            Register8::RegisterAddress(r) => self.mem.write_b(self.get16(r), value),
+            Register8::A => self.reg.a = value,
+            Register8::B => self.reg.b = value,
+            Register8::C => self.reg.c = value,
+            Register8::D => self.reg.d = value,
+            Register8::E => self.reg.e = value,
+            Register8::H => self.reg.h = value,
+            Register8::L => self.reg.l = value,
+            Register8::RegisterAddress(r) => {
+                let addr = self.get16(r);
+                self.mem.write_b(addr, value);
+            },
             Register8::Address(addr) => self.mem.write_b(addr, value),
             _ => {},
         };
     }
 
-    pub fn get16(&self, reg: Register16) -> u16 {
+    pub fn get16(&mut self, reg: Register16) -> u16 {
         match reg {
-            AF => Registers::as_u16(self.reg.a, self.reg.f),
-            BC => Registers::as_u16(self.reg.b, self.reg.c),
-            DE => Registers::as_u16(self.reg.d, self.reg.e),
-            HL => Registers::as_u16(self.reg.h, self.reg.l),
-            SP => self.reg.sp,
-            PC => self.reg.pc,
-            Immediate16 => self.get_immediate16(),
+            Register16::AF => Registers::combine_as_u16(self.reg.a, self.reg.f),
+            Register16::BC => Registers::combine_as_u16(self.reg.b, self.reg.c),
+            Register16::DE => Registers::combine_as_u16(self.reg.d, self.reg.e),
+            Register16::HL => Registers::combine_as_u16(self.reg.h, self.reg.l),
+            Register16::SP => self.reg.sp,
+            Register16::PC => self.reg.pc,
+            Register16::Immediate16 => self.get_immediate16(),
             Register16::Value16(n) => n,
         }
     }
 
     pub fn set16(&mut self, reg: Register16, value: u16) {
         match reg {
-            AF => { self.reg.a = (value >> 8) as u8 ; self.reg.f = value as u8; },
-            BC => { self.reg.b = (value >> 8) as u8 ; self.reg.c = value as u8; },
-            DE => { self.reg.d = (value >> 8) as u8 ; self.reg.e = value as u8; },
-            HL => { self.reg.h = (value >> 8) as u8 ; self.reg.l = value as u8; },
-            SP => { self.reg.sp = value },
-            PC => { self.reg.pc = value },
+            Register16::AF => { self.reg.a = (value >> 8) as u8 ; self.reg.f = value as u8; },
+            Register16::BC => { self.reg.b = (value >> 8) as u8 ; self.reg.c = value as u8; },
+            Register16::DE => { self.reg.d = (value >> 8) as u8 ; self.reg.e = value as u8; },
+            Register16::HL => { self.reg.h = (value >> 8) as u8 ; self.reg.l = value as u8; },
+            Register16::SP => { self.reg.sp = value },
+            Register16::PC => { self.reg.pc = value },
             _ => {},
         };
     }

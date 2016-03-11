@@ -33,7 +33,7 @@ fn main() {
             fb[i] = (0, 255, 255);
         }
 
-        front.display_frame(fb.as_slice());
+        front.display_frame(&fb);
         front.update();
     }
 }

@@ -1,21 +1,25 @@
 use jeebie::core::cpu::CPU;
 use jeebie::registers::*;
+use jeebie::registers::Register8::*;
 
 #[test]
 fn compute_add_8_bit() {
     let mut cpu = CPU::new();
-    // simple add
-    cpu.compute_add(2u8, 2u8);
-    assert_eq!(cpu.reg.af.high.get(), 4u8);
+    // simple add, 2 + 2
+    cpu.set8(A, 2u8);
+    cpu.compute_add(A, A);
+    assert_eq!(cpu.get8(A), 4u8);
     // no flags
     assert!(!cpu.reg.is_set(Flags::Zero));
     assert!(!cpu.reg.is_set(Flags::Carry));
     assert!(!cpu.reg.is_set(Flags::HalfCarry));
     assert!(!cpu.reg.is_set(Flags::Sub));
 
-    // overflow
-    cpu.compute_add(255u8, 1u8);
-    assert_eq!(cpu.reg.af.high.get(), 0u8);
+    // overflow, 255 + 1
+    cpu.set8(A, 255u8);
+    cpu.set8(B, 1u8);
+    cpu.compute_add(A, B);
+    assert_eq!(cpu.get8(A), 0u8);
     // all except sub
     assert!(cpu.reg.is_set(Flags::Zero));
     assert!(cpu.reg.is_set(Flags::Carry));
@@ -23,8 +27,10 @@ fn compute_add_8_bit() {
     assert!(!cpu.reg.is_set(Flags::Sub));
 
     // halfcarry
-    cpu.compute_add(127u8, 1u8);
-    assert_eq!(cpu.reg.af.high.get(), 128u8);
+    cpu.set8(A, 127u8);
+    cpu.set8(B, 1u8);
+    cpu.compute_add(A, B);
+    assert_eq!(cpu.get8(A), 128u8);
     // HC only
     assert!(!cpu.reg.is_set(Flags::Zero));
     assert!(!cpu.reg.is_set(Flags::Carry));
@@ -36,8 +42,10 @@ fn compute_add_8_bit() {
 fn compute_sub_8_bit() {
     let mut cpu = CPU::new();
     // simple sub
-    cpu.compute_sub(8u8, 2u8);
-    assert_eq!(cpu.reg.af.high.get(), 6u8);
+    cpu.set8(A, 8u8);
+    cpu.set8(B, 2u8);
+    cpu.compute_sub(B);
+    assert_eq!(cpu.get8(A), 6u8);
     // sub only
     assert!(!cpu.reg.is_set(Flags::Zero));
     assert!(!cpu.reg.is_set(Flags::Carry));
@@ -45,8 +53,10 @@ fn compute_sub_8_bit() {
     assert!(cpu.reg.is_set(Flags::Sub));
 
     // underflow
-    cpu.compute_sub(0u8, 1u8);
-    assert_eq!(cpu.reg.af.high.get(), 255u8);
+    cpu.set8(A, 0u8);
+    cpu.set8(B, 1u8);
+    cpu.compute_sub(B);
+    assert_eq!(cpu.get8(A), 255u8);
     // all flags except zero
     assert!(!cpu.reg.is_set(Flags::Zero));
     assert!(cpu.reg.is_set(Flags::Carry));
@@ -54,8 +64,10 @@ fn compute_sub_8_bit() {
     assert!(cpu.reg.is_set(Flags::Sub));
 
     // halfcarry
-    cpu.compute_sub(128u8, 1u8);
-    assert_eq!(cpu.reg.af.high.get(), 127u8);
+    cpu.set8(A, 128u8);
+    cpu.set8(B, 2u8);
+    cpu.compute_sub(B);
+    assert_eq!(cpu.get8(A), 126u8);
     // HC and sub
     assert!(!cpu.reg.is_set(Flags::Zero));
     assert!(!cpu.reg.is_set(Flags::Carry));

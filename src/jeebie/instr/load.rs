@@ -1,5 +1,4 @@
 use jeebie::core::cpu::CPU;
-use jeebie::registers::Flags;
 use jeebie::registers::Register8::*;
 use jeebie::registers::Register16::*;
 
@@ -104,7 +103,7 @@ pub fn LD_b_a(cpu: &mut CPU) {
 
 // 'LD B,(HL)' 46 8
 pub fn LD_b_HLm(cpu: &mut CPU) {
-    cpu.load_rr(B, HLAddr);
+    cpu.load_rr(B, RegisterAddress(HL));
 }
 
 // 'LD C,B' 48 4
@@ -144,7 +143,7 @@ pub fn LD_c_a(cpu: &mut CPU) {
 
 // 'LD C,(HL)' 4E 8
 pub fn LD_c_HLm(cpu: &mut CPU) {
-    cpu.load_rr(C, HLAddr);
+    cpu.load_rr(C, RegisterAddress(HL));
 }
 
 // 'LD D,B' 50 4
@@ -184,7 +183,7 @@ pub fn LD_d_a(cpu: &mut CPU) {
 
 // 'LD D,(HL)' 56 8
 pub fn LD_d_HLm(cpu: &mut CPU) {
-    cpu.load_rr(D, HLAddr);
+    cpu.load_rr(D, RegisterAddress(HL));
 }
 
 // 'LD E,B' 58 4
@@ -219,7 +218,7 @@ pub fn LD_e_l(cpu: &mut CPU) {
 
 // 'LD E,(HL)' 5E 8
 pub fn LD_e_HLm(cpu: &mut CPU) {
-    cpu.load_rr(E, HLAddr);
+    cpu.load_rr(E, RegisterAddress(HL));
 }
 
 // 'LD E,A' 5F 4
@@ -259,7 +258,7 @@ pub fn LD_h_l(cpu: &mut CPU) {
 
 // 'LD H,(HL)' 66 8
 pub fn LD_h_HLm(cpu: &mut CPU) {
-    cpu.load_rr(H, HLAddr);
+    cpu.load_rr(H, RegisterAddress(HL));
 }
 
 // 'LD H,A' 67 4
@@ -304,47 +303,47 @@ pub fn LD_l_a(cpu: &mut CPU) {
 
 // 'LD L,(HL)' 6E 8
 pub fn LD_l_HLm(cpu: &mut CPU) {
-    cpu.load_rr(L, HLAddr);
+    cpu.load_rr(L, RegisterAddress(HL));
 }
 
 // 'LD (HL),B' 70 8
 pub fn LD_HLm_b(cpu: &mut CPU) {
-    cpu.load_rr(HLAddr, B);
+    cpu.load_rr(RegisterAddress(HL), B);
 }
 
 // 'LD (HL),C' 71 8
 pub fn LD_HLm_c(cpu: &mut CPU) {
-    cpu.load_rr(HLAddr, C);
+    cpu.load_rr(RegisterAddress(HL), C);
 }
 
 // 'LD (HL),D' 72 8
 pub fn LD_HLm_d(cpu: &mut CPU) {
-    cpu.load_rr(HLAddr, D);
+    cpu.load_rr(RegisterAddress(HL), D);
 }
 
 // 'LD (HL),E' 73 8
 pub fn LD_HLm_e(cpu: &mut CPU) {
-    cpu.load_rr(HLAddr, E);
+    cpu.load_rr(RegisterAddress(HL), E);
 }
 
 // 'LD (HL),H' 74 8
 pub fn LD_HLm_h(cpu: &mut CPU) {
-    cpu.load_rr(HLAddr, H);
+    cpu.load_rr(RegisterAddress(HL), H);
 }
 
 // 'LD (HL),L' 75 8
 pub fn LD_HLm_l(cpu: &mut CPU) {
-    cpu.load_rr(HLAddr, L);
+    cpu.load_rr(RegisterAddress(HL), L);
 }
 
 // 'LD (HL),n' 36 12
 pub fn LD_HLm_n(cpu: &mut CPU) {
-    cpu.load_rr(HLAddr, Immediate);
+    cpu.load_rr(RegisterAddress(HL), Immediate);
 }
 
 // 'LD (HL),A' 77 8
 pub fn LD_HLm_a(cpu: &mut CPU) {
-    cpu.load_rr(HLAddr, A);
+    cpu.load_rr(RegisterAddress(HL), A);
 }
 
 // 'LD A,(BC)' 0A 8
@@ -389,12 +388,14 @@ pub fn LD_nnm_A(cpu: &mut CPU) {
 
 // 'LD A,($FF00 + C)' F2 8
 pub fn LD_a_c_mem(cpu: &mut CPU) {
-    cpu.load_rr(A, Address((0xFF00 & cpu.get8(C)) as u16));
+    let addr = 0xFF00 & (cpu.get8(C) as u16);
+    cpu.load_rr(A, Address(addr));
 }
 
 // 'LD ($FF00+C),A' E2 8
 pub fn LD_c_mem_a(cpu: &mut CPU) {
-    cpu.load_rr(Address((0xFF00 & cpu.get8(C)) as u16), A);
+    let addr = 0xFF00 & (cpu.get8(C) as u16);
+    cpu.load_rr(Address(addr), A);
 }
 
 // 'LDD A,(HL)' 3A 8
@@ -423,67 +424,47 @@ pub fn LDI_HLm_a(cpu: &mut CPU) {
 
 // 'LDH ($FF00+n),A' E0 12
 pub fn LDH_nm_a(cpu: &mut CPU) {
-    let addr = 0xFF00 & (cpu.reg.pc.low.get() as u16);
-    let value = cpu.reg.af.high.get();
-    cpu.mem.write_b(addr, value);
+    let addr = 0xFF00 & (cpu.get8(Immediate) as u16);
+    cpu.load_rr(Address(addr), A);
 }
 
 // 'LDH A,($FF00+n)' F0 12
 pub fn LDH_a_nm(cpu: &mut CPU) {
-    let addr = 0xFF00 & (cpu.reg.pc.low.get() as u16);
-    let value = cpu.mem.read_b(addr);
-    cpu.reg.af.high.set(value);
+    let addr = 0xFF00 & (cpu.get8(Immediate) as u16);
+    cpu.load_rr(A, Address(addr));
 }
 
 // *** 16-bit loads ***
 
 // 'LD BC,nn' 01 12
 pub fn LD_bc_nn(cpu: &mut CPU) {
-    let immediate = cpu.get_immediate16();
-    cpu.reg.bc.set(immediate);
+    cpu.load_rr16(BC, Immediate16);
 }
 
 // 'LD DE,nn' 11 12
 pub fn LD_de_nn(cpu: &mut CPU) {
-    let immediate = cpu.get_immediate16();
-    cpu.reg.de.set(immediate);
+    cpu.load_rr16(DE, Immediate16);
 }
 
 // 'LD HL,nn' 21 12
 pub fn LD_hl_nn(cpu: &mut CPU) {
-    let immediate = cpu.get_immediate16();
-    cpu.reg.hl.set(immediate);
+    cpu.load_rr16(HL, Immediate16);
 }
 
 // 'LD SP,nn' 31 12
 pub fn LD_sp_nn(cpu: &mut CPU) {
-    let immediate = cpu.get_immediate16();
-    cpu.reg.sp.set(immediate);
+    cpu.load_rr16(SP, Immediate16);
 }
 
 // 'LD SP,HL' F9 8
 pub fn LD_sp_hl(cpu: &mut CPU) {
-    cpu.reg.sp.set(cpu.reg.hl.get());
+    cpu.load_rr16(SP, HL);
 }
 
 // 'LD HL,SP+n' F8 12
 pub fn LDHL_sp_n(cpu: &mut CPU) {
-    let immediate = cpu.get_immediate8();
-    let result = cpu.reg.sp.get().wrapping_add(immediate as u16);
-
-    cpu.reg.hl.set(result);
-
-    // TODO: check that flags conditions are correct (test maybe?)
-    cpu.reg.clear_all_flags();
-
-    if ((cpu.reg.sp.get() ^ (immediate as u16) ^ result) & 0x100) == 0x100 {
-        cpu.reg.set_flag(Flags::Carry)
-    }
-
-    if ((cpu.reg.sp.get() ^ (immediate as u16) ^ result) & 0x10) == 0x10 {
-        cpu.reg.set_flag(Flags::HalfCarry)
-    }
-
+    let spn = cpu.get16(SP).wrapping_add(cpu.get8(Immediate) as u16);
+    cpu.compute_add16(HL, Value16(spn));
 }
 
 // 'LD (nn),SP' 08 20
@@ -491,6 +472,9 @@ pub fn LD_nnm_sp(cpu: &mut CPU) {
     let addr_low = cpu.get_immediate16();
     let addr_high = addr_low.wrapping_add(1);
 
-    cpu.mem.write_b(addr_low, cpu.reg.sp.low.get());
-    cpu.mem.write_b(addr_high, cpu.reg.sp.high.get());
+    let low = (cpu.get16(SP) & 0x00FF) as u8;
+    let high = (cpu.get16(SP) >> 8) as u8;
+
+    cpu.load_rr(Address(addr_low), Value8(low));
+    cpu.load_rr(Address(addr_high), Value8(high));
 }

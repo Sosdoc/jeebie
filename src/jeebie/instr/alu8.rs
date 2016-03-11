@@ -1,7 +1,6 @@
 /// Module for 8 bit arithmetic (ALU instructions)
 
 use jeebie::core::cpu::CPU;
-use jeebie::registers::Flags;
 use jeebie::registers::Register8::*;
 use jeebie::registers::Register16::*;
 
@@ -42,7 +41,7 @@ pub fn ADD_a_l(cpu: &mut CPU) {
 
 // 'ADD A,(HL)' 86 8
 pub fn ADD_a_hlm(cpu: &mut CPU) {
-    cpu.compute_add(A, HLAddr);
+    cpu.compute_add(A, RegisterAddress(HL));
 }
 
 // 'ADD A,#' C6 8
@@ -87,7 +86,7 @@ pub fn ADC_a_l(cpu: &mut CPU) {
 
 // 'ADC A,(HL)' 8E 8
 pub fn ADC_a_hlm(cpu: &mut CPU) {
-    cpu.compute_adc(A, HLAddr);
+    cpu.compute_adc(A, RegisterAddress(HL));
 }
 
 // 'ADC A,#' CE 8
@@ -132,7 +131,7 @@ pub fn SUB_a_L(cpu: &mut CPU) {
 
 // 'SUB (HL)' 96 8
 pub fn SUB_a_hlm(cpu: &mut CPU) {
-    cpu.compute_sub(HLAddr);
+    cpu.compute_sub(RegisterAddress(HL));
 }
 
 // 'SUB #' D6 8
@@ -177,7 +176,7 @@ pub fn SBC_a_l(cpu: &mut CPU) {
 
 // 'SBC A,(HL)' 9E 8
 pub fn SBC_a_hlm(cpu: &mut CPU) {
-    cpu.compute_sbc(HLAddr);
+    cpu.compute_sbc(RegisterAddress(HL));
 }
 
 // 'SBC A,#' ?? ? --- manual has no opcode for this... leave it
@@ -222,7 +221,7 @@ pub fn AND_l(cpu: &mut CPU) {
 
 // 'AND (HL)' A6 8
 pub fn AND_hlm(cpu: &mut CPU) {
-    cpu.compute_and(HLAddr);
+    cpu.compute_and(RegisterAddress(HL));
 }
 
 // 'AND #' E6 8
@@ -267,7 +266,7 @@ pub fn OR_l(cpu: &mut CPU) {
 
 // 'OR (HL)' B6 8
 pub fn OR_hlm(cpu: &mut CPU) {
-    cpu.compute_or(HLAddr);
+    cpu.compute_or(RegisterAddress(HL));
 }
 
 // 'OR #' F6 8
@@ -312,7 +311,7 @@ pub fn XOR_l(cpu: &mut CPU) {
 
 // 'XOR (HL)' AE 8
 pub fn XOR_hlm(cpu: &mut CPU) {
-    cpu.compute_xor(HLAddr);
+    cpu.compute_xor(RegisterAddress(HL));
 }
 
 // 'XOR *' EE 8
@@ -357,7 +356,7 @@ pub fn CP_l(cpu: &mut CPU) {
 
 // 'CP (HL)' BE 8
 pub fn CP_hlm(cpu: &mut CPU) {
-    cpu.compute_cp(HLAddr);
+    cpu.compute_cp(RegisterAddress(HL));
 }
 
 // 'CP #' FE 8
@@ -402,7 +401,7 @@ pub fn INC_l(cpu: &mut CPU) {
 
 // 'INC (HL)' 34 12
 pub fn INC_hlm(cpu: &mut CPU) {
-    cpu.compute_inc(HLAddr);
+    cpu.compute_inc(RegisterAddress(HL));
 }
 
 // 'DEC A' 3D 4
@@ -442,5 +441,5 @@ pub fn DEC_l(cpu: &mut CPU) {
 
 // 'DEC (HL)' 35 12
 pub fn DEC_hlm(cpu: &mut CPU) {
-    let result = cpu.compute_dec(HLAddr);
+    cpu.compute_dec(RegisterAddress(HL));
 }

@@ -1,8 +1,6 @@
 /// Module for 16 bit arithmetic (ALU instructions)
 
 use jeebie::core::cpu::CPU;
-use jeebie::registers::Flags;
-use jeebie::registers::Register8::*;
 use jeebie::registers::Register16::*;
 
 // 'ADD HL,BC' 09 8
@@ -27,7 +25,8 @@ pub fn ADD_hl_sp(cpu: &mut CPU) {
 
 // 'ADD SP,#' E8 16
 pub fn ADD_sp_n(cpu: &mut CPU) {
-    cpu.compute_add16(SP, Value16(cpu.get_immediate8() as u16));
+    let value = Value16(cpu.get_immediate8() as u16);
+    cpu.compute_add16(SP, value);
 }
 
 // 'INC BC' 03 8

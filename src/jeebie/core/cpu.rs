@@ -35,7 +35,8 @@ impl CPU {
 
     // Swaps low and high nibble of an 8 bit value and sets flags.
     // Returns the result of the swap operation.
-    pub fn compute_swap(&mut self, value: u8) -> u8 {
+    pub fn compute_swap(&mut self, reg: Register8) {
+        let value = self.get8(reg);
         let result = (value << 4) | (value >> 4);
 
         self.reg.clear_all_flags();
@@ -43,11 +44,17 @@ impl CPU {
             self.reg.set_flag(Flags::Zero);
         }
 
-        result
+        self.set8(reg, result);
     }
 
     pub fn load_rr(&mut self, reg1: Register8, reg2: Register8) {
-        self.set8(reg1, self.get8(reg2));
+        let value = self.get8(reg2);
+        self.set8(reg1, value);
+    }
+
+    pub fn load_rr16(&mut self, reg1: Register16, reg2: Register16) {
+        let value = self.get16(reg2);
+        self.set16(reg1, value);
     }
 
     // Computes the flags and result for a 16-bit ADD instruction.
@@ -239,13 +246,15 @@ impl CPU {
     /// Computes an INC instruction on a 16 bit register.
     /// Flags are not affected.
     pub fn compute_inc16(&mut self, reg: Register16) {
-        self.set16(reg, self.get16(reg).wrapping_add(1));
+        let value = self.get16(reg).wrapping_add(1);
+        self.set16(reg, value);
     }
 
     /// Computes an INC instruction on a 16 bit register.
     /// Flags are not affected.
     pub fn compute_dec16(&mut self, reg: Register16) {
-        self.set16(reg, self.get16(reg).wrapping_sub(1));
+        let value = self.get16(reg).wrapping_sub(1);
+        self.set16(reg, value);
     }
 
     /// Computes flags after a DEC instruction based on the final value.
@@ -284,14 +293,15 @@ impl CPU {
     }
 
     /// Pops a 16-bit value from the stack, MSB first, returning the u16 value.
-    pub fn pop_stack(&mut self) -> u16 {
+    pub fn pop_stack(&mut self, dest: Register16) {
         let high = self.mem.read_b(self.reg.sp);
         self.reg.sp.wrapping_add(1);
 
         let low = self.mem.read_b(self.reg.sp);
         self.reg.sp.wrapping_add(1);
 
-        ((high as u16) << 8) & (low as u16)
+        let result = ((high as u16) << 8) & (low as u16);
+        self.set16(dest, result);
     }
 
     /// Retrieves an immediate 8-bit value.
