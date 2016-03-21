@@ -1,10 +1,10 @@
 /// The memory module.
-/// This module declares a single struct, the Memory Management Unit (MMU). 
+/// This module declares a single struct, the Memory Management Unit (MMU).
 /// The MMU holds all components that are addressable via memory, instead of having
 /// a single Memory object holding all data and shared among components.
 /// This approach simplifies design and avoids having to resort to `Rc` pointers or
 /// adding lifetime specifications to every struct.
-/// 
+///
 /// Each component (GPU, I/O registers, Cartridges) keeps its own data, the MMU simply
 /// accesses it according to the memory mapping.
 
@@ -44,13 +44,13 @@ impl MMU {
 
         match addr {
             // bios area, 256B long for regular gameboy.
-            0...0x00FF if self.loading_bios.get() => 0,
+            0...0x00FF if self.loading_bios.get() => unimplemented!(),
             // ROM0 area, this is banked memory, it will swap according to selected bank
-            0x0000...0x3FFF if !self.loading_bios.get() => 0,
+            0x0000...0x3FFF if !self.loading_bios.get() => unimplemented!(),
             // ROM1 area, 16kB unbanked data
-            0x4000...0x7FFF => 0,
+            0x4000...0x7FFF => unimplemented!(),
             // Graphics, 8kB VRAM
-            0x8000...0x9FFF => 0,
+            0x8000...0x9FFF => unimplemented!(),
             // Switchable RAM bank, 8kB
             0xA000...0xBFFF => {
                 // TODO: handle RAM banks

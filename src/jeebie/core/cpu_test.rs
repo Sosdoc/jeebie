@@ -74,3 +74,28 @@ fn compute_sub_8_bit() {
     assert!(cpu.reg.is_set(Flags::HalfCarry));
     assert!(cpu.reg.is_set(Flags::Sub));
 }
+
+#[test]
+fn compute_cp_test() {
+    let mut cpu = CPU::new();
+    
+    // simple sub
+    cpu.set8(A, 10);
+    cpu.set8(B, 2);
+    cpu.compute_cp(B);
+  
+    assert!(cpu.reg.is_set(Flags::Sub));
+    assert!(!cpu.reg.is_set(Flags::Zero));
+    assert!(!cpu.reg.is_set(Flags::Carry));
+    assert!(!cpu.reg.is_set(Flags::HalfCarry));
+
+    // underflow
+    cpu.set8(A, 100);
+    cpu.set8(B, 100);
+    cpu.compute_cp(B);
+    
+    assert!(cpu.reg.is_set(Flags::Zero));
+    assert!(!cpu.reg.is_set(Flags::Carry));
+    assert!(!cpu.reg.is_set(Flags::HalfCarry));
+    assert!(cpu.reg.is_set(Flags::Sub));
+}

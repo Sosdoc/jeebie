@@ -118,9 +118,8 @@ impl GliumFrontend {
     pub fn update(&mut self) {
         // TODO: this is necessary for input, map keys to actions for the emulator
         for ev in self.display.poll_events() {
-            match ev {
-                glutin::Event::Closed => self.should_run = false,
-                _ => (),
+            if let glutin::Event::Closed = ev {
+                self.should_run = false;
             }
         }
     }
