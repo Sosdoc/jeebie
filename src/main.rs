@@ -8,12 +8,13 @@ mod jeebie;
 
 use jeebie::core::cpu::*;
 use jeebie::frontend::GpuFrontend;
+use jeebie::memory::MMU;
 
 fn main() {
     // TODO: make a proper main
     println!("Hello, cpu!");
-
-    let mut cpu = CPU::new();
+    let mut mmu = MMU::new();
+    let mut cpu = CPU::new(&mut mmu);
     println!("{:?}", cpu);
 
     jeebie::instr::load::LD_HLm_a(&mut cpu);

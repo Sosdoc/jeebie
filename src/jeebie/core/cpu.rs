@@ -2,16 +2,14 @@ use jeebie::memory::MMU;
 use jeebie::registers::*;
 
 #[derive(Debug)]
-pub struct CPU {
+pub struct CPU<'a> {
     pub reg: Registers,
-    pub mem: MMU,
+    pub mem: &'a mut MMU,
 }
 
-impl CPU {
-    pub fn new() -> CPU {
+impl<'a> CPU<'a> {
+    pub fn new(mmu: &'a mut MMU) -> CPU<'a> {
         let r = Registers::new();
-        let mmu = MMU::new();
-
         CPU { reg: r, mem: mmu }
     }
 
@@ -20,7 +18,8 @@ impl CPU {
 
     /// reads instructions and executes them
     pub fn fetch_and_exec() {
-        let mut cpu = CPU::new();
+        let mut mmu = MMU::new();
+        let mut cpu = CPU::new(&mut mmu);
 
         loop {
             // fetch
@@ -31,6 +30,72 @@ impl CPU {
             cpu.reg.pc.wrapping_add(1);
             // TODO: compute clock timings
         }
+    }
+
+    fn combine_as_u16(high: u8, low: u8) -> u16 {
+        ((high as u16) << 8) & (low as u16)
+    }
+
+    pub fn get8(&mut self, reg: Register8) -> u8 {
+        match reg {
+            Register8::A => self.reg.a,
+            Register8::B => self.reg.b,
+            Register8::C => self.reg.c,
+            Register8::D => self.reg.d,
+            Register8::E => self.reg.e,
+            Register8::H => self.reg.h,
+            Register8::L => self.reg.l,
+            Register8::RegisterAddress(r) => {
+                let addr = self.get16(r);
+                self.mem.read_b(addr)
+            },
+            Register8::Address(addr) => self.mem.read_b(addr),
+            Register8::Immediate => self.get_immediate8(),
+            Register8::Value8(n) => n,
+        }
+    }
+
+    pub fn set8(&mut self, reg: Register8, value: u8) {
+        match reg {
+            Register8::A => self.reg.a = value,
+            Register8::B => self.reg.b = value,
+            Register8::C => self.reg.c = value,
+            Register8::D => self.reg.d = value,
+            Register8::E => self.reg.e = value,
+            Register8::H => self.reg.h = value,
+            Register8::L => self.reg.l = value,
+            Register8::RegisterAddress(r) => {
+                let addr = self.get16(r);
+                self.mem.write_b(addr, value);
+            },
+            Register8::Address(addr) => self.mem.write_b(addr, value),
+            _ => {},
+        };
+    }
+
+    pub fn get16(&mut self, reg: Register16) -> u16 {
+        match reg {
+            Register16::AF => CPU::combine_as_u16(self.reg.a, self.reg.f),
+            Register16::BC => CPU::combine_as_u16(self.reg.b, self.reg.c),
+            Register16::DE => CPU::combine_as_u16(self.reg.d, self.reg.e),
+            Register16::HL => CPU::combine_as_u16(self.reg.h, self.reg.l),
+            Register16::SP => self.reg.sp,
+            Register16::PC => self.reg.pc,
+            Register16::Immediate16 => self.get_immediate16(),
+            Register16::Value16(n) => n,
+        }
+    }
+
+    pub fn set16(&mut self, reg: Register16, value: u16) {
+        match reg {
+            Register16::AF => { self.reg.a = (value >> 8) as u8 ; self.reg.f = value as u8; },
+            Register16::BC => { self.reg.b = (value >> 8) as u8 ; self.reg.c = value as u8; },
+            Register16::DE => { self.reg.d = (value >> 8) as u8 ; self.reg.e = value as u8; },
+            Register16::HL => { self.reg.h = (value >> 8) as u8 ; self.reg.l = value as u8; },
+            Register16::SP => { self.reg.sp = value },
+            Register16::PC => { self.reg.pc = value },
+            _ => {},
+        };
     }
 
     // Swaps low and high nibble of an 8 bit value and sets flags.

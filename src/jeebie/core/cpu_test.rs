@@ -1,10 +1,12 @@
 use jeebie::core::cpu::CPU;
+use jeebie::memory::MMU;
 use jeebie::registers::*;
 use jeebie::registers::Register8::*;
 
 #[test]
 fn compute_add_8_bit() {
-    let mut cpu = CPU::new();
+    let mut mmu = MMU::new();
+    let mut cpu = CPU::new(&mut mmu);
     // simple add, 2 + 2
     cpu.set8(A, 2u8);
     cpu.compute_add(A, A);
@@ -40,7 +42,8 @@ fn compute_add_8_bit() {
 
 #[test]
 fn compute_sub_8_bit() {
-    let mut cpu = CPU::new();
+    let mut mmu = MMU::new();
+    let mut cpu = CPU::new(&mut mmu);
     // simple sub
     cpu.set8(A, 8u8);
     cpu.set8(B, 2u8);
@@ -77,13 +80,14 @@ fn compute_sub_8_bit() {
 
 #[test]
 fn compute_cp_test() {
-    let mut cpu = CPU::new();
-    
+    let mut mmu = MMU::new();
+    let mut cpu = CPU::new(&mut mmu);
+
     // simple sub
     cpu.set8(A, 10);
     cpu.set8(B, 2);
     cpu.compute_cp(B);
-  
+
     assert!(cpu.reg.is_set(Flags::Sub));
     assert!(!cpu.reg.is_set(Flags::Zero));
     assert!(!cpu.reg.is_set(Flags::Carry));
@@ -93,7 +97,7 @@ fn compute_cp_test() {
     cpu.set8(A, 100);
     cpu.set8(B, 100);
     cpu.compute_cp(B);
-    
+
     assert!(cpu.reg.is_set(Flags::Zero));
     assert!(!cpu.reg.is_set(Flags::Carry));
     assert!(!cpu.reg.is_set(Flags::HalfCarry));

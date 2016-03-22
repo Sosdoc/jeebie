@@ -1,5 +1,3 @@
-use jeebie::core::cpu::CPU;
-
 /// The four flags and their respective bit values. Bits 0-3 are unused.
 pub enum Flags {
     /// This bit is set when the result of a math operation
@@ -40,10 +38,10 @@ pub enum Register16 {
 /// This struct also offers convenience methods to get and set individual flags.
 #[derive(Debug)]
 pub struct Registers {
-    a: u8, f: u8,
-    b: u8, c: u8,
-    d: u8, e: u8,
-    h: u8, l: u8,
+    pub a: u8, pub f: u8,
+    pub b: u8, pub c: u8,
+    pub d: u8, pub e: u8,
+    pub h: u8, pub l: u8,
 
     pub pc: u16, // program counter
     pub sp: u16, // stack pointer
@@ -84,69 +82,5 @@ impl Registers {
 
     fn combine_as_u16(high: u8, low: u8) -> u16 {
         ((high as u16) << 8) & (low as u16)
-    }
-}
-
-impl CPU {
-    pub fn get8(&mut self, reg: Register8) -> u8 {
-        match reg {
-            Register8::A => self.reg.a,
-            Register8::B => self.reg.b,
-            Register8::C => self.reg.c,
-            Register8::D => self.reg.d,
-            Register8::E => self.reg.e,
-            Register8::H => self.reg.h,
-            Register8::L => self.reg.l,
-            Register8::RegisterAddress(r) => {
-                let addr = self.get16(r);
-                self.mem.read_b(addr)
-            },
-            Register8::Address(addr) => self.mem.read_b(addr),
-            Register8::Immediate => self.get_immediate8(),
-            Register8::Value8(n) => n,
-        }
-    }
-
-    pub fn set8(&mut self, reg: Register8, value: u8) {
-        match reg {
-            Register8::A => self.reg.a = value,
-            Register8::B => self.reg.b = value,
-            Register8::C => self.reg.c = value,
-            Register8::D => self.reg.d = value,
-            Register8::E => self.reg.e = value,
-            Register8::H => self.reg.h = value,
-            Register8::L => self.reg.l = value,
-            Register8::RegisterAddress(r) => {
-                let addr = self.get16(r);
-                self.mem.write_b(addr, value);
-            },
-            Register8::Address(addr) => self.mem.write_b(addr, value),
-            _ => {},
-        };
-    }
-
-    pub fn get16(&mut self, reg: Register16) -> u16 {
-        match reg {
-            Register16::AF => Registers::combine_as_u16(self.reg.a, self.reg.f),
-            Register16::BC => Registers::combine_as_u16(self.reg.b, self.reg.c),
-            Register16::DE => Registers::combine_as_u16(self.reg.d, self.reg.e),
-            Register16::HL => Registers::combine_as_u16(self.reg.h, self.reg.l),
-            Register16::SP => self.reg.sp,
-            Register16::PC => self.reg.pc,
-            Register16::Immediate16 => self.get_immediate16(),
-            Register16::Value16(n) => n,
-        }
-    }
-
-    pub fn set16(&mut self, reg: Register16, value: u16) {
-        match reg {
-            Register16::AF => { self.reg.a = (value >> 8) as u8 ; self.reg.f = value as u8; },
-            Register16::BC => { self.reg.b = (value >> 8) as u8 ; self.reg.c = value as u8; },
-            Register16::DE => { self.reg.d = (value >> 8) as u8 ; self.reg.e = value as u8; },
-            Register16::HL => { self.reg.h = (value >> 8) as u8 ; self.reg.l = value as u8; },
-            Register16::SP => { self.reg.sp = value },
-            Register16::PC => { self.reg.pc = value },
-            _ => {},
-        };
     }
 }
