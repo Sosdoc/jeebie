@@ -1,21 +1,52 @@
-use jeebie::memory::MMU;
-
-pub struct GPU<'a> {
+pub struct GPU {
     mode: Mode,
     line: u32,
     cycles: u32,
-    mem: &'a mut MMU,
+    vram: VideoMemory
 }
 
+/// Video memory and related data/registers
+/// The main VRAM (`data`) is used for the following values:
+///     8000-87FF	Tile set #1: tiles 0-127
+///     8800-8FFF	Tile set #1: tiles 128-255 Tile set #0: tiles -1 to -128
+///     9000-97FF	Tile set #0: tiles 0-127
+///     9800-9BFF	Tile map #0
+///     9C00-9FFF	Tile map #1
+///
+/// The rest of the memory (`oam`) is used for sprite data and addressed separately
+/// from FE00 to FE9F.
+pub struct VideoMemory {
+    data: [u8; 8192],
+    oam: [u8; 160],
+}
 
-impl<'a> GPU<'a> {
-    pub fn new(mmu: &mut MMU) -> GPU {
+impl GPU {
+    pub fn new() -> GPU {
         GPU {
             mode: Mode::HBlank,
             line: 0,
             cycles: 0,
-            mem: mmu,
+            vram: VideoMemory {
+                data: [0; 8192],
+                oam: [0; 160],
+            },
         }
+    }
+
+    pub fn write_vram(&mut self, addr: usize, value: u8) {
+        self.vram.data[addr] = value;
+    }
+
+    pub fn read_vram(&self, addr: usize) -> u8 {
+        self.vram.data[addr]
+    }
+
+    pub fn write_oam(&mut self, addr: usize, value: u8) {
+        self.vram.oam[addr] = value;
+    }
+
+    pub fn read_oam(&self, addr: usize) -> u8 {
+        self.vram.oam[addr]
     }
 
     /// Emulates the GPU.

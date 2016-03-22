@@ -5,27 +5,14 @@
 use std::fmt;
 use std::cell::Cell;
 
+use jeebie::gpu::GPU;
+
 /// The Memory Management Unit.
 /// Provides access to all mapped memory in the system, including I/O and graphics.
 pub struct MMU {
     pub loading_bios: Cell<bool>,
     data: [u8; 65536],
-    vram: VideoMemory,
-}
-
-/// Video memory and related data/registers
-/// The main VRAM (`data`) is used for the following values:
-///     8000-87FF	Tile set #1: tiles 0-127
-///     8800-8FFF	Tile set #1: tiles 128-255 Tile set #0: tiles -1 to -128
-///     9000-97FF	Tile set #0: tiles 0-127
-///     9800-9BFF	Tile map #0
-///     9C00-9FFF	Tile map #1
-///
-/// The rest of the memory (`oam`) is used for sprite data and addressed separately
-/// from FE00 to FE9F.
-struct VideoMemory {
-    data: [u8; 8192],
-    oam: [u8; 160],
+    gpu: GPU,
 }
 
 impl fmt::Debug for MMU {
@@ -39,10 +26,7 @@ impl MMU {
         MMU {
             loading_bios: Cell::new(true),
             data: [1; 65536],
-            vram: VideoMemory {
-                data: [0; 8192],
-                oam: [0; 160],
-            }
+            gpu: GPU::new(),
         }
     }
 
@@ -64,7 +48,7 @@ impl MMU {
             // ROM1 area, 16kB unbanked data
             0x4000...0x7FFF => unimplemented!(),
             // Graphics, 8kB VRAM
-            0x8000...0x9FFF => self.vram.data[(addr & 0x1FFF) as usize],
+            0x8000...0x9FFF => self.gpu.read_vram((addr & 0x1FFF) as usize),
             // Switchable RAM bank, 8kB
             0xA000...0xBFFF => {
                 // TODO: handle RAM banks
@@ -75,7 +59,7 @@ impl MMU {
             // Echo of internal RAM, this is less than 8k, up to 0xFDFF,
             0xE000...0xFDFF => self.data[(addr - 0x2000) as usize],
             // Sprite attribute memory, 160B
-            0xFE00...0xFE9F => self.vram.oam[(addr - 0xFE00) as usize],
+            0xFE00...0xFE9F => self.gpu.read_oam((addr - 0xFE00) as usize),
             // empty
             0xFEA0...0xFEFF | 0xFF4C...0xFF7F => 0,
             // I/O ports
