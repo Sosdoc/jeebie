@@ -1,13 +1,5 @@
 use jeebie::utils::is_set;
 
-pub struct GPU {
-    mode: Mode,
-    line: u32,
-    cycles: u32,
-    vram: VideoMemory,
-    lcdc: LCDControl,
-}
-
 /// Video memory and related data/registers
 /// The main VRAM (`data`) is used for the following values:
 ///     8000-87FF	Tile set #1: tiles 0-127
@@ -150,6 +142,32 @@ impl Tile {
     }    
 }
 
+/// Holds position and scrolling data for the display
+struct LCDPosition {
+    scroll_y: u8,
+    scroll_x: u8,
+    window_y: u8,
+    // window_x is the actual position minus 7, i.e. window_x = 7 means x = 0
+    window_x: u8,
+}
+
+impl LCDPosition {
+    pub fn new() -> LCDPosition {
+        LCDPosition { scroll_y: 0, scroll_x: 0, window_y: 0, window_x: 0 }
+    }
+}
+
+/// Holds all information relative to the graphics subsystem.
+/// Includes computed data like the framebuffer, in a format that can be drawn to screen.
+pub struct GPU {
+    mode: Mode,
+    line: u32,
+    cycles: u32,
+    vram: VideoMemory,
+    lcdc: LCDControl,
+    lcdp: LCDPosition,
+    framebuffer: [(u8, u8, u8); 160 * 144]
+}
 
 impl GPU {
     pub fn new() -> GPU {
@@ -157,11 +175,10 @@ impl GPU {
             mode: Mode::HBlank,
             line: 0,
             cycles: 0,
-            vram: VideoMemory {
-                data: [0; 8192],
-                oam: [0; 160],
-            },
+            vram: VideoMemory { data: [0; 8192], oam: [0; 160] },
             lcdc: LCDControl::new(),
+            lcdp: LCDPosition::new(),
+            framebuffer: [(0, 0, 0); 160 * 144],
         }
     }
     
@@ -196,20 +213,29 @@ impl GPU {
         
         Tile { pixels: pixels }
     }
+    
+    /// Renders a single scanline to the framebuffer, from the internal tile data. 
+    fn render_scanline(&mut self) {
+        
+    }
 
     pub fn write_vram(&mut self, addr: usize, value: u8) {
+        if let Mode::VRAMRead = self.mode { panic!("Attempted write to VRAM during VRAMRead mode") };
         self.vram.data[addr] = value;
     }
 
     pub fn read_vram(&self, addr: usize) -> u8 {
+        if let Mode::VRAMRead = self.mode { panic!("Attempted access to VRAM during VRAMRead mode") };        
         self.vram.data[addr]
     }
 
     pub fn write_oam(&mut self, addr: usize, value: u8) {
+        if let Mode::OAMRead = self.mode { panic!("Attempted write to OAM during OAMRead mode") };
         self.vram.oam[addr] = value;
     }
 
     pub fn read_oam(&self, addr: usize) -> u8 {
+        if let Mode::OAMRead = self.mode { panic!("Attempted access to OAM during OAMRead mode") };
         self.vram.oam[addr]
     }
 
@@ -243,6 +269,9 @@ impl GPU {
 
                     self.mode = if self.line == 143 {
                         Mode::VBlank
+                        
+                        // TODO: push framebuffer data to frontend now (interrupt)
+                        
                     } else {
                         Mode::OAMRead
                     };

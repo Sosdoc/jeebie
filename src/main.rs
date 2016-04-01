@@ -7,24 +7,12 @@ extern crate rand;
 
 mod jeebie;
 
-use jeebie::core::cpu::*;
 use jeebie::frontend::GpuFrontend;
-use jeebie::memory::MMU;
-
 use std::time::Duration;
-
 use rand::distributions::{IndependentSample, Range};
 
 fn main() {
     // TODO: make a proper main
-    println!("Hello, cpu!");
-    let mut mmu = MMU::new();
-    let mut cpu = CPU::new(&mut mmu);
-    println!("{:?}", cpu);
-
-    jeebie::instr::load::LD_HLm_a(&mut cpu);
-    println!("{:?}", cpu);
-
     let mut front = jeebie::frontend::glium::GliumFrontend::new_with_size((160, 144));
 
     let tex_size = (160 * 144) as usize;
