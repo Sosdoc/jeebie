@@ -1,3 +1,5 @@
+use jeebie::utils::is_set;
+
 pub struct GPU {
     mode: Mode,
     line: u32,
@@ -28,11 +30,6 @@ pub struct GPU {
 pub struct VideoMemory {
     data: [u8; 8192],
     oam: [u8; 160],
-}
-
-/// An enum used to discriminate tilesets (and maps)
-enum TileSelector {
-    Set0, Set1
 }
 
 ///  Mode 0 (HBlank): The LCD controller is in the H-Blank period and
@@ -80,6 +77,49 @@ impl GBColor {
             3 => GBColor::On,
             _ => panic!("Invalid color value {}", number),
         }
+    }
+}
+
+/// An enum used to discriminate tilesets (and maps)
+enum TileSelector {
+    Set0, Set1
+}
+
+/// An enum for sprite size mode (8x8 or 8x16)
+enum SpriteSize {
+    Size8, Size16
+}
+
+/// LCD Control register data 
+///     Bit 7 - LCD Display Enable             (0=Off, 1=On)
+///     Bit 6 - Window Tile Map Display Select (0=9800-9BFF, 1=9C00-9FFF)
+///     Bit 5 - Window Display Enable          (0=Off, 1=On)
+///     Bit 4 - BG & Window Tile Data Select   (0=8800-97FF, 1=8000-8FFF)
+///     Bit 3 - BG Tile Map Display Select     (0=9800-9BFF, 1=9C00-9FFF)
+///     Bit 2 - OBJ (Sprite) Size              (0=8x8, 1=8x16)
+///     Bit 1 - OBJ (Sprite) Display Enable    (0=Off, 1=On)
+///     Bit 0 - BG Display (for CGB see below) (0=Off, 1=On)
+struct LCDControl {
+    lcd_enable: bool,
+    window_tile_map: TileSelector,    
+    window_enable: bool,    
+    bgw_tile_data_select: TileSelector,
+    bg_tile_map: TileSelector,   
+    sprite_size: SpriteSize,
+    sprite_enable: bool,   
+    bg_enable: bool,
+}
+
+impl LCDControl {    
+    pub fn set_from_u8(&mut self, data: u8) {        
+        self.lcd_enable = if is_set(data, 7) { true } else { false };
+        self.window_tile_map = if is_set(data, 6) { TileSelector::Set1 } else { TileSelector::Set0 };
+        self.window_enable = if is_set(data, 5) { true } else { false };
+        self.bgw_tile_data_select = if is_set(data, 4) { TileSelector::Set1 } else { TileSelector::Set0 };
+        self.bg_tile_map = if is_set(data, 3) { TileSelector::Set1 } else { TileSelector::Set0 };
+        self.sprite_size = if is_set(data, 2) { SpriteSize::Size16 } else { SpriteSize::Size8 };
+        self.sprite_enable = if is_set(data, 1) { true } else { false };
+        self.bg_enable = if is_set(data, 0) { true } else { false };
     }
 }
 
