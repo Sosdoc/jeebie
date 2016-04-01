@@ -13,12 +13,70 @@ pub struct GPU {
 ///     9800-9BFF	Tile map #0
 ///     9C00-9FFF	Tile map #1
 ///
+/// There are 2 tile sets of 256 tiles, but 128 tiles are shared between them, so the
+/// total amounts to 384 tiles. 
+/// The tile maps hold indexes to a corresponding tile in the tilesets.
+/// Pixel data is 2 bits and is split between two adjacent bytes, low bit first:
+///
+///     1 0 0 0 1 1 0 1 -- 0x8000
+///     0 1 1 0 1 0 1 1 -- 0x8001
+///
+///     1 2 2 0 3 1 2 3 -- pixel value (0 to 3)
+///     
 /// The rest of the memory (`oam`) is used for sprite data and addressed separately
 /// from FE00 to FE9F.
 pub struct VideoMemory {
     data: [u8; 8192],
     oam: [u8; 160],
 }
+
+///  Mode 0 (HBlank): The LCD controller is in the H-Blank period and
+///          the CPU can access both the display RAM (8000h-9FFFh)
+///          and OAM (FE00h-FE9Fh)
+///
+///  Mode 1 (VBlank): The LCD controller is in the V-Blank period (or the
+///          display is disabled) and the CPU can access both the
+///          display RAM (8000h-9FFFh) and OAM (FE00h-FE9Fh)
+///
+///  Mode 2 (OAMRead): The LCD controller is reading from OAM memory.
+///          The CPU <cannot> access OAM memory (FE00h-FE9Fh)
+///          during this period.
+///
+///  Mode 3 (VRAMRead): The LCD controller is reading from both OAM and VRAM,
+///          The CPU <cannot> access OAM and VRAM during this period.
+///          CGB Mode: Cannot access Palette Data (FF69,FF6B) either.
+enum Mode {
+    HBlank,
+    VBlank,
+    OAMRead,
+    VRAMRead,
+}
+
+/// An enum representing the possible color values for a pixel in the original GB.
+/// While the GB is said to be monochromatic, it can actually display 4 different shades. 
+#[derive(Copy, Clone)]
+enum GBColor {
+    // white, rgb #FFFFFF
+    Off = 0, 
+    // light grey, rgb #C0C0C0
+    On33 = 1,
+    // dark grey, rgb #606060
+    On66 = 2,
+    // black, rgb #000000
+    On = 3,
+}
+
+/// A tile is an 8x8 square of pixels, each one stored in one of the VRAM's tilesets.
+struct Tile {
+    pixels: [GBColor; 64],
+}
+
+impl Tile {
+    pub fn new() -> Tile {
+        Tile { pixels: [GBColor::Off; 64] }
+    }    
+}
+
 
 impl GPU {
     pub fn new() -> GPU {
@@ -96,26 +154,4 @@ impl GPU {
             }
         }
     }
-}
-
-///  Mode 0 (HBlank): The LCD controller is in the H-Blank period and
-///          the CPU can access both the display RAM (8000h-9FFFh)
-///          and OAM (FE00h-FE9Fh)
-///
-///  Mode 1 (VBlank): The LCD controller is in the V-Blank period (or the
-///          display is disabled) and the CPU can access both the
-///          display RAM (8000h-9FFFh) and OAM (FE00h-FE9Fh)
-///
-///  Mode 2 (OAMRead): The LCD controller is reading from OAM memory.
-///          The CPU <cannot> access OAM memory (FE00h-FE9Fh)
-///          during this period.
-///
-///  Mode 3 (VRAMRead): The LCD controller is reading from both OAM and VRAM,
-///          The CPU <cannot> access OAM and VRAM during this period.
-///          CGB Mode: Cannot access Palette Data (FF69,FF6B) either.
-enum Mode {
-    HBlank,
-    VBlank,
-    OAMRead,
-    VRAMRead,
 }
