@@ -4,7 +4,8 @@ pub struct GPU {
     mode: Mode,
     line: u32,
     cycles: u32,
-    vram: VideoMemory
+    vram: VideoMemory,
+    lcdc: LCDControl,
 }
 
 /// Video memory and related data/registers
@@ -110,7 +111,22 @@ struct LCDControl {
     bg_enable: bool,
 }
 
-impl LCDControl {    
+impl LCDControl {
+    
+    pub fn new() -> LCDControl {
+        LCDControl {
+            lcd_enable: false,
+            window_tile_map: TileSelector::Set0,
+            window_enable: false,
+            bgw_tile_data_select: TileSelector::Set0,
+            bg_tile_map: TileSelector::Set0,
+            sprite_size: SpriteSize::Size8,
+            sprite_enable: false,
+            bg_enable: false,
+        }
+    }
+    
+    /// Sets LCDC data from a byte value     
     pub fn set_from_u8(&mut self, data: u8) {        
         self.lcd_enable = if is_set(data, 7) { true } else { false };
         self.window_tile_map = if is_set(data, 6) { TileSelector::Set1 } else { TileSelector::Set0 };
@@ -145,6 +161,7 @@ impl GPU {
                 data: [0; 8192],
                 oam: [0; 160],
             },
+            lcdc: LCDControl::new(),
         }
     }
     
@@ -160,6 +177,7 @@ impl GPU {
         let mut addr = start_addr;
         let mut pixels = [GBColor::Off; 64];             
         
+        // this is basically a for with step 2. Iterates 8 times (two bytes read at a time). 
         while addr < end_addr {
             let (low, high) = (self.vram.data[addr], self.vram.data[addr + 1]);
             
@@ -215,6 +233,7 @@ impl GPU {
                     self.mode = Mode::HBlank;
 
                     // TODO: scanline is done, write it to framebuffer
+                    
                 }
             }
             Mode::HBlank => {
