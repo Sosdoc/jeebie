@@ -30,6 +30,11 @@ pub struct VideoMemory {
     oam: [u8; 160],
 }
 
+/// An enum used to discriminate tilesets (and maps)
+enum TileSelector {
+    Set0, Set1
+}
+
 ///  Mode 0 (HBlank): The LCD controller is in the H-Blank period and
 ///          the CPU can access both the display RAM (8000h-9FFFh)
 ///          and OAM (FE00h-FE9Fh)
@@ -54,7 +59,7 @@ enum Mode {
 
 /// An enum representing the possible color values for a pixel in the original GB.
 /// While the GB is said to be monochromatic, it can actually display 4 different shades. 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 enum GBColor {
     // white, rgb #FFFFFF
     Off = 0, 
@@ -64,6 +69,18 @@ enum GBColor {
     On66 = 2,
     // black, rgb #000000
     On = 3,
+}
+
+impl GBColor {    
+    pub fn from_u8(number: u8) -> GBColor {
+        match number {
+            0 => GBColor::Off,
+            1 => GBColor::On33,
+            2 => GBColor::On66,
+            3 => GBColor::On,
+            _ => panic!("Invalid color value {}", number),
+        }
+    }
 }
 
 /// A tile is an 8x8 square of pixels, each one stored in one of the VRAM's tilesets.
@@ -89,6 +106,37 @@ impl GPU {
                 oam: [0; 160],
             },
         }
+    }
+    
+    /// Retrieves Tile information from the VRAM.
+    /// A tile is held in 16 bytes in the VRAM, enough information for 64 pixels (8x8 matrix, 2 bits per pixel).
+    /// When selecting tiles from Set #1, the index 0 represents tile -128 (equal to tile 128 from Set #0) 
+    fn get_tile(&self, set: TileSelector, tile_index: usize) -> Tile {
+        // Set1 starts after 128 tiles, or after 16 * 128 = 2048 (0x800) bytes
+        let offset = if let TileSelector::Set1 = set { 0x800 } else { 0 };
+        let start_addr = (offset + tile_index) * 0x10;         
+        let end_addr = start_addr + 0x10;
+        
+        let mut addr = start_addr;
+        let mut pixels = [GBColor::Off; 64];             
+        
+        while addr < end_addr {
+            let (low, high) = (self.vram.data[addr], self.vram.data[addr + 1]);
+            
+            for i in 0..8 {
+                let low_bit = (low >> i) & 0x01;
+                let high_bit = (high >> i) & 0x01;
+                
+                let pixel_value = GBColor::from_u8(low_bit + high_bit * 2);                
+                // px 0..7, then 8..15
+                let pixel_addr = (addr / 2) * 8 + i;                
+                pixels[pixel_addr as usize] = pixel_value;
+            }
+            
+            addr += 2;
+        }
+        
+        Tile { pixels: pixels }
     }
 
     pub fn write_vram(&mut self, addr: usize, value: u8) {
@@ -153,5 +201,31 @@ impl GPU {
                 }
             }
         }
+    }
+}
+
+#[test]
+fn get_tile_test() {
+    let mut gpu = GPU::new();
+    // write first line of tile #0 in set #0
+    // pixels should be: 0 1 2 3 3 2 1 0
+    gpu.write_vram(0, 0b0101_1010u8);
+    gpu.write_vram(1, 0b0011_1100u8);
+    
+    let tile = gpu.get_tile(TileSelector::Set0, 0);
+    
+    assert_eq!(tile.pixels[0], GBColor::Off);
+    assert_eq!(tile.pixels[1], GBColor::On33);
+    assert_eq!(tile.pixels[2], GBColor::On66);
+    assert_eq!(tile.pixels[3], GBColor::On);
+    
+    assert_eq!(tile.pixels[4], GBColor::On);
+    assert_eq!(tile.pixels[5], GBColor::On66);
+    assert_eq!(tile.pixels[6], GBColor::On33);
+    assert_eq!(tile.pixels[7], GBColor::Off);
+    
+    // rest of the pixels are off
+    for i in 8..64 {
+        assert_eq!(tile.pixels[i], GBColor::Off);
     }
 }
