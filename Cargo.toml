@@ -6,6 +6,7 @@ authors = ["Valerio Pipolo <valep27@gmail.com>"]
 [dependencies]
 clippy = {version = "*", optional = true}
 glium = "*"
+rand = "*"
 
 [features]
 default=[]

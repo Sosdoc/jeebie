@@ -3,12 +3,17 @@
 
 #[macro_use]
 extern crate glium;
+extern crate rand;
 
 mod jeebie;
 
 use jeebie::core::cpu::*;
 use jeebie::frontend::GpuFrontend;
 use jeebie::memory::MMU;
+
+use std::time::Duration;
+
+use rand::distributions::{IndependentSample, Range};
 
 fn main() {
     // TODO: make a proper main
@@ -26,15 +31,21 @@ fn main() {
     let mut fb = Vec::with_capacity(tex_size);
 
     for _ in 0..tex_size {
-        fb.push((255, 0, 0));
+        fb.push((0, 0, 0));
     }
-
+       
+    let range = Range::new(0, 255);
+    let mut rng = rand::thread_rng();
+    
     while front.should_run {
-        for i in 0..tex_size - 1000 {
-            fb[i] = (0, 255, 255);
+        for i in 0..tex_size {
+            let a = range.ind_sample(&mut rng);
+            fb[i] = (a, a, a);
         }
 
         front.display_frame(&fb);
         front.update();
+        
+        std::thread::sleep(Duration::from_millis(10));
     }
 }

@@ -100,7 +100,7 @@ impl GliumFrontend {
         let mut target = self.display.draw();
         target.clear_color(0.0, 0.0, 0.0, 1.0);
 
-        //let texture = Texture2d::new(&*self.display, image).unwrap();
+        let texture = Texture2d::new(&*self.display, image).unwrap();
 
         let uniforms = uniform! {
             tex: &self.texture,
