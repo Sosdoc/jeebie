@@ -25,7 +25,7 @@ impl MMU {
     pub fn new() -> MMU {
         MMU {
             loading_bios: Cell::new(true),
-            data: [1; 65536],
+            data: [0; 65536],
             gpu: GPU::new(),
         }
     }
@@ -63,18 +63,63 @@ impl MMU {
             // empty
             0xFEA0...0xFEFF | 0xFF4C...0xFF7F => 0,
             // I/O ports
-            0xFF00...0xFF4B => 0,
+            0xFF00...0xFF4B => {
+                match addr & 0xFF {
+                    0x40 | 0x42 | 0x43 | 0x44 | 0x47 => self.gpu.read_register(addr as usize),
+                    _ => 0,
+                }                
+            },
             // High RAM (zero page), used with LDH instructions
             0xFF80...0xFFFE => 0,
             // Interrupt Enable register
             0xFFFF => 0,
 
-            _ => panic!("tried to write at unkown address: {:4X}", addr),
+            _ => panic!("tried to read at unknown address: {:4x}", addr),
         }
     }
 
     pub fn write_b(&mut self, addr: u16, data: u8) {
-        // TODO: mapping like read
-        self.data[addr as usize] = data;
+        match addr {
+            // bios area, 256B long for regular gameboy.
+            0...0x00FF if self.loading_bios.get() => unimplemented!(),
+            // ROM0 area, this is banked memory, it will swap according to selected bank
+            0x0000...0x3FFF if !self.loading_bios.get() => unimplemented!(),
+            // ROM1 area, 16kB unbanked data
+            0x4000...0x7FFF => unimplemented!(),
+            // Graphics, 8kB VRAM
+            0x8000...0x9FFF => self.gpu.write_vram((addr & 0x1FFF) as usize, data), 
+            // Switchable RAM bank, 8kB
+            0xA000...0xBFFF => {
+                // TODO: handle RAM banks
+                self.data[addr as usize] = data;
+            }
+            // Internal RAM, 8kB
+            0xC000...0xDFFF => { 
+                self.data[addr as usize] = data;
+            },
+            // Echo of internal RAM, this is less than 8k, up to 0xFDFF,
+            0xE000...0xFDFF => {
+                self.data[(addr - 0x2000) as usize] = data;
+            },
+            // Sprite attribute memory, 160B
+            0xFE00...0xFE9F => {
+                self.gpu.write_oam((addr - 0xFE00) as usize, data);
+            }
+            // empty
+            0xFEA0...0xFEFF | 0xFF4C...0xFF7F => {},
+            // I/O ports
+            0xFF00...0xFF4B => {
+                match addr & 0xFF {
+                    0x40 | 0x42 | 0x43 | 0x44 | 0x47 => self.gpu.write_register(addr as usize, data),
+                    _ => {},
+                }                
+            },
+            // High RAM (zero page), used with LDH instructions
+            0xFF80...0xFFFE => unimplemented!(),
+            // Interrupt Enable register
+            0xFFFF => unimplemented!(),
+
+            _ => panic!("tried to write at unknown address: {:4x}", addr),
+        }
     }
 }
