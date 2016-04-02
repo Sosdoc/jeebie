@@ -6,6 +6,7 @@ use std::fmt;
 use std::cell::Cell;
 
 use jeebie::gpu::GPU;
+use jeebie::cart::Cartridge;
 
 /// The Memory Management Unit.
 /// Provides access to all mapped memory in the system, including I/O and graphics.
@@ -29,7 +30,20 @@ impl MMU {
             gpu: GPU::new(),
         }
     }
-
+    
+    pub fn load_rom(&mut self, cart: &Cartridge) {        
+        if cart.size <= 0x8000 {
+            // load rom data up to 0x8000
+            for i in 0..cart.size {
+                self.data[i] = cart.data[i];
+            }
+            
+        } else {
+            // TODO: support other memory controllers and cartridges with > 32k ROM 
+            unimplemented!()
+        }        
+    }
+    
     /// reads a byte at the memory address specified
     pub fn read_b(&self, addr: u16) -> u8 {
         // when PC first reaches 0x100, the BIOS data is not addressable anymore.
@@ -44,9 +58,9 @@ impl MMU {
             // bios area, 256B long for regular gameboy.
             0...0x00FF if self.loading_bios.get() => unimplemented!(),
             // ROM0 area, this is banked memory, it will swap according to selected bank
-            0x0000...0x3FFF if !self.loading_bios.get() => unimplemented!(),
+            0x0000...0x3FFF if !self.loading_bios.get() => self.data[addr as usize],
             // ROM1 area, 16kB unbanked data
-            0x4000...0x7FFF => unimplemented!(),
+            0x4000...0x7FFF => self.data[addr as usize],
             // Graphics, 8kB VRAM
             0x8000...0x9FFF => self.gpu.read_vram((addr & 0x1FFF) as usize),
             // Switchable RAM bank, 8kB

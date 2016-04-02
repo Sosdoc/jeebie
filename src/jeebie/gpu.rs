@@ -188,6 +188,7 @@ impl LCDPosition {
 /// Includes computed data like the framebuffer, in a format that can be drawn to screen.
 pub struct GPU {
     mode: Mode,
+    vblank_int: bool,
     line: u8,
     cycles: u32,
     vram: VideoMemory,
@@ -200,6 +201,7 @@ impl GPU {
     pub fn new() -> GPU {
         GPU {
             mode: Mode::HBlank,
+            vblank_int: false,
             line: 0,
             cycles: 0,
             vram: VideoMemory { data: [0; 8192], oam: [0; 160] },
@@ -254,6 +256,15 @@ impl GPU {
         let high_bit = (high >> i) & 0x01;
         
         GBColor::from_u8(low_bit + high_bit * 2)
+    }
+    
+    /// Retrieves a slice of the framebuffer.
+    fn get_framebuffer(&mut self) -> &[(u8, u8, u8)]{
+        if self.vblank_int {
+            self.vblank_int = false;
+        }
+        
+        &self.framebuffer
     }
     
     /// Renders a single scanline to the framebuffer, from the internal tile data. 
@@ -370,10 +381,10 @@ impl GPU {
                     self.cycles = 0;
                     self.line += 1;
 
-                    self.mode = if self.line == 143 {
-                        Mode::VBlank
-                        
+                    self.mode = if self.line == 143 {                                              
                         // TODO: push framebuffer data to frontend now (interrupt)
+                        self.vblank_int = true;
+                        Mode::VBlank                        
                         
                     } else {
                         Mode::OAMRead

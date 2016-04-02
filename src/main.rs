@@ -7,6 +7,10 @@ extern crate rand;
 
 mod jeebie;
 
+use jeebie::core::cpu::*;
+use jeebie::memory::*;
+use jeebie::cart::Cartridge;
+
 use jeebie::frontend::GpuFrontend;
 use std::time::Duration;
 use rand::distributions::{IndependentSample, Range};
@@ -25,6 +29,14 @@ fn main() {
     let range = Range::new(0, 255);
     let mut rng = rand::thread_rng();
     
+    let cart = Cartridge::new_with_path("");    
+    let mut mmu = MMU::new();    
+    mmu.load_rom(&cart);
+    
+    let cpu = CPU::new(&mut mmu);
+    
+    // TODO: emulation loop
+        
     while front.should_run {
         for i in 0..tex_size {
             let a = range.ind_sample(&mut rng);

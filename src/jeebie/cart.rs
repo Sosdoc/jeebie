@@ -6,8 +6,8 @@ use std::io::Read;
 /// Data contained in a cartridge is exposed as a Vec<u8> but should be accessed via the MMU.
 #[derive(Debug)]
 pub struct Cartridge {
-    size: usize,
-    data: Vec<u8>,
+    pub size: usize,
+    pub data: Vec<u8>,
 }
 
 impl Cartridge {
@@ -25,7 +25,7 @@ impl Cartridge {
     }
 
     /// Loads binary data from a file into a vector buffer.
-    pub fn load_rom_file(path: &str) -> Vec<u8> {
+    fn load_rom_file(path: &str) -> Vec<u8> {
         let mut buf: Vec<u8> = vec![];
 
         if let Ok(mut file) = File::open(path) {
