@@ -71,14 +71,25 @@ impl GBColor {
             _ => panic!("Invalid color value {}", number),
         }
     }
+    
+    pub fn to_u8u8u8(self) -> (u8, u8, u8) {
+        match self {
+            GBColor::Off => (255, 255, 255),
+            GBColor::On33 => (192, 192, 192),
+            GBColor::On66 => (96, 96, 96),
+            GBColor::On => (0, 0, 0),
+        }
+    }
 }
 
 /// An enum used to discriminate tilesets (and maps)
+#[derive(Copy, Clone)]
 enum TileSelector {
     Set0, Set1
 }
 
 /// An enum for sprite size mode (8x8 or 8x16)
+#[derive(Copy, Clone)]
 enum SpriteSize {
     Size8, Size16
 }
@@ -205,7 +216,7 @@ impl GPU {
                 let pixel_value = GBColor::from_u8(low_bit + high_bit * 2);                
                 // px 0..7, then 8..15
                 let pixel_addr = (addr / 2) * 8 + i;                
-                pixels[pixel_addr as usize] = pixel_value;
+                pixels[pixel_addr] = pixel_value;
             }
             
             addr += 2;
@@ -214,9 +225,61 @@ impl GPU {
         Tile { pixels: pixels }
     }
     
+    
+    /// Retrieves a single pixel from a given tile index.
+    /// The pixel index is a number between 0 and 63.
+    fn get_tile_pixel(&self, set: TileSelector, tile_index: usize, pixel_index: usize) -> GBColor {        
+        let offset = if let TileSelector::Set1 = set { 0x800 } else { 0 };
+        let start_addr = (offset + tile_index) * 0x10;              
+        
+        let addr = start_addr + (pixel_index % 8) * 2;        
+        let (low, high) = (self.vram.data[addr], self.vram.data[addr + 1]);        
+        let i = pixel_index % 8;
+        let low_bit = (low >> i) & 0x01;
+        let high_bit = (high >> i) & 0x01;
+        
+        GBColor::from_u8(low_bit + high_bit * 2)
+    }
+    
     /// Renders a single scanline to the framebuffer, from the internal tile data. 
     fn render_scanline(&mut self) {
+        // map offset starts from 0x1C00 (for tileset #1) or 0x1800 (for tileset #0)
+        let mut y_offset : u16 = if let TileSelector::Set1 = self.lcdc.bg_tile_map { 0x1C00 } else { 0x1800 };
         
+        // add vertical offset (y_scroll plus the scanline we are at right now)
+        // line and scroll_y are on a per pixel basis, shifting right by 3 gets the tile index offset
+        y_offset += ((self.line as u8).wrapping_add(self.lcdp.scroll_y) >> 3) as u16;
+                
+        // same for x tile offset
+        let mut x_offset = (self.lcdp.scroll_x >> 3) as u16;
+        
+        // x,y are the 3 least significant bits in the offsets
+        // they represent the coordinates of the pixel inside a tile
+        let y = (y_offset & 0x07) as usize; 
+        let mut x = (x_offset & 0x07) as usize;
+        
+        // starting scanline where we will write on the framebuffer 
+        let fb_offset = (self.line * 160) as usize;
+        
+        // read the tile index from the vram at the computed offset
+        let mut tile_index = self.read_vram((y_offset + x_offset) as usize);
+        
+        // compute each of the 160 pixels in a scanline
+        for i in 0..160 {
+            // TODO: maybe load tile lines instead of single pixels, less function calls.
+            let pixel = self.get_tile_pixel(self.lcdc.bg_tile_map, tile_index as usize, x + y);          
+            self.framebuffer[fb_offset + i] = pixel.to_u8u8u8();            
+            x += 1;
+            
+            if x == 8 {
+                // reached end of current tile, go to the next one (right)
+                x = 0;
+                // tiles wrap horizontally (every 32)
+                x_offset = (x_offset + 1) % 32;
+                tile_index = self.read_vram((y_offset + x_offset) as usize);
+            }
+        }
+                      
     }
 
     pub fn write_vram(&mut self, addr: usize, value: u8) {
@@ -258,8 +321,8 @@ impl GPU {
                     self.cycles = 0;
                     self.mode = Mode::HBlank;
 
-                    // TODO: scanline is done, write it to framebuffer
-                    
+                    // scanline is done, write it to framebuffer
+                    self.render_scanline();
                 }
             }
             Mode::HBlank => {
