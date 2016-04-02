@@ -13,7 +13,7 @@ use jeebie::cart::Cartridge;
 pub struct MMU {
     pub loading_bios: Cell<bool>,
     data: [u8; 65536],
-    gpu: GPU,
+    pub gpu: GPU,
 }
 
 impl fmt::Debug for MMU {
@@ -31,17 +31,10 @@ impl MMU {
         }
     }
     
-    pub fn load_rom(&mut self, cart: &Cartridge) {        
-        if cart.size <= 0x8000 {
-            // load rom data up to 0x8000
-            for i in 0..cart.size {
-                self.data[i] = cart.data[i];
-            }
-            
-        } else {
-            // TODO: support other memory controllers and cartridges with > 32k ROM 
-            unimplemented!()
-        }        
+    pub fn load_rom(&mut self, cart: &Cartridge) {
+        for i in 0..cart.size {
+            self.data[i] = cart.data[i];
+        }           
     }
     
     /// reads a byte at the memory address specified
