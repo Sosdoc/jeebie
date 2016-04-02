@@ -232,7 +232,7 @@ impl GPU {
         let offset = if let TileSelector::Set1 = set { 0x800 } else { 0 };
         let start_addr = (offset + tile_index) * 0x10;              
         
-        let addr = start_addr + (pixel_index % 8) * 2;        
+        let addr = start_addr + ((pixel_index / 8) as usize) * 2;        
         let (low, high) = (self.vram.data[addr], self.vram.data[addr + 1]);        
         let i = pixel_index % 8;
         let low_bit = (low >> i) & 0x01;
@@ -379,4 +379,23 @@ fn get_tile_test() {
     for i in 8..64 {
         assert_eq!(tile.pixels[i], GBColor::Off);
     }
+}
+
+#[test]
+fn get_pixel_test() {
+    let mut gpu = GPU::new();
+    // write first line of tile #0 in set #0
+    // pixels should be: 0 1 2 3 3 2 1 0
+    gpu.write_vram(0, 0b0101_1010u8);
+    gpu.write_vram(1, 0b0011_1100u8);
+    
+    assert_eq!(gpu.get_tile_pixel(TileSelector::Set0, 0, 0), GBColor::Off);
+    assert_eq!(gpu.get_tile_pixel(TileSelector::Set0, 0, 1), GBColor::On33);
+    assert_eq!(gpu.get_tile_pixel(TileSelector::Set0, 0, 2), GBColor::On66);
+    assert_eq!(gpu.get_tile_pixel(TileSelector::Set0, 0, 3), GBColor::On);
+    
+    assert_eq!(gpu.get_tile_pixel(TileSelector::Set0, 0, 4), GBColor::On);
+    assert_eq!(gpu.get_tile_pixel(TileSelector::Set0, 0, 5), GBColor::On66);
+    assert_eq!(gpu.get_tile_pixel(TileSelector::Set0, 0, 6), GBColor::On33);
+    assert_eq!(gpu.get_tile_pixel(TileSelector::Set0, 0, 7), GBColor::Off);    
 }
