@@ -140,6 +140,22 @@ impl LCDControl {
         self.sprite_enable = if is_set(data, 1) { true } else { false };
         self.bg_enable = if is_set(data, 0) { true } else { false };
     }
+    
+    /// Retrieves LCDC data as a byte.
+    pub fn as_u8(&self) -> u8 {
+        let mut result = 0;
+        
+        if self.lcd_enable { result |= 7 };
+        if let TileSelector::Set1 = self.window_tile_map { result |= 6 };
+        if self.window_enable { result |= 5 };
+        if let TileSelector::Set1 = self.bgw_tile_data_select { result |= 4 };
+        if let TileSelector::Set1 = self.bg_tile_map  { result |= 3 };
+        if let SpriteSize::Size16 = self.sprite_size { result |= 2 };
+        if self.sprite_enable { result |= 1 };
+        if self.bg_enable { result |= 0 };
+        
+        result
+    }
 }
 
 /// A tile is an 8x8 square of pixels, each one stored in one of the VRAM's tilesets.
@@ -172,7 +188,7 @@ impl LCDPosition {
 /// Includes computed data like the framebuffer, in a format that can be drawn to screen.
 pub struct GPU {
     mode: Mode,
-    line: u32,
+    line: u8,
     cycles: u32,
     vram: VideoMemory,
     lcdc: LCDControl,
@@ -224,8 +240,7 @@ impl GPU {
         
         Tile { pixels: pixels }
     }
-    
-    
+        
     /// Retrieves a single pixel from a given tile index.
     /// The pixel index is a number between 0 and 63.
     fn get_tile_pixel(&self, set: TileSelector, tile_index: usize, pixel_index: usize) -> GBColor {        
@@ -300,6 +315,31 @@ impl GPU {
     pub fn read_oam(&self, addr: usize) -> u8 {
         if let Mode::OAMRead = self.mode { panic!("Attempted access to OAM during OAMRead mode") };
         self.vram.oam[addr]
+    }
+    
+    pub fn read_register(&self, addr: usize) -> u8 {
+        match addr {
+            0xFF40 => self.lcdc.as_u8(), // LCDC
+            0xFF42 => self.lcdp.scroll_x,
+            0xFF43 => self.lcdp.scroll_y,
+            0xFF44 => self.line, // current scanline
+            0xFF47 => panic!("Palette is write only!"),
+            _ => panic!("Attempted GPU register access with addr {:4x}", addr),
+        }
+    }
+    
+    pub fn write_register(&mut self, addr: usize, data: u8) {
+        match addr {
+            0xFF40 => self.lcdc.set_from_u8(data), // LCDC
+            0xFF42 => { self.lcdp.scroll_x = data },
+            0xFF43 => { self.lcdp.scroll_y = data },
+            0xFF44 => { self.line = data }, // current scanline
+            0xFF47 => {
+                // TODO: figure palette writing (is it needed for CGB only?)
+                unimplemented!();
+             },
+            _ => panic!("Attempted GPU register write with addr {:4x}", addr),
+        };
     }
 
     /// Emulates the GPU.
