@@ -1,35 +1,52 @@
 use jeebie::memory::MMU;
 use jeebie::registers::*;
 
+use jeebie::opcodes::{ CB_OPCODE_TABLE, OPCODE_TABLE };
+use jeebie::timings::{ CB_TIMING_TABLE, TIMING_TABLE };
+
 #[derive(Debug)]
 pub struct CPU<'a> {
     pub reg: Registers,
     pub mem: &'a mut MMU,
+    
+    // amount of machine cycles (as reported in timing tables) elapsed.
+    cycles: u32,
+    
 }
 
 impl<'a> CPU<'a> {
     pub fn new(mmu: &'a mut MMU) -> CPU<'a> {
         let r = Registers::new();
-        CPU { reg: r, mem: mmu }
+        CPU { reg: r, mem: mmu, cycles: 0}
     }
 
-    /// executes the instruction
-    pub fn dispatch(&mut self, opcode: u8) {}
-
-    /// reads instructions and executes them
-    pub fn fetch_and_exec() {
-        let mut mmu = MMU::new();
-        let mut cpu = CPU::new(&mut mmu);
-
-        loop {
-            // fetch
-            let opcode = cpu.mem.read_b(cpu.reg.pc);
-            // execute
-            cpu.dispatch(opcode);
-            // increase PC
-            cpu.reg.pc.wrapping_add(1);
-            // TODO: compute clock timings
-        }
+    /// executes one instruction, updating cycles and PC register accordingly
+    pub fn exec(&mut self) {
+        // fetch
+        let opcode = self.mem.read_b(self.reg.pc);
+        self.reg.pc.wrapping_add(1);
+        
+        let instr_timing = match opcode {
+            0xCB => {
+                // 2-byte opcodes are prefixed with 0xCB
+                let second_byte = self.mem.read_b(self.reg.pc);
+                self.reg.pc.wrapping_add(1);
+                
+                CB_OPCODE_TABLE[second_byte as usize](self);
+                CB_TIMING_TABLE[second_byte as usize]
+            },
+            _ => {
+                OPCODE_TABLE[opcode as usize](self);
+                TIMING_TABLE[opcode as usize]
+            }
+        };
+        
+        self.cycles.wrapping_add(instr_timing as u32);
+    }
+  
+    pub fn exec_one_frame(&mut self) {        
+               
+        
     }
 
     fn combine_as_u16(high: u8, low: u8) -> u16 {
