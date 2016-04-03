@@ -10,7 +10,7 @@ pub struct CPU<'a> {
     pub mem: &'a mut MMU,
     
     // amount of machine cycles (as reported in timing tables) elapsed.
-    cycles: u32,
+    cycles: u64,
     
 }
 
@@ -20,8 +20,9 @@ impl<'a> CPU<'a> {
         CPU { reg: r, mem: mmu, cycles: 0}
     }
 
-    /// executes one instruction, updating cycles and PC register accordingly
-    pub fn exec(&mut self) {
+    /// Executes one instruction, updating cycles and PC register accordingly.
+    /// Returns the number of elapsed machine cycles.
+    pub fn exec(&mut self) -> u32 {
         // fetch
         let opcode = self.mem.read_b(self.reg.pc);
         self.reg.pc.wrapping_add(1);
@@ -41,12 +42,24 @@ impl<'a> CPU<'a> {
             }
         };
         
-        self.cycles.wrapping_add(instr_timing as u32);
+        self.cycles.wrapping_add(instr_timing as u64);
+        instr_timing as u32
     }
   
-    pub fn exec_one_frame(&mut self) {        
-               
+    /// Executes instructions until a single frame is produced.
+    /// A frame is 144 scanlines, plus 10 vertical blanks, and scanlines are rendered every 456 machine cycles.
+    /// This means one frame is ready every 154 * 456 = 70224 machine cycles.
+    pub fn exec_one_frame(&mut self) -> &[(u8, u8, u8)]{
+        // TODO: handle overflows
+        let target = self.cycles + 70224;
         
+        while self.cycles < target {
+            let cycles = self.exec();
+            self.mem.gpu.emulate(cycles);
+        }
+        
+        // frame is ready 
+        self.mem.gpu.get_framebuffer()
     }
 
     fn combine_as_u16(high: u8, low: u8) -> u16 {

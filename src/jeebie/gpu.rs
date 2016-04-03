@@ -259,7 +259,7 @@ impl GPU {
     }
     
     /// Retrieves a slice of the framebuffer.
-    fn get_framebuffer(&mut self) -> &[(u8, u8, u8)]{
+    pub fn get_framebuffer(&mut self) -> &[(u8, u8, u8)]{
         if self.vblank_int {
             self.vblank_int = false;
         }
