@@ -27,6 +27,8 @@ impl<'a> CPU<'a> {
         let opcode = self.mem.read_b(self.reg.pc);
         self.reg.pc.wrapping_add(1);
         
+        println!("Exec opcode {}", opcode);
+        
         let instr_timing = match opcode {
             0xCB => {
                 // 2-byte opcodes are prefixed with 0xCB
@@ -42,7 +44,7 @@ impl<'a> CPU<'a> {
             }
         };
         
-        self.cycles.wrapping_add(instr_timing as u64);
+        self.cycles = self.cycles.wrapping_add(instr_timing as u64);
         instr_timing as u32
     }
   
@@ -53,7 +55,7 @@ impl<'a> CPU<'a> {
         // TODO: handle overflows
         let target = self.cycles + 70224;
         
-        while self.cycles < target {
+        while self.cycles < target {            
             let cycles = self.exec();
             self.mem.gpu.emulate(cycles);
         }

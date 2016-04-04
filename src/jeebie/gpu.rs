@@ -284,8 +284,8 @@ impl GPU {
         let y = (y_offset & 0x07) as usize; 
         let mut x = (x_offset & 0x07) as usize;
         
-        // starting scanline where we will write on the framebuffer 
-        let fb_offset = (self.line * 160) as usize;
+        // starting scanline where we will write on the framebuffer               
+        let fb_offset = (self.line as usize) * 160;
         
         // read the tile index from the vram at the computed offset
         let mut tile_index = self.read_vram((y_offset + x_offset) as usize);
@@ -293,7 +293,8 @@ impl GPU {
         // compute each of the 160 pixels in a scanline
         for i in 0..160 {
             // TODO: maybe load tile lines instead of single pixels, less function calls.
-            let pixel = self.get_tile_pixel(self.lcdc.bg_tile_map, tile_index as usize, x + y);          
+            let pixel = self.get_tile_pixel(self.lcdc.bg_tile_map, tile_index as usize, x + y);   
+                     
             self.framebuffer[fb_offset + i] = pixel.to_u8u8u8();            
             x += 1;
             
@@ -391,9 +392,9 @@ impl GPU {
                     };
                 }
             }
-            Mode::VBlank => {
+            Mode::VBlank => {                
                 if self.cycles >= 456 {
-                    self.mode = Mode::HBlank;
+                    self.cycles = 0;
                     self.line += 1;
 
                     if self.line > 153 {

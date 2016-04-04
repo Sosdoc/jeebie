@@ -7,6 +7,7 @@ use std::cell::Cell;
 
 use jeebie::gpu::GPU;
 use jeebie::cart::Cartridge;
+use jeebie::bootrom::DMG_BOOTROM;
 
 /// The Memory Management Unit.
 /// Provides access to all mapped memory in the system, including I/O and graphics.
@@ -49,7 +50,7 @@ impl MMU {
 
         match addr {
             // bios area, 256B long for regular gameboy.
-            0...0x00FF if self.loading_bios.get() => unimplemented!(),
+            0...0x00FF if self.loading_bios.get() => DMG_BOOTROM[(addr & 0xFF) as usize],
             // ROM0 area, this is banked memory, it will swap according to selected bank
             0x0000...0x3FFF if !self.loading_bios.get() => self.data[addr as usize],
             // ROM1 area, 16kB unbanked data
