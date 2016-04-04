@@ -26,9 +26,7 @@ impl<'a> CPU<'a> {
         // fetch
         let opcode = self.mem.read_b(self.reg.pc);
         self.reg.pc.wrapping_add(1);
-        
-        println!("Exec opcode {}", opcode);
-        
+               
         let instr_timing = match opcode {
             0xCB => {
                 // 2-byte opcodes are prefixed with 0xCB
