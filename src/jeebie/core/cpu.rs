@@ -25,13 +25,13 @@ impl<'a> CPU<'a> {
     pub fn exec(&mut self) -> u32 {
         // fetch
         let opcode = self.mem.read_b(self.reg.pc);
-        self.reg.pc.wrapping_add(1);
+        self.reg.pc = self.reg.pc.wrapping_add(1);
                
         let instr_timing = match opcode {
             0xCB => {
                 // 2-byte opcodes are prefixed with 0xCB
                 let second_byte = self.mem.read_b(self.reg.pc);
-                self.reg.pc.wrapping_add(1);
+                self.reg.pc = self.reg.pc.wrapping_add(1);
                 
                 CB_OPCODE_TABLE[second_byte as usize](self);
                 CB_TIMING_TABLE[second_byte as usize]
