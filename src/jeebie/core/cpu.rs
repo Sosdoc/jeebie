@@ -376,12 +376,12 @@ impl<'a> CPU<'a> {
     pub fn push_stack(&mut self, reg: Register16) {
         let value = self.get16(reg);
 
-        self.reg.sp.wrapping_sub(1);
+        self.reg.sp = self.reg.sp.wrapping_sub(1);
         let addr = self.reg.sp;
         let low = (value & 0x00FF) as u8;
         self.mem.write_b(addr, low);
 
-        self.reg.sp.wrapping_sub(1);
+        self.reg.sp = self.reg.sp.wrapping_sub(1);
         let addr = self.reg.sp;
         let high = ((value >> 8) & 0x00FF) as u8;
         self.mem.write_b(addr, high);
@@ -390,10 +390,10 @@ impl<'a> CPU<'a> {
     /// Pops a 16-bit value from the stack, MSB first, returning the u16 value.
     pub fn pop_stack(&mut self, dest: Register16) {
         let high = self.mem.read_b(self.reg.sp);
-        self.reg.sp.wrapping_add(1);
+        self.reg.sp = self.reg.sp.wrapping_add(1);
 
         let low = self.mem.read_b(self.reg.sp);
-        self.reg.sp.wrapping_add(1);
+        self.reg.sp = self.reg.sp.wrapping_add(1);
 
         let result = ((high as u16) << 8) & (low as u16);
         self.set16(dest, result);
@@ -403,7 +403,7 @@ impl<'a> CPU<'a> {
     /// Immediates are retrieved by reading at the address in the PC register.
     pub fn get_immediate8(&mut self) -> u8 {
         let value = self.mem.read_b(self.reg.pc);
-        self.reg.pc.wrapping_add(1);
+        self.reg.pc = self.reg.pc.wrapping_add(1);
 
         value
     }
