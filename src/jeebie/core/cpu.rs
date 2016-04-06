@@ -151,6 +151,24 @@ impl<'a> CPU<'a> {
         let value = self.get16(reg2);
         self.set16(reg1, value);
     }
+    
+    pub fn jump(&mut self, addr: u16) {
+        self.reg.pc = addr;
+    }
+    
+    pub fn jump_flag(&mut self, flag: Flags, reg: Register16) {
+        if self.reg.is_set(flag) {
+            let addr = self.get16(reg);
+            self.jump(addr);
+        }
+    }
+    
+    pub fn jump_not_flag(&mut self, flag: Flags, reg: Register16) {
+        if !self.reg.is_set(flag) {
+            let addr = self.get16(reg);
+            self.jump(addr);
+        }
+    }
 
     // Computes the flags and result for a 16-bit ADD instruction.
     // The result is put in the specified `reg1`.
