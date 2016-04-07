@@ -73,3 +73,39 @@ pub fn JR_C_n(cpu: &mut CPU) {
     let addr = pc.wrapping_add((n as i8) as u16);
     cpu.jump_flag(Flags::Carry, Register16::Value16(addr));
 }
+
+// 'CALL nn' CD 12
+pub fn CALL_nn(cpu: &mut CPU) {
+    let call_addr = cpu.get16(Register16::Immediate16);
+    let next_instr = cpu.reg.pc.wrapping_add(1);
+    cpu.push_stack(Register16::Value16(next_instr));
+    cpu.jump(call_addr);
+}
+
+// 'CALL NZ,nn' C4 12
+pub fn CALL_NZ_nn(cpu: &mut CPU) {
+    if !cpu.reg.is_set(Flags::Zero) {
+        CALL_nn(cpu);
+    }
+}
+
+// 'CALL Z,nn' CC 12
+pub fn CALL_Z_nn(cpu: &mut CPU) {
+    if cpu.reg.is_set(Flags::Zero) {
+        CALL_nn(cpu);
+    }
+}
+
+// 'CALL NC,nn' D4 12
+pub fn CALL_NC_nn(cpu: &mut CPU) {
+    if !cpu.reg.is_set(Flags::Carry) {
+        CALL_nn(cpu);
+    }
+}
+
+// 'CALL C,nn' DC 12
+pub fn CALL_C_nn(cpu: &mut CPU) {
+    if cpu.reg.is_set(Flags::Carry) {
+        CALL_nn(cpu);
+    }
+}
