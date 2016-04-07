@@ -109,3 +109,43 @@ pub fn CALL_C_nn(cpu: &mut CPU) {
         CALL_nn(cpu);
     }
 }
+
+// 'RST 00H' C7 32
+pub fn RST_00h(cpu: &mut CPU) {
+    cpu.restart(0x00);
+}
+
+// 'RST 08H' CF 32
+pub fn RST_08h(cpu: &mut CPU) {
+    cpu.restart(0x08);
+}
+
+// 'RST 10H' D7 32
+pub fn RST_10h(cpu: &mut CPU) {
+    cpu.restart(0x10);
+}
+
+// 'RST 18H' DF 32
+pub fn RST_18h(cpu: &mut CPU) {
+    cpu.restart(0x18);
+}
+
+// 'RST 20H' E7 32
+pub fn RST_20h(cpu: &mut CPU) {
+    cpu.restart(0x20);
+}
+
+// 'RST 28H' EF 32
+pub fn RST_28h(cpu: &mut CPU) {
+    cpu.restart(0x28);
+}
+
+// 'RST 30H' F7 32
+pub fn RST_30h(cpu: &mut CPU) {
+    cpu.restart(0x30);
+}
+
+// 'RST 38H' FF 32
+pub fn RST_38h(cpu: &mut CPU) {
+    cpu.restart(0x38);
+}

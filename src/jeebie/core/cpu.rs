@@ -169,6 +169,13 @@ impl<'a> CPU<'a> {
             self.jump(addr);
         }
     }
+    
+    // A restart (RST) will push the current address on the stack and jump to the provided address
+    // addresses are encoded in the opcode, with a total of 8 possible ones.
+    pub fn restart(&mut self, addr: u16) {        
+        self.push_stack(Register16::PC);
+        self.jump(addr); 
+    }
 
     // Computes the flags and result for a 16-bit ADD instruction.
     // The result is put in the specified `reg1`.
@@ -429,9 +436,9 @@ impl<'a> CPU<'a> {
     /// Retrieves an immediate 16-bit value.
     /// 16-bit immediates are read as two 8-bit immediates, the first being the LSB.
     pub fn get_immediate16(&mut self) -> u16 {
-        let low = self.get_immediate8();
-        let high = self.get_immediate8();
-
-        (high as u16) & (low as u16)
+        let low = self.get_immediate8() as u16;
+        let high = self.get_immediate8() as u16;
+        
+        (high << 8) & low        
     }
 }
