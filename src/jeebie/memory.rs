@@ -89,11 +89,11 @@ impl MMU {
     pub fn write_b(&mut self, addr: u16, data: u8) {
         match addr {
             // bios area, 256B long for regular gameboy.
-            0...0x00FF if self.loading_bios.get() => unimplemented!(),
+            0...0x00FF if self.loading_bios.get() => panic!("Writing to bootrom ${:04x} <- {:02x}", addr, data),
             // ROM0 area, this is banked memory, it will swap according to selected bank
-            0x0000...0x3FFF if !self.loading_bios.get() => unimplemented!(),
+            0x0000...0x3FFF if !self.loading_bios.get() => panic!("Writing to ROM0 ${:04x} <- {:02x}", addr, data),
             // ROM1 area, 16kB unbanked data
-            0x4000...0x7FFF => unimplemented!(),
+            0x4000...0x7FFF => panic!("Writing to ROM1 ${:04x} <- {:02x}", addr, data),
             // Graphics, 8kB VRAM
             0x8000...0x9FFF => self.gpu.write_vram((addr & 0x1FFF) as usize, data), 
             // Switchable RAM bank, 8kB
