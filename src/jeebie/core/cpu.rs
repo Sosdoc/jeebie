@@ -26,7 +26,7 @@ impl<'a> CPU<'a> {
         // fetch
         let opcode = self.mem.read_b(self.reg.pc);
         self.reg.pc = self.reg.pc.wrapping_add(1);
-               
+        
         let instr_timing = match opcode {
             0xCB => {
                 // 2-byte opcodes are prefixed with 0xCB
@@ -41,7 +41,7 @@ impl<'a> CPU<'a> {
                 TIMING_TABLE[opcode as usize]
             }
         };
-        
+
         self.cycles = self.cycles.wrapping_add(instr_timing as u64);
         instr_timing as u32
     }
@@ -61,9 +61,10 @@ impl<'a> CPU<'a> {
         // frame is ready 
         self.mem.gpu.get_framebuffer()
     }
-
+    
     fn combine_as_u16(high: u8, low: u8) -> u16 {
-        ((high as u16) << 8) & (low as u16)
+        // TODO: write tests for these things, when they fail they make you feel stupid.
+        ((high as u16) << 8) | (low as u16)
     }
 
     pub fn get8(&mut self, reg: Register8) -> u8 {
@@ -122,8 +123,8 @@ impl<'a> CPU<'a> {
             Register16::BC => { self.reg.b = (value >> 8) as u8 ; self.reg.c = value as u8; },
             Register16::DE => { self.reg.d = (value >> 8) as u8 ; self.reg.e = value as u8; },
             Register16::HL => { self.reg.h = (value >> 8) as u8 ; self.reg.l = value as u8; },
-            Register16::SP => { self.reg.sp = value },
-            Register16::PC => { self.reg.pc = value },
+            Register16::SP => { self.reg.sp = value; },
+            Register16::PC => { self.reg.pc = value; },
             _ => {},
         };
     }
@@ -429,7 +430,6 @@ impl<'a> CPU<'a> {
     pub fn get_immediate8(&mut self) -> u8 {
         let value = self.mem.read_b(self.reg.pc);
         self.reg.pc = self.reg.pc.wrapping_add(1);
-
         value
     }
 
@@ -437,8 +437,7 @@ impl<'a> CPU<'a> {
     /// 16-bit immediates are read as two 8-bit immediates, the first being the LSB.
     pub fn get_immediate16(&mut self) -> u16 {
         let low = self.get_immediate8() as u16;
-        let high = self.get_immediate8() as u16;
-        
-        (high << 8) & low        
+        let high = self.get_immediate8() as u16;        
+        (high << 8) | low        
     }
 }
