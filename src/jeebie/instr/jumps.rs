@@ -1,4 +1,4 @@
-/// Module for 16 bit arithmetic (ALU instructions)
+/// Module for jump and related instructions (call, return, reset)
 use jeebie::core::cpu::CPU;
 use jeebie::registers::{ Flags, Register16 };
 
