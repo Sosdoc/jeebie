@@ -76,14 +76,14 @@ pub static OPCODE_TABLE : [OpcodeFunc; 256] = [
              CP_b,          CP_c,          CP_d,          CP_e,
              CP_h,          CP_l,        CP_hlm,          CP_a,
     // 0xc0
-          missing,        POP_bc,      JP_NZ_nn,         JP_nn,
+           RET_NZ,        POP_bc,      JP_NZ_nn,         JP_nn,
        CALL_NZ_nn,       PUSH_bc,       ADD_a_n,       RST_00h,
-          missing,       missing,       JP_Z_nn,       missing,
+            RET_Z,           RET,       JP_Z_nn,       missing,
         CALL_Z_nn,       CALL_nn,       ADC_a_n,       RST_08h,
     // 0xd0
-          missing,        POP_de,      JP_NC_nn,       missing,
+           RET_NC,        POP_de,      JP_NC_nn,       missing,
        CALL_NC_nn,       PUSH_de,       SUB_a_n,       RST_10h,
-          missing,       missing,       JP_C_nn,       missing,
+            RET_C,       missing,       JP_C_nn,       missing,
         CALL_C_nn,       missing,       missing,       RST_18h,
     // 0xe0
          LDH_nm_a,        POP_hl,    LD_c_mem_a,       missing,

@@ -170,7 +170,8 @@ pub fn RET_NC(cpu: &mut CPU) {
     cpu.return_flag(Flags::Carry);    
 }
 
-// 'RET C' D8 8 
+// 'RET C' D8 8
 pub fn RET_C(cpu: &mut CPU) {
     cpu.return_not_flag(Flags::Carry);    
 }
+
