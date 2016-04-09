@@ -149,3 +149,28 @@ pub fn RST_30h(cpu: &mut CPU) {
 pub fn RST_38h(cpu: &mut CPU) {
     cpu.restart(0x38);
 }
+
+// 'RET' C9 8
+pub fn RET(cpu: &mut CPU) {
+    cpu.pop_stack(Register16::PC);
+}
+
+// 'RET NZ' C0 8
+pub fn RET_NZ(cpu: &mut CPU) {
+    cpu.return_flag(Flags::Zero);    
+}
+
+// 'RET Z' C8 8
+pub fn RET_Z(cpu: &mut CPU) {
+    cpu.return_not_flag(Flags::Zero);    
+}
+
+// 'RET NC' D0 8
+pub fn RET_NC(cpu: &mut CPU) {
+    cpu.return_flag(Flags::Carry);    
+}
+
+// 'RET C' D8 8 
+pub fn RET_C(cpu: &mut CPU) {
+    cpu.return_not_flag(Flags::Carry);    
+}

@@ -171,6 +171,20 @@ impl<'a> CPU<'a> {
         }
     }
     
+    /// Performs a return (RET) instruction if the specified flag is set.
+    pub fn return_flag(&mut self, flag: Flags) {
+        if self.reg.is_set(flag) {
+            self.pop_stack(Register16::PC);
+        }
+    }
+    
+    /// Performs a return (RET) instruction if the specified flag is not set.
+    pub fn return_not_flag(&mut self, flag: Flags) {
+        if !self.reg.is_set(flag) {
+            self.pop_stack(Register16::PC);
+        }
+    }
+    
     // A restart (RST) will push the current address on the stack and jump to the provided address
     // addresses are encoded in the opcode, with a total of 8 possible ones.
     pub fn restart(&mut self, addr: u16) {        
@@ -412,8 +426,8 @@ impl<'a> CPU<'a> {
         let high = ((value >> 8) & 0x00FF) as u8;
         self.mem.write_b(addr, high);
     }
-
-    /// Pops a 16-bit value from the stack, MSB first, returning the u16 value.
+    
+    /// Pops a 16-bit value from the stack, MSB first, setting the value to the specified register.
     pub fn pop_stack(&mut self, dest: Register16) {
         let high = self.mem.read_b(self.reg.sp);
         self.reg.sp = self.reg.sp.wrapping_add(1);
