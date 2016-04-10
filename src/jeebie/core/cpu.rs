@@ -3,6 +3,7 @@ use jeebie::registers::*;
 
 use jeebie::opcodes::{ CB_OPCODE_TABLE, OPCODE_TABLE };
 use jeebie::timings::{ CB_TIMING_TABLE, TIMING_TABLE };
+use jeebie::utils::{ is_set, swap_bit, set_bit, reset_bit };
 
 #[derive(Debug)]
 pub struct CPU<'a> {
@@ -128,7 +129,39 @@ impl<'a> CPU<'a> {
             _ => {},
         };
     }
-
+    
+    // Checks the b bit of a register.
+    // Zero flag is set if the bit is 0
+    // Sub reset, HC set 
+    pub fn bit_check(&mut self, b: usize, reg: Register8) {
+        let set = is_set(self.get8(reg), b);
+        
+        if set { self.reg.set_flag(Flags::Zero); };
+        self.reg.clear_flag(Flags::Sub);
+        self.reg.set_flag(Flags::HalfCarry);
+    }
+    
+    // Swaps the bit b in the specified register.
+    // No flags are affected.
+    pub fn bit_swap(&mut self, b: usize, reg: Register8) {
+        let data = swap_bit(self.get8(reg), b);
+        self.set8(reg, data);
+    }
+    
+    // Set the bit b in the specified register.
+    // No flags are affected.
+    pub fn bit_set(&mut self, b: usize, reg: Register8) {
+        let data = set_bit(self.get8(reg), b);
+        self.set8(reg, data);
+    }
+    
+    // Reset the bit b in the specified register.
+    // No flags are affected.
+    pub fn bit_reset(&mut self, b: usize, reg: Register8) {
+        let data = reset_bit(self.get8(reg), b);
+        self.set8(reg, data);
+    }  
+    
     // Swaps low and high nibble of an 8 bit value and sets flags.
     // Returns the result of the swap operation.
     pub fn compute_swap(&mut self, reg: Register8) {
