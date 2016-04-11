@@ -34,7 +34,7 @@ pub fn JP_HL(cpu: &mut CPU) {
     cpu.jump(addr);
 }
 
-// 'JR n' 18 8 
+// 'JR n' 18 8
 pub fn JR_n(cpu: &mut CPU) {
     let pc = cpu.reg.pc + 1; // it isn't updated yet
     let n = cpu.mem.read_b(cpu.reg.pc);
@@ -157,21 +157,21 @@ pub fn RET(cpu: &mut CPU) {
 
 // 'RET NZ' C0 8
 pub fn RET_NZ(cpu: &mut CPU) {
-    cpu.return_flag(Flags::Zero);    
+    cpu.return_flag(Flags::Zero);
 }
 
 // 'RET Z' C8 8
 pub fn RET_Z(cpu: &mut CPU) {
-    cpu.return_not_flag(Flags::Zero);    
+    cpu.return_not_flag(Flags::Zero);
 }
 
 // 'RET NC' D0 8
 pub fn RET_NC(cpu: &mut CPU) {
-    cpu.return_flag(Flags::Carry);    
+    cpu.return_flag(Flags::Carry);
 }
 
 // 'RET C' D8 8
 pub fn RET_C(cpu: &mut CPU) {
-    cpu.return_not_flag(Flags::Carry);    
+    cpu.return_not_flag(Flags::Carry);
 }
 

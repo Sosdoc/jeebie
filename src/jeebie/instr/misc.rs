@@ -3,7 +3,7 @@ use jeebie::core::cpu::CPU;
 use jeebie::registers::Register8::*;
 use jeebie::registers::Register16::*;
 
-/// 'NOP' 00 4
+// 'NOP' 00 4
 pub fn nop(cpu: &mut CPU) {}
 
 // 'SWAP A' CB 37 8
