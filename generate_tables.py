@@ -30,9 +30,13 @@ TABLE_DECL = u'\n\npub static {0}_TABLE : [OpcodeFunc; 256] = [\n'
 
 TIMING_T_DECL = u'\n\npub static {0}_TABLE : [u8; 256] = [\n'
 
+DISASM_T_DECL = u'\n\npub static {0}_TABLE : [&\'static str; 256] = [\n'
+
 TABLE_ROW = u'    {:>13}, {:>13}, {:>13}, {:>13},\n'
 
 TIMING_T_ROW = u'    {:>2}, {:>2}, {:>2}, {:>2},\n'
+
+DISASM_T_ROW = u'    "{}", "{}", "{}", "{}",\n'
 
 UNIMPLEMENTED = u'missing'
 UNIMPLEMENTED_CB = u'missing_cb'
@@ -129,6 +133,33 @@ def build_timings():
     output.append('];')
     return output
 
+def build_disasm_metadata():
+    output = []
+    output.append(DISCLAIMER)
+    output.append(DISASM_T_DECL.format('DISASM'))
+
+    for i in xrange(0, 256, 4):
+        if i % 16 == 0:
+            output.append('    // ' + format(i, '#04x') + '\n')
+
+        row = DISASM_T_ROW.format(disasm(i), disasm(
+            i + 1), disasm(i + 2), disasm(i + 3))
+        output.append(row)
+
+    output.append('];')
+    output.append(DISASM_T_DECL.format('CB_DISASM'))
+
+    for i in xrange(0, 256, 4):
+        if i % 16 == 0:
+            output.append('    // ' + format(i, '#04x') + '\n')
+
+        row = DISASM_T_ROW.format(disasm_cb(i), disasm_cb(
+            i + 1), disasm_cb(i + 2), disasm_cb(i + 3))
+        output.append(row)
+
+    output.append('];')
+    return output
+
 
 def func(opcode):
     return CODES[opcode]['fn'] if opcode in CODES else UNIMPLEMENTED
@@ -145,6 +176,12 @@ def timing(opcode):
 def timing_cb(opcode):
     return CB_CODES[opcode]['timing'] if opcode in CB_CODES else '0'
 
+def disasm(opcode):
+    return CODES[opcode]['name'] if opcode in CODES else 'Missing'
+
+def disasm_cb(opcode):
+    return CB_CODES[opcode]['name'] if opcode in CB_CODES else 'Missing'
+
 if __name__ == "__main__":
 
     for src_file in glob.glob('src/jeebie/instr/*.rs'):
@@ -155,3 +192,8 @@ if __name__ == "__main__":
 
     with open('src/jeebie/timings.rs', 'w') as out_file:
         out_file.writelines(build_timings())
+
+    with open('src/jeebie/disasm/metadata.rs', 'w') as out_file:
+        out_file.writelines(build_disasm_metadata())
+
+    print "Done generating mapping files."

@@ -13,3 +13,4 @@ pub mod frontend;
 pub mod gpu;
 pub mod utils;
 pub mod bootrom;
+pub mod disasm;
