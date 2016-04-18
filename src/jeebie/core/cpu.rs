@@ -3,8 +3,8 @@ use jeebie::registers::*;
 
 use jeebie::opcodes::{ CB_OPCODE_TABLE, OPCODE_TABLE };
 use jeebie::timings::{ CB_TIMING_TABLE, TIMING_TABLE };
-// use jeebie::disasm::metadata::{ CB_DISASM_TABLE, DISASM_TABLE };
 use jeebie::utils::{ is_set, swap_bit, set_bit, reset_bit };
+use jeebie::disasm::get_instruction_str;
 
 #[derive(Debug)]
 pub struct CPU<'a> {
@@ -25,6 +25,9 @@ impl<'a> CPU<'a> {
     /// Executes one instruction, updating cycles and PC register accordingly.
     /// Returns the number of elapsed machine cycles.
     pub fn exec(&mut self) -> u32 {
+        // disasm string
+        println!("{}", get_instruction_str(self));
+
         // fetch
         let opcode = self.mem.read_b(self.reg.pc);
         self.reg.pc = self.reg.pc.wrapping_add(1);
@@ -35,12 +38,10 @@ impl<'a> CPU<'a> {
                 let second_byte = self.mem.read_b(self.reg.pc);
                 self.reg.pc = self.reg.pc.wrapping_add(1);
 
-                // println!("{} - {} ", self.reg.pc - 1, CB_DISASM_TABLE[second_byte as usize]);
                 CB_OPCODE_TABLE[second_byte as usize](self);
                 CB_TIMING_TABLE[second_byte as usize]
             },
             _ => {
-                // println!("{} - {}", self.reg.pc - 1, DISASM_TABLE[opcode as usize]);
                 OPCODE_TABLE[opcode as usize](self);
                 TIMING_TABLE[opcode as usize]
             }
