@@ -47,7 +47,7 @@ pub fn JR_NZ_n(cpu: &mut CPU) {
     let pc = cpu.reg.pc + 1;
     let n = cpu.mem.read_b(cpu.reg.pc);
     let addr = pc.wrapping_add((n as i8) as u16);
-    // TODO: increase PC cpu.reg.pc = cpu.reg.pc.wrapping_add(1);
+    cpu.reg.pc = cpu.reg.pc.wrapping_add(1);
     cpu.jump_not_flag(Flags::Zero, Register16::Value16(addr));
 }
 
@@ -56,6 +56,7 @@ pub fn JR_Z_n(cpu: &mut CPU) {
     let pc = cpu.reg.pc + 1;
     let n = cpu.mem.read_b(cpu.reg.pc);
     let addr = pc.wrapping_add((n as i8) as u16);
+    cpu.reg.pc = cpu.reg.pc.wrapping_add(1);
     cpu.jump_flag(Flags::Zero, Register16::Value16(addr));
 }
 
@@ -64,6 +65,7 @@ pub fn JR_NC_n(cpu: &mut CPU) {
     let pc = cpu.reg.pc + 1;
     let n = cpu.mem.read_b(cpu.reg.pc);
     let addr = pc.wrapping_add((n as i8) as u16);
+    cpu.reg.pc = cpu.reg.pc.wrapping_add(1);
     cpu.jump_not_flag(Flags::Carry, Register16::Value16(addr));
 }
 
@@ -72,6 +74,7 @@ pub fn JR_C_n(cpu: &mut CPU) {
     let pc = cpu.reg.pc + 1;
     let n = cpu.mem.read_b(cpu.reg.pc);
     let addr = pc.wrapping_add((n as i8) as u16);
+    cpu.reg.pc = cpu.reg.pc.wrapping_add(1);
     cpu.jump_flag(Flags::Carry, Register16::Value16(addr));
 }
 

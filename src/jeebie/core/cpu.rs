@@ -135,8 +135,7 @@ impl<'a> CPU<'a> {
     // Sub reset, HC set
     pub fn bit_check(&mut self, b: usize, reg: Register8) {
         let set = is_set(self.get8(reg), b);
-
-        if set { self.reg.set_flag(Flags::Zero); };
+        if !set { self.reg.set_flag(Flags::Zero) } else { self.reg.clear_flag(Flags::Zero) };
         self.reg.clear_flag(Flags::Sub);
         self.reg.set_flag(Flags::HalfCarry);
     }

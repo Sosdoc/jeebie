@@ -9,7 +9,7 @@ use jeebie::utils::is_set;
 ///     9C00-9FFF	Tile map #1
 ///
 /// There are 2 tile sets of 256 tiles, but 128 tiles are shared between them, so the
-/// total amounts to 384 tiles. 
+/// total amounts to 384 tiles.
 /// The tile maps hold indexes to a corresponding tile in the tilesets.
 /// Pixel data is 2 bits and is split between two adjacent bytes, low bit first:
 ///
@@ -17,7 +17,7 @@ use jeebie::utils::is_set;
 ///     0 1 1 0 1 0 1 1 -- 0x8001
 ///
 ///     1 2 2 0 3 1 2 3 -- pixel value (0 to 3)
-///     
+///
 /// The rest of the memory (`oam`) is used for sprite data and addressed separately
 /// from FE00 to FE9F.
 pub struct VideoMemory {
@@ -48,11 +48,11 @@ enum Mode {
 }
 
 /// An enum representing the possible color values for a pixel in the original GB.
-/// While the GB is said to be monochromatic, it can actually display 4 different shades. 
+/// While the GB is said to be monochromatic, it can actually display 4 different shades.
 #[derive(Copy, Clone, PartialEq, Debug)]
 enum GBColor {
     // white, rgb #FFFFFF
-    Off = 0, 
+    Off = 0,
     // light grey, rgb #C0C0C0
     On33 = 1,
     // dark grey, rgb #606060
@@ -61,7 +61,7 @@ enum GBColor {
     On = 3,
 }
 
-impl GBColor {    
+impl GBColor {
     pub fn from_u8(number: u8) -> GBColor {
         match number {
             0 => GBColor::Off,
@@ -71,7 +71,7 @@ impl GBColor {
             _ => panic!("Invalid color value {}", number),
         }
     }
-    
+
     pub fn to_u8u8u8(self) -> (u8, u8, u8) {
         match self {
             GBColor::Off => (255, 255, 255),
@@ -94,7 +94,7 @@ enum SpriteSize {
     Size8, Size16
 }
 
-/// LCD Control register data 
+/// LCD Control register data
 ///     Bit 7 - LCD Display Enable             (0=Off, 1=On)
 ///     Bit 6 - Window Tile Map Display Select (0=9800-9BFF, 1=9C00-9FFF)
 ///     Bit 5 - Window Display Enable          (0=Off, 1=On)
@@ -105,17 +105,17 @@ enum SpriteSize {
 ///     Bit 0 - BG Display (for CGB see below) (0=Off, 1=On)
 struct LCDControl {
     lcd_enable: bool,
-    window_tile_map: TileSelector,    
-    window_enable: bool,    
+    window_tile_map: TileSelector,
+    window_enable: bool,
     bgw_tile_data_select: TileSelector,
-    bg_tile_map: TileSelector,   
+    bg_tile_map: TileSelector,
     sprite_size: SpriteSize,
-    sprite_enable: bool,   
+    sprite_enable: bool,
     bg_enable: bool,
 }
 
 impl LCDControl {
-    
+
     pub fn new() -> LCDControl {
         LCDControl {
             lcd_enable: false,
@@ -128,9 +128,9 @@ impl LCDControl {
             bg_enable: false,
         }
     }
-    
-    /// Sets LCDC data from a byte value     
-    pub fn set_from_u8(&mut self, data: u8) {        
+
+    /// Sets LCDC data from a byte value
+    pub fn set_from_u8(&mut self, data: u8) {
         self.lcd_enable = if is_set(data, 7) { true } else { false };
         self.window_tile_map = if is_set(data, 6) { TileSelector::Set1 } else { TileSelector::Set0 };
         self.window_enable = if is_set(data, 5) { true } else { false };
@@ -140,11 +140,11 @@ impl LCDControl {
         self.sprite_enable = if is_set(data, 1) { true } else { false };
         self.bg_enable = if is_set(data, 0) { true } else { false };
     }
-    
+
     /// Retrieves LCDC data as a byte.
     pub fn as_u8(&self) -> u8 {
         let mut result = 0;
-        
+
         if self.lcd_enable { result |= 7 };
         if let TileSelector::Set1 = self.window_tile_map { result |= 6 };
         if self.window_enable { result |= 5 };
@@ -153,7 +153,7 @@ impl LCDControl {
         if let SpriteSize::Size16 = self.sprite_size { result |= 2 };
         if self.sprite_enable { result |= 1 };
         if self.bg_enable { result |= 0 };
-        
+
         result
     }
 }
@@ -166,7 +166,7 @@ struct Tile {
 impl Tile {
     pub fn new() -> Tile {
         Tile { pixels: [GBColor::Off; 64] }
-    }    
+    }
 }
 
 /// Holds position and scrolling data for the display
@@ -210,94 +210,94 @@ impl GPU {
             framebuffer: [(0, 0, 0); 160 * 144],
         }
     }
-    
+
     /// Retrieves Tile information from the VRAM.
     /// A tile is held in 16 bytes in the VRAM, enough information for 64 pixels (8x8 matrix, 2 bits per pixel).
-    /// When selecting tiles from Set #1, the index 0 represents tile -128 (equal to tile 128 from Set #0) 
+    /// When selecting tiles from Set #1, the index 0 represents tile -128 (equal to tile 128 from Set #0)
     fn get_tile(&self, set: TileSelector, tile_index: usize) -> Tile {
         // Set1 starts after 128 tiles, or after 16 * 128 = 2048 (0x800) bytes
         let offset = if let TileSelector::Set1 = set { 0x800 } else { 0 };
-        let start_addr = (offset + tile_index) * 0x10;         
+        let start_addr = (offset + tile_index) * 0x10;
         let end_addr = start_addr + 0x10;
-        
+
         let mut addr = start_addr;
-        let mut pixels = [GBColor::Off; 64];             
-        
-        // this is basically a for with step 2. Iterates 8 times (two bytes read at a time). 
+        let mut pixels = [GBColor::Off; 64];
+
+        // this is basically a for with step 2. Iterates 8 times (two bytes read at a time).
         while addr < end_addr {
             let (low, high) = (self.vram.data[addr], self.vram.data[addr + 1]);
-            
+
             for i in 0..8 {
                 let low_bit = (low >> i) & 0x01;
                 let high_bit = (high >> i) & 0x01;
-                
-                let pixel_value = GBColor::from_u8(low_bit + high_bit * 2);                
+
+                let pixel_value = GBColor::from_u8(low_bit + high_bit * 2);
                 // px 0..7, then 8..15
-                let pixel_addr = (addr / 2) * 8 + i;                
+                let pixel_addr = (addr / 2) * 8 + i;
                 pixels[pixel_addr] = pixel_value;
             }
-            
+
             addr += 2;
         }
-        
+
         Tile { pixels: pixels }
     }
-        
+
     /// Retrieves a single pixel from a given tile index.
     /// The pixel index is a number between 0 and 63.
-    fn get_tile_pixel(&self, set: TileSelector, tile_index: usize, pixel_index: usize) -> GBColor {        
+    fn get_tile_pixel(&self, set: TileSelector, tile_index: usize, pixel_index: usize) -> GBColor {
         let offset = if let TileSelector::Set1 = set { 0x800 } else { 0 };
-        let start_addr = (offset + tile_index) * 0x10;              
-        
-        let addr = start_addr + ((pixel_index / 8) as usize) * 2;        
-        let (low, high) = (self.vram.data[addr], self.vram.data[addr + 1]);        
+        let start_addr = (offset + tile_index) * 0x10;
+
+        let addr = start_addr + ((pixel_index / 8) as usize) * 2;
+        let (low, high) = (self.vram.data[addr], self.vram.data[addr + 1]);
         let i = pixel_index % 8;
         let low_bit = (low >> i) & 0x01;
         let high_bit = (high >> i) & 0x01;
-        
+
         GBColor::from_u8(low_bit + high_bit * 2)
     }
-    
+
     /// Retrieves a slice of the framebuffer.
     pub fn get_framebuffer(&mut self) -> &[(u8, u8, u8)]{
         if self.vblank_int {
             self.vblank_int = false;
         }
-        
+
         &self.framebuffer
     }
-    
-    /// Renders a single scanline to the framebuffer, from the internal tile data. 
+
+    /// Renders a single scanline to the framebuffer, from the internal tile data.
     fn render_scanline(&mut self) {
         // map offset starts from 0x1C00 (for tileset #1) or 0x1800 (for tileset #0)
         let mut y_offset : u16 = if let TileSelector::Set1 = self.lcdc.bg_tile_map { 0x1C00 } else { 0x1800 };
-        
+
         // add vertical offset (y_scroll plus the scanline we are at right now)
         // line and scroll_y are on a per pixel basis, shifting right by 3 gets the tile index offset
         y_offset += ((self.line as u8).wrapping_add(self.lcdp.scroll_y) >> 3) as u16;
-                
+
         // same for x tile offset
         let mut x_offset = (self.lcdp.scroll_x >> 3) as u16;
-        
+
         // x,y are the 3 least significant bits in the offsets
         // they represent the coordinates of the pixel inside a tile
-        let y = (y_offset & 0x07) as usize; 
+        let y = (y_offset & 0x07) as usize;
         let mut x = (x_offset & 0x07) as usize;
-        
-        // starting scanline where we will write on the framebuffer               
+
+        // starting scanline where we will write on the framebuffer
         let fb_offset = (self.line as usize) * 160;
-        
+
         // read the tile index from the vram at the computed offset
         let mut tile_index = self.read_vram((y_offset + x_offset) as usize);
-        
+
         // compute each of the 160 pixels in a scanline
         for i in 0..160 {
             // TODO: maybe load tile lines instead of single pixels, less function calls.
-            let pixel = self.get_tile_pixel(self.lcdc.bg_tile_map, tile_index as usize, x + y);   
-                     
-            self.framebuffer[fb_offset + i] = pixel.to_u8u8u8();            
+            let pixel = self.get_tile_pixel(self.lcdc.bg_tile_map, tile_index as usize, x + y);
+
+            self.framebuffer[fb_offset + i] = pixel.to_u8u8u8();
             x += 1;
-            
+
             if x == 8 {
                 // reached end of current tile, go to the next one (right)
                 x = 0;
@@ -306,29 +306,29 @@ impl GPU {
                 tile_index = self.read_vram((y_offset + x_offset) as usize);
             }
         }
-                      
+
     }
 
     pub fn write_vram(&mut self, addr: usize, value: u8) {
-        if let Mode::VRAMRead = self.mode { panic!("Attempted write to VRAM during VRAMRead mode") };
+        // if let Mode::VRAMRead = self.mode { panic!("Attempted write to VRAM during VRAMRead mode") };
         self.vram.data[addr] = value;
     }
 
     pub fn read_vram(&self, addr: usize) -> u8 {
-        if let Mode::VRAMRead = self.mode { panic!("Attempted access to VRAM during VRAMRead mode") };        
+        // if let Mode::VRAMRead = self.mode { panic!("Attempted access to VRAM during VRAMRead mode") };
         self.vram.data[addr]
     }
 
     pub fn write_oam(&mut self, addr: usize, value: u8) {
-        if let Mode::OAMRead = self.mode { panic!("Attempted write to OAM during OAMRead mode") };
+        // if let Mode::OAMRead = self.mode { panic!("Attempted write to OAM during OAMRead mode") };
         self.vram.oam[addr] = value;
     }
 
     pub fn read_oam(&self, addr: usize) -> u8 {
-        if let Mode::OAMRead = self.mode { panic!("Attempted access to OAM during OAMRead mode") };
+        // if let Mode::OAMRead = self.mode { panic!("Attempted access to OAM during OAMRead mode") };
         self.vram.oam[addr]
     }
-    
+
     pub fn read_register(&self, addr: usize) -> u8 {
         match addr {
             0xFF40 => self.lcdc.as_u8(), // LCDC
@@ -339,7 +339,7 @@ impl GPU {
             _ => panic!("Attempted GPU register access with addr {:4x}", addr),
         }
     }
-    
+
     pub fn write_register(&mut self, addr: usize, data: u8) {
         match addr {
             0xFF40 => self.lcdc.set_from_u8(data), // LCDC
@@ -382,17 +382,17 @@ impl GPU {
                     self.cycles = 0;
                     self.line += 1;
 
-                    self.mode = if self.line == 143 {                                              
+                    self.mode = if self.line == 143 {
                         // TODO: push framebuffer data to frontend now (interrupt)
                         self.vblank_int = true;
-                        Mode::VBlank                        
-                        
+                        Mode::VBlank
+
                     } else {
                         Mode::OAMRead
                     };
                 }
             }
-            Mode::VBlank => {                
+            Mode::VBlank => {
                 if self.cycles >= 456 {
                     self.cycles = 0;
                     self.line += 1;
@@ -414,19 +414,19 @@ fn get_tile_test() {
     // pixels should be: 0 1 2 3 3 2 1 0
     gpu.write_vram(0, 0b0101_1010u8);
     gpu.write_vram(1, 0b0011_1100u8);
-    
+
     let tile = gpu.get_tile(TileSelector::Set0, 0);
-    
+
     assert_eq!(tile.pixels[0], GBColor::Off);
     assert_eq!(tile.pixels[1], GBColor::On33);
     assert_eq!(tile.pixels[2], GBColor::On66);
     assert_eq!(tile.pixels[3], GBColor::On);
-    
+
     assert_eq!(tile.pixels[4], GBColor::On);
     assert_eq!(tile.pixels[5], GBColor::On66);
     assert_eq!(tile.pixels[6], GBColor::On33);
     assert_eq!(tile.pixels[7], GBColor::Off);
-    
+
     // rest of the pixels are off
     for i in 8..64 {
         assert_eq!(tile.pixels[i], GBColor::Off);
@@ -440,14 +440,14 @@ fn get_pixel_test() {
     // pixels should be: 0 1 2 3 3 2 1 0
     gpu.write_vram(0, 0b0101_1010u8);
     gpu.write_vram(1, 0b0011_1100u8);
-    
+
     assert_eq!(gpu.get_tile_pixel(TileSelector::Set0, 0, 0), GBColor::Off);
     assert_eq!(gpu.get_tile_pixel(TileSelector::Set0, 0, 1), GBColor::On33);
     assert_eq!(gpu.get_tile_pixel(TileSelector::Set0, 0, 2), GBColor::On66);
     assert_eq!(gpu.get_tile_pixel(TileSelector::Set0, 0, 3), GBColor::On);
-    
+
     assert_eq!(gpu.get_tile_pixel(TileSelector::Set0, 0, 4), GBColor::On);
     assert_eq!(gpu.get_tile_pixel(TileSelector::Set0, 0, 5), GBColor::On66);
     assert_eq!(gpu.get_tile_pixel(TileSelector::Set0, 0, 6), GBColor::On33);
-    assert_eq!(gpu.get_tile_pixel(TileSelector::Set0, 0, 7), GBColor::Off);    
+    assert_eq!(gpu.get_tile_pixel(TileSelector::Set0, 0, 7), GBColor::Off);
 }
