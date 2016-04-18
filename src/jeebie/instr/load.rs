@@ -388,13 +388,13 @@ pub fn LD_nnm_A(cpu: &mut CPU) {
 
 // 'LD A,($FF00 + C)' F2 8
 pub fn LD_a_c_mem(cpu: &mut CPU) {
-    let addr = 0xFF00 & (cpu.get8(C) as u16);
+    let addr = 0xFF00 | (cpu.get8(C) as u16);
     cpu.load_rr(A, Address(addr));
 }
 
 // 'LD ($FF00+C),A' E2 8
 pub fn LD_c_mem_a(cpu: &mut CPU) {
-    let addr = 0xFF00 & (cpu.get8(C) as u16);
+    let addr = 0xFF00 | (cpu.get8(C) as u16);
     cpu.load_rr(Address(addr), A);
 }
 
@@ -424,13 +424,13 @@ pub fn LDI_HLm_a(cpu: &mut CPU) {
 
 // 'LDH ($FF00+n),A' E0 12
 pub fn LDH_nm_a(cpu: &mut CPU) {
-    let addr = 0xFF00 & (cpu.get8(Immediate) as u16);
+    let addr = 0xFF00 | (cpu.get8(Immediate) as u16);
     cpu.load_rr(Address(addr), A);
 }
 
 // 'LDH A,($FF00+n)' F0 12
 pub fn LDH_a_nm(cpu: &mut CPU) {
-    let addr = 0xFF00 & (cpu.get8(Immediate) as u16);
+    let addr = 0xFF00 | (cpu.get8(Immediate) as u16);
     cpu.load_rr(A, Address(addr));
 }
 
