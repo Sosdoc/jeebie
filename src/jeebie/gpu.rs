@@ -348,7 +348,6 @@ impl GPU {
             0xFF44 => { self.line = data }, // current scanline
             0xFF47 => {
                 // TODO: figure palette writing (is it needed for CGB only?)
-                unimplemented!();
              },
             _ => panic!("Attempted GPU register write with addr {:4x}", addr),
         };

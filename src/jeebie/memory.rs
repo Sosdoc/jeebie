@@ -31,13 +31,13 @@ impl MMU {
             gpu: GPU::new(),
         }
     }
-    
+
     pub fn load_rom(&mut self, cart: &Cartridge) {
         for i in 0..cart.size {
             self.data[i] = cart.data[i];
-        }           
+        }
     }
-    
+
     /// reads a byte at the memory address specified
     pub fn read_b(&self, addr: u16) -> u8 {
         // when PC first reaches 0x100, the BIOS data is not addressable anymore.
@@ -51,8 +51,10 @@ impl MMU {
         match addr {
             // bios area, 256B long for regular gameboy.
             0...0x00FF if self.loading_bios.get() => DMG_BOOTROM[(addr & 0xFF) as usize],
+            // ROM0 area accessible only when bootrom is disabled (first 256 bytes).
+            0x0000...0x00FF if !self.loading_bios.get() => self.data[addr as usize],
             // ROM0 area, this is banked memory, it will swap according to selected bank
-            0x0000...0x3FFF if !self.loading_bios.get() => self.data[addr as usize],
+            0x0100...0x3FFF => self.data[addr as usize],
             // ROM1 area, 16kB unbanked data
             0x4000...0x7FFF => self.data[addr as usize],
             // Graphics, 8kB VRAM
@@ -75,14 +77,14 @@ impl MMU {
                 match addr & 0xFF {
                     0x40 | 0x42 | 0x43 | 0x44 | 0x47 => self.gpu.read_register(addr as usize),
                     _ => 0,
-                }                
+                }
             },
             // High RAM (zero page), used with LDH instructions
             0xFF80...0xFFFE => 0,
             // Interrupt Enable register
             0xFFFF => 0,
 
-            _ => panic!("tried to read at unknown address: {:4x}", addr),
+            _ => panic!("tried to read at unknown address: {:04x}", addr),
         }
     }
 
@@ -91,18 +93,18 @@ impl MMU {
             // bios area, 256B long for regular gameboy.
             0...0x00FF if self.loading_bios.get() => panic!("Writing to bootrom ${:04x} <- {:02x}", addr, data),
             // ROM0 area, this is banked memory, it will swap according to selected bank
-            0x0000...0x3FFF if !self.loading_bios.get() => panic!("Writing to ROM0 ${:04x} <- {:02x}", addr, data),
+            0x0000...0x3FFF => panic!("Writing to ROM0 ${:04x} <- {:02x}", addr, data),
             // ROM1 area, 16kB unbanked data
             0x4000...0x7FFF => panic!("Writing to ROM1 ${:04x} <- {:02x}", addr, data),
             // Graphics, 8kB VRAM
-            0x8000...0x9FFF => self.gpu.write_vram((addr & 0x1FFF) as usize, data), 
+            0x8000...0x9FFF => self.gpu.write_vram((addr & 0x1FFF) as usize, data),
             // Switchable RAM bank, 8kB
             0xA000...0xBFFF => {
                 // TODO: handle RAM banks
                 self.data[addr as usize] = data;
             }
             // Internal RAM, 8kB
-            0xC000...0xDFFF => { 
+            0xC000...0xDFFF => {
                 self.data[addr as usize] = data;
             },
             // Echo of internal RAM, this is less than 8k, up to 0xFDFF,
@@ -120,7 +122,7 @@ impl MMU {
                 match addr & 0xFF {
                     0x40 | 0x42 | 0x43 | 0x44 | 0x47 => self.gpu.write_register(addr as usize, data),
                     _ => {},
-                }                
+                }
             },
             // High RAM (zero page), used with LDH instructions
             0xFF80...0xFFFE => unimplemented!(),
