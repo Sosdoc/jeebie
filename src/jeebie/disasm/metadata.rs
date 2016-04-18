@@ -78,9 +78,9 @@ pub static DISASM_TABLE : [&'static str; 256] = [
     "ADD SP,#", "JP (HL)", "LD (nn),A", "Missing",
     "Missing", "Missing", "XOR *", "RST 28H",
     // 0xf0
-    "LDH A,($FF00+n)", "POP AF", "LD A,($FF00 + C)", "Missing",
+    "LDH A,($FF00+n)", "POP AF", "LD A,($FF00 + C)", "DI",
     "Missing", "PUSH AF", "OR #", "RST 30H",
-    "LD HL,SP+n", "LD SP,HL", "LD A,(nn)", "Missing",
+    "LD HL,SP+n", "LD SP,HL", "LD A,(nn)", "EI",
     "Missing", "Missing", "CP #", "RST 38H",
 ];
 

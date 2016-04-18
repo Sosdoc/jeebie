@@ -9,16 +9,16 @@ use jeebie::utils::{ is_set, swap_bit, set_bit, reset_bit };
 pub struct CPU<'a> {
     pub reg: Registers,
     pub mem: &'a mut MMU,
-    
+    pub interrupts_enabled: bool,
+
     // amount of machine cycles (as reported in timing tables) elapsed.
     cycles: u64,
-    
 }
 
 impl<'a> CPU<'a> {
     pub fn new(mmu: &'a mut MMU) -> CPU<'a> {
         let r = Registers::new();
-        CPU { reg: r, mem: mmu, cycles: 0}
+        CPU { reg: r, mem: mmu, cycles: 0, interrupts_enabled: false}
     }
 
     /// Executes one instruction, updating cycles and PC register accordingly.
@@ -27,13 +27,13 @@ impl<'a> CPU<'a> {
         // fetch
         let opcode = self.mem.read_b(self.reg.pc);
         self.reg.pc = self.reg.pc.wrapping_add(1);
-        
+
         let instr_timing = match opcode {
             0xCB => {
                 // 2-byte opcodes are prefixed with 0xCB
                 let second_byte = self.mem.read_b(self.reg.pc);
                 self.reg.pc = self.reg.pc.wrapping_add(1);
-                
+
                 CB_OPCODE_TABLE[second_byte as usize](self);
                 CB_TIMING_TABLE[second_byte as usize]
             },
@@ -46,23 +46,23 @@ impl<'a> CPU<'a> {
         self.cycles = self.cycles.wrapping_add(instr_timing as u64);
         instr_timing as u32
     }
-  
+
     /// Executes instructions until a single frame is produced.
     /// A frame is 144 scanlines, plus 10 vertical blanks, and scanlines are rendered every 456 machine cycles.
     /// This means one frame is ready every 154 * 456 = 70224 machine cycles.
     pub fn exec_one_frame(&mut self) -> &[(u8, u8, u8)]{
         // TODO: handle overflows
         let target = self.cycles + 70224;
-        
-        while self.cycles < target {            
+
+        while self.cycles < target {
             let cycles = self.exec();
             self.mem.gpu.emulate(cycles);
         }
-        
-        // frame is ready 
+
+        // frame is ready
         self.mem.gpu.get_framebuffer()
     }
-    
+
     fn combine_as_u16(high: u8, low: u8) -> u16 {
         // TODO: write tests for these things, when they fail they make you feel stupid.
         ((high as u16) << 8) | (low as u16)
@@ -129,39 +129,39 @@ impl<'a> CPU<'a> {
             _ => {},
         };
     }
-    
+
     // Checks the b bit of a register.
     // Zero flag is set if the bit is 0
-    // Sub reset, HC set 
+    // Sub reset, HC set
     pub fn bit_check(&mut self, b: usize, reg: Register8) {
         let set = is_set(self.get8(reg), b);
-        
+
         if set { self.reg.set_flag(Flags::Zero); };
         self.reg.clear_flag(Flags::Sub);
         self.reg.set_flag(Flags::HalfCarry);
     }
-    
+
     // Swaps the bit b in the specified register.
     // No flags are affected.
     pub fn bit_swap(&mut self, b: usize, reg: Register8) {
         let data = swap_bit(self.get8(reg), b);
         self.set8(reg, data);
     }
-    
+
     // Set the bit b in the specified register.
     // No flags are affected.
     pub fn bit_set(&mut self, b: usize, reg: Register8) {
         let data = set_bit(self.get8(reg), b);
         self.set8(reg, data);
     }
-    
+
     // Reset the bit b in the specified register.
     // No flags are affected.
     pub fn bit_reset(&mut self, b: usize, reg: Register8) {
         let data = reset_bit(self.get8(reg), b);
         self.set8(reg, data);
-    }  
-    
+    }
+
     // Swaps low and high nibble of an 8 bit value and sets flags.
     // Returns the result of the swap operation.
     pub fn compute_swap(&mut self, reg: Register8) {
@@ -185,44 +185,44 @@ impl<'a> CPU<'a> {
         let value = self.get16(reg2);
         self.set16(reg1, value);
     }
-    
+
     pub fn jump(&mut self, addr: u16) {
         self.reg.pc = addr;
     }
-    
+
     pub fn jump_flag(&mut self, flag: Flags, reg: Register16) {
         if self.reg.is_set(flag) {
             let addr = self.get16(reg);
             self.jump(addr);
         }
     }
-    
+
     pub fn jump_not_flag(&mut self, flag: Flags, reg: Register16) {
         if !self.reg.is_set(flag) {
             let addr = self.get16(reg);
             self.jump(addr);
         }
     }
-    
+
     /// Performs a return (RET) instruction if the specified flag is set.
     pub fn return_flag(&mut self, flag: Flags) {
         if self.reg.is_set(flag) {
             self.pop_stack(Register16::PC);
         }
     }
-    
+
     /// Performs a return (RET) instruction if the specified flag is not set.
     pub fn return_not_flag(&mut self, flag: Flags) {
         if !self.reg.is_set(flag) {
             self.pop_stack(Register16::PC);
         }
     }
-    
+
     // A restart (RST) will push the current address on the stack and jump to the provided address
     // addresses are encoded in the opcode, with a total of 8 possible ones.
-    pub fn restart(&mut self, addr: u16) {        
+    pub fn restart(&mut self, addr: u16) {
         self.push_stack(Register16::PC);
-        self.jump(addr); 
+        self.jump(addr);
     }
 
     // Computes the flags and result for a 16-bit ADD instruction.
@@ -459,7 +459,7 @@ impl<'a> CPU<'a> {
         let high = ((value >> 8) & 0x00FF) as u8;
         self.mem.write_b(addr, high);
     }
-    
+
     /// Pops a 16-bit value from the stack, MSB first, setting the value to the specified register.
     pub fn pop_stack(&mut self, dest: Register16) {
         let high = self.mem.read_b(self.reg.sp);
@@ -484,7 +484,7 @@ impl<'a> CPU<'a> {
     /// 16-bit immediates are read as two 8-bit immediates, the first being the LSB.
     pub fn get_immediate16(&mut self) -> u16 {
         let low = self.get_immediate8() as u16;
-        let high = self.get_immediate8() as u16;        
-        (high << 8) | low        
+        let high = self.get_immediate8() as u16;
+        (high << 8) | low
     }
 }

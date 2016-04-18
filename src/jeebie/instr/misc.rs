@@ -45,3 +45,13 @@ pub fn SWAP_l(cpu: &mut CPU) {
 pub fn SWAP_hl(cpu: &mut CPU) {
     cpu.compute_swap(RegisterAddress(HL));
 }
+
+// 'EI' FB 4
+pub fn EI(cpu: &mut CPU) {
+    cpu.interrupts_enabled = true;
+}
+
+// 'DI' F3 4
+pub fn FI(cpu: &mut CPU) {
+    cpu.interrupts_enabled = false;
+}
