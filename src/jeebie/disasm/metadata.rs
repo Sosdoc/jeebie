@@ -4,14 +4,14 @@
 pub static DISASM_TABLE : [&'static str; 256] = [
     // 0x00
     "NOP", "LD BC,nn", "LD (BC),A", "INC BC",
-    "INC B", "DEC B", "LD B,n", "Missing",
+    "INC B", "DEC B", "LD B,n", "RLCA",
     "LD (nn),SP", "ADD HL,BC", "LD A,(BC)", "DEC BC",
-    "INC C", "DEC C", "LD C,n", "Missing",
+    "INC C", "DEC C", "LD C,n", "RRCA",
     // 0x10
     "Missing", "LD DE,nn", "LD (DE),A", "INC DE",
-    "INC D", "DEC D", "LD D,n", "Missing",
+    "INC D", "DEC D", "LD D,n", "RLA",
     "JR n", "ADD HL,DE", "LD A,(DE)", "DEC DE",
-    "INC E", "DEC E", "LD E,n", "Missing",
+    "INC E", "DEC E", "LD E,n", "RRA",
     // 0x20
     "JR NZ,*", "LD HL,nn", "LDI (HL),A", "INC HL",
     "INC H", "DEC H", "LD H,n", "Missing",
@@ -86,15 +86,15 @@ pub static DISASM_TABLE : [&'static str; 256] = [
 
 pub static CB_DISASM_TABLE : [&'static str; 256] = [
     // 0x00
-    "Missing", "Missing", "Missing", "Missing",
-    "Missing", "Missing", "Missing", "Missing",
-    "Missing", "Missing", "Missing", "Missing",
-    "Missing", "Missing", "Missing", "Missing",
+    "RLC B", "RLC C", "RLC D", "RLC E",
+    "RLC H", "RLC L", "RLC (HL)", "RLC A",
+    "RRC B", "RRC C", "RRC D", "RRC E",
+    "RRC H", "RRC L", "RRC (HL)", "RRC A",
     // 0x10
-    "Missing", "Missing", "Missing", "Missing",
-    "Missing", "Missing", "Missing", "Missing",
-    "Missing", "Missing", "Missing", "Missing",
-    "Missing", "Missing", "Missing", "Missing",
+    "RL B", "RL C", "RL D", "RL E",
+    "RL H", "RL L", "RL (HL)", "RL A",
+    "RR B", "RR C", "RR D", "RR E",
+    "RR H", "RR L", "RR (HL)", "RR A",
     // 0x20
     "Missing", "Missing", "Missing", "Missing",
     "Missing", "Missing", "Missing", "Missing",

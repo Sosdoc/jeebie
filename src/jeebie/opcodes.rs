@@ -5,6 +5,7 @@ use jeebie::instr::bit::*;
 use jeebie::instr::jumps::*;
 use jeebie::instr::load::*;
 use jeebie::instr::misc::*;
+use jeebie::instr::rotates::*;
 use jeebie::instr::stack::*;
 
 use jeebie::core::cpu::CPU;
@@ -18,14 +19,14 @@ fn missing_cb(cpu: &mut CPU) { panic!("Opcode 0xCB{:02X} is not implemented!", c
 pub static OPCODE_TABLE : [OpcodeFunc; 256] = [
     // 0x00
               nop,      LD_bc_nn,      LD_BCm_A,        INC_bc,
-            INC_b,         DEC_b,        LD_B_n,       missing,
+            INC_b,         DEC_b,        LD_B_n,          RLCA,
         LD_nnm_sp,     ADD_hl_bc,      LD_a_BCm,        DEC_bc,
-            INC_c,         DEC_c,        LD_C_n,       missing,
+            INC_c,         DEC_c,        LD_C_n,          RRCA,
     // 0x10
           missing,      LD_de_nn,      LD_DEm_A,        INC_de,
-            INC_d,         DEC_d,        LD_D_n,       missing,
+            INC_d,         DEC_d,        LD_D_n,           RLA,
              JR_n,     ADD_hl_de,      LD_a_DEm,        DEC_de,
-            INC_e,         DEC_e,        LD_E_n,       missing,
+            INC_e,         DEC_e,        LD_E_n,           RRA,
     // 0x20
           JR_NZ_n,      LD_hl_nn,     LDI_HLm_a,        INC_hl,
             INC_h,         DEC_h,        LD_H_n,       missing,
@@ -100,15 +101,15 @@ pub static OPCODE_TABLE : [OpcodeFunc; 256] = [
 
 pub static CB_OPCODE_TABLE : [OpcodeFunc; 256] = [
     // 0x00
-       missing_cb,    missing_cb,    missing_cb,    missing_cb,
-       missing_cb,    missing_cb,    missing_cb,    missing_cb,
-       missing_cb,    missing_cb,    missing_cb,    missing_cb,
-       missing_cb,    missing_cb,    missing_cb,    missing_cb,
+            RLC_B,         RLC_C,         RLC_D,         RLC_E,
+            RLC_H,         RLC_L,       RLC_HLm,         RLC_A,
+            RRC_B,         RRC_C,         RRC_D,         RRC_E,
+            RRC_H,         RRC_L,       RRC_HLm,         RRC_A,
     // 0x10
-       missing_cb,    missing_cb,    missing_cb,    missing_cb,
-       missing_cb,    missing_cb,    missing_cb,    missing_cb,
-       missing_cb,    missing_cb,    missing_cb,    missing_cb,
-       missing_cb,    missing_cb,    missing_cb,    missing_cb,
+             RL_B,          RL_C,          RL_D,          RL_E,
+             RL_H,          RL_L,        RL_HLm,          RL_A,
+             RR_B,          RR_C,          RR_D,          RR_E,
+             RR_H,          RR_L,        RR_HLm,          RR_A,
     // 0x20
        missing_cb,    missing_cb,    missing_cb,    missing_cb,
        missing_cb,    missing_cb,    missing_cb,    missing_cb,

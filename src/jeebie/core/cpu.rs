@@ -228,6 +228,56 @@ impl<'a> CPU<'a> {
         self.jump(addr);
     }
 
+    // Rotate the register left, old bit 7 goes to carry flag (RLC).
+    pub fn rotate_left_carry(&mut self, reg: Register8) {
+        self.reg.clear_all_flags();
+
+        let value = self.get8(reg);
+        let result = value.rotate_left(1);
+        self.set8(reg, result);
+
+        if is_set(value, 7) { self.reg.set_flag(Flags::Carry); }
+        if result == 0 { self.reg.set_flag(Flags::Zero); }
+    }
+
+    // Rotate the register left through carry flag (RL).
+    pub fn rotate_left(&mut self, reg: Register8) {
+        let carry = if self.reg.is_set(Flags::Carry) { 1 } else { 0 };
+        self.reg.clear_all_flags();
+
+        let value = self.get8(reg);
+        let result = (value << 1) | carry;
+        self.set8(reg, result);
+
+        if is_set(value, 7) { self.reg.set_flag(Flags::Carry); }
+        if result == 0 { self.reg.set_flag(Flags::Zero); }
+    }
+
+    // Rotate the register right, old bit 0 goes to carry flag (RRC).
+    pub fn rotate_right_carry(&mut self, reg: Register8) {
+        self.reg.clear_all_flags();
+
+        let value = self.get8(reg);
+        let result = value.rotate_right(1);
+        self.set8(reg, result);
+
+        if is_set(value, 0) { self.reg.set_flag(Flags::Carry); }
+        if result == 0 { self.reg.set_flag(Flags::Zero); }
+    }
+
+    // Rotate the register right through carry flag (RR).
+    pub fn rotate_right(&mut self, reg: Register8) {
+        let carry = if self.reg.is_set(Flags::Carry) { 1 } else { 0 };
+        self.reg.clear_all_flags();
+
+        let value = self.get8(reg);
+        let result = (value >> 1) | carry;
+        self.set8(reg, result);
+
+        if is_set(value, 0) { self.reg.set_flag(Flags::Carry); }
+        if result == 0 { self.reg.set_flag(Flags::Zero); }
+    }
+
     // Computes the flags and result for a 16-bit ADD instruction.
     // The result is put in the specified `reg1`.
     pub fn compute_add16(&mut self, reg1: Register16, reg2: Register16) {
