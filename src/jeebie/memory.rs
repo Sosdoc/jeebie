@@ -12,8 +12,10 @@ use jeebie::bootrom::DMG_BOOTROM;
 /// The Memory Management Unit.
 /// Provides access to all mapped memory in the system, including I/O and graphics.
 pub struct MMU {
-    pub loading_bios: Cell<bool>,
+    // TODO: MMU should own RAM/High RAM (8k + 256 bytes), maybe some registers.
     data: [u8; 65536],
+    loading_bios: Cell<bool>,
+
     pub gpu: GPU,
 }
 
@@ -76,13 +78,13 @@ impl MMU {
             0xFF00...0xFF4B => {
                 match addr & 0xFF {
                     0x40 | 0x42 | 0x43 | 0x44 | 0x47 => self.gpu.read_register(addr as usize),
-                    _ => 0,
+                    _ => unimplemented!(),
                 }
             },
             // High RAM (zero page), used with LDH instructions
-            0xFF80...0xFFFE => 0,
+            0xFF80...0xFFFE => self.data[addr as usize],
             // Interrupt Enable register
-            0xFFFF => 0,
+            0xFFFF => unimplemented!(),
 
             _ => panic!("tried to read at unknown address: {:04x}", addr),
         }
@@ -125,7 +127,7 @@ impl MMU {
                 }
             },
             // High RAM (zero page), used with LDH instructions
-            0xFF80...0xFFFE => unimplemented!(),
+            0xFF80...0xFFFE => { self.data[addr as usize] = data; },
             // Interrupt Enable register
             0xFFFF => unimplemented!(),
 
