@@ -27,7 +27,7 @@ impl<'a> CPU<'a> {
     pub fn exec(&mut self) -> u32 {
         // disasm string
         println!("{}", get_instruction_str(self));
-
+        
         // fetch
         let opcode = self.mem.read_b(self.reg.pc);
         self.reg.pc = self.reg.pc.wrapping_add(1);
@@ -521,7 +521,7 @@ impl<'a> CPU<'a> {
         let low = self.mem.read_b(self.reg.sp);
         self.reg.sp = self.reg.sp.wrapping_add(1);
 
-        let result = ((high as u16) << 8) & (low as u16);
+        let result = ((high as u16) << 8) | (low as u16);
         self.set16(dest, result);
     }
 

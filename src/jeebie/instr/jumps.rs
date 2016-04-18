@@ -81,7 +81,7 @@ pub fn JR_C_n(cpu: &mut CPU) {
 // 'CALL nn' CD 12
 pub fn CALL_nn(cpu: &mut CPU) {
     let call_addr = cpu.get16(Register16::Immediate16);
-    let next_instr = cpu.reg.pc.wrapping_add(1);
+    let next_instr = cpu.reg.pc;
     cpu.push_stack(Register16::Value16(next_instr));
     cpu.jump(call_addr);
 }
