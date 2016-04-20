@@ -1,6 +1,6 @@
 /// Module for jump and related instructions (call, return, reset)
 use jeebie::core::cpu::CPU;
-use jeebie::registers::{ Flags, Register16 };
+use jeebie::core::registers::{ Flags, Register16 };
 
 // 'JP nn' C3 12
 pub fn JP_nn(cpu: &mut CPU) {

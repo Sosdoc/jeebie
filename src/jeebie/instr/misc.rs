@@ -1,7 +1,7 @@
 /// Module for miscellaneous instructions
 use jeebie::core::cpu::CPU;
-use jeebie::registers::Register8::*;
-use jeebie::registers::Register16::*;
+use jeebie::core::registers::Register8::*;
+use jeebie::core::registers::Register16::*;
 
 // 'NOP' 00 4
 pub fn nop(cpu: &mut CPU) {}

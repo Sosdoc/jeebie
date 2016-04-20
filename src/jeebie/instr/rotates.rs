@@ -1,7 +1,7 @@
 //! Rotates & Shifts
 use jeebie::core::cpu::CPU;
-use jeebie::registers::Register8::*;
-use jeebie::registers::Register16::*;
+use jeebie::core::registers::Register8::*;
+use jeebie::core::registers::Register16::*;
 
 // 'RLCA' 07 4
 pub fn RLCA(cpu: &mut CPU) {

@@ -1,7 +1,7 @@
 use jeebie::core::cpu::CPU;
 use jeebie::memory::MMU;
-use jeebie::registers::*;
-use jeebie::registers::Register8::*;
+use jeebie::core::registers::*;
+use jeebie::core::registers::Register8::*;
 
 #[test]
 fn compute_add_8_bit() {

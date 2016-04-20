@@ -1,8 +1,8 @@
 /// Module for bit operations (checking, set/reset, etc.)
 
 use jeebie::core::cpu::CPU;
-use jeebie::registers::Register8::*;
-use jeebie::registers::Register16::HL;
+use jeebie::core::registers::Register8::*;
+use jeebie::core::registers::Register16::HL;
 
 
 // 'BIT 0,A' CB 47 8

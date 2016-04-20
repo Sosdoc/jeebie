@@ -1,6 +1,6 @@
 use jeebie::core::cpu::CPU;
-use jeebie::registers::Register8::*;
-use jeebie::registers::Register16::*;
+use jeebie::core::registers::Register8::*;
+use jeebie::core::registers::Register16::*;
 
 // 'LD B,n' 06 8
 pub fn LD_B_n(cpu: &mut CPU) {

@@ -1,8 +1,8 @@
 /// Module for 8 bit arithmetic (ALU instructions)
 
 use jeebie::core::cpu::CPU;
-use jeebie::registers::Register8::*;
-use jeebie::registers::Register16::*;
+use jeebie::core::registers::Register8::*;
+use jeebie::core::registers::Register16::*;
 
 // 'ADD A,A' 87 4
 pub fn ADD_a_a(cpu: &mut CPU) {

@@ -1,5 +1,5 @@
 use jeebie::core::cpu::CPU;
-use jeebie::registers::Register16::*;
+use jeebie::core::registers::Register16::*;
 
 // 'PUSH AF' F5 16
 pub fn PUSH_af(cpu: &mut CPU) {

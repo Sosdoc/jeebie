@@ -1,5 +1,5 @@
 use jeebie::memory::MMU;
-use jeebie::registers::*;
+use jeebie::core::registers::*;
 
 use jeebie::opcodes::{ CB_OPCODE_TABLE, OPCODE_TABLE };
 use jeebie::timings::{ CB_TIMING_TABLE, TIMING_TABLE };
@@ -27,7 +27,7 @@ impl<'a> CPU<'a> {
     pub fn exec(&mut self) -> u32 {
         // disasm string
         println!("{}", get_instruction_str(self));
-        
+
         // fetch
         let opcode = self.mem.read_b(self.reg.pc);
         self.reg.pc = self.reg.pc.wrapping_add(1);
