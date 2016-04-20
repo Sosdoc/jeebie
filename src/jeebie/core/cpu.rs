@@ -1,8 +1,8 @@
 use jeebie::memory::MMU;
 use jeebie::core::registers::*;
 
-use jeebie::opcodes::{ CB_OPCODE_TABLE, OPCODE_TABLE };
-use jeebie::timings::{ CB_TIMING_TABLE, TIMING_TABLE };
+use jeebie::instr::opcodes::{ CB_OPCODE_TABLE, OPCODE_TABLE };
+use jeebie::instr::timings::{ CB_TIMING_TABLE, TIMING_TABLE };
 use jeebie::utils::{ is_set, swap_bit, set_bit, reset_bit };
 use jeebie::disasm::get_instruction_str;
 

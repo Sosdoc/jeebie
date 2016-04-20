@@ -4,8 +4,6 @@
 
 pub mod core;
 pub mod memory;
-pub mod opcodes;
-pub mod timings;
 pub mod instr;
 pub mod cart;
 pub mod frontend;

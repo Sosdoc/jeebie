@@ -67,7 +67,7 @@ def process_opcode_file(file_name):
 
     module_name = os.path.splitext(os.path.basename(file_name))[0]
 
-    if module_name != 'mod':
+    if module_name not in ['mod', 'opcodes', 'timings']:
         MODULES.append(module_name)
 
 
@@ -187,10 +187,10 @@ if __name__ == "__main__":
     for src_file in glob.glob('src/jeebie/instr/*.rs'):
         process_opcode_file(src_file)
 
-    with open('src/jeebie/opcodes.rs', 'w') as out_file:
+    with open('src/jeebie/instr/opcodes.rs', 'w') as out_file:
         out_file.writelines(build_output())
 
-    with open('src/jeebie/timings.rs', 'w') as out_file:
+    with open('src/jeebie/instr/timings.rs', 'w') as out_file:
         out_file.writelines(build_timings())
 
     with open('src/jeebie/disasm/metadata.rs', 'w') as out_file:
