@@ -109,3 +109,100 @@ Racer is a bit of a sore spot as it can't always give information (it can't do
 much with a `RefCell` for example), fortunately, rustc will include full
 support for autocompletion (and IDEs) later on, check on https://areweideyet.com/
 to know about current progress.
+
+### The CPU
+
+The core of any system! The CPU is modeled as a struct (aptly named `CPU`) which mainly holds data on its registers,
+a reference to a struct used to access memory (discussed later) and some more information needed
+during execution, like the amount of elapsed clock cycles.
+
+#### Registers
+
+An important part of the CPU are its `Registers`, a struct that holds all the info on them. The GB CPU has a total
+of 10 registers, some of them can be accessed both as 8 or 16 bit registers. Here's a list:
+
+- AF: Accumulator and Flags
+- BC: General purpose
+- DE: General purpose
+- HL: General purpose
+- PC: Program counter
+- SP: Stack pointer
+
+For example, the registers B and C can be accessed separately, or as a single 16 bit register where B is the 8 high bits
+and C is the low 8 bits.
+Register F cannot be accessed directly, as it holds the flags, set by instructions. PC and SP are generally accessible only
+as 16 bit registers.
+
+Here's a neat little trick employed in the emulator for accessing registers.
+
+We have the basic `Registers` struct that holds all the register data:
+
+```
+pub struct Registers {
+    pub a: u8, pub f: u8,
+    pub b: u8, pub c: u8,
+    pub d: u8, pub e: u8,
+    pub h: u8, pub l: u8,
+
+    pub pc: u16, // program counter
+    pub sp: u16, // stack pointer
+}
+```
+
+Then, two types of enums, that represent 8 and 16 bit registers:
+
+```
+pub enum Register8 {
+    A, B, C, D, E, H, L,
+    RegisterAddress(Register16),
+    Address(u16),
+    Immediate,
+    Value8(u8)
+}
+
+pub enum Register16 {
+    AF, BC, DE, HL, SP, PC,
+    Immediate16,
+    Value16(u16)
+}
+```
+
+With this, any register value can be retrieved (using a function) and specifying only the name of
+a register. This makes writing instructions easier by abstracting the read/write logic for registers.
+
+But wait! There's also a bunch of odd declarations... What is a `Address(u16)` and why is it an 8 bit register?
+Well, an address is 16 bit wide but it points to an 8 bit value in memory, so, with this enum variant we can treat
+any value in memory just like a register, and use it in functions that accept a register!
+Also, this allows to keep read/write logic separated from functions that implement instructions on registers... Just take a
+look at the `alu8.rs` file and you'll see how handy it is!
+
+These are the **algebraic enums** (or discriminated unions, variants, whatever you want to call them, etc.) of Rust in
+action, which allow us to embed extra data in each enum variant.
+
+You can also see that we can specify a 16 bit register and use it as a pointer to memory (with `RegisterAddress`)
+or even retrieve and immediate value (which will also automatically increase the PC).
+
+the read/write logic is implemented in the `CPU` struct with some simple methods such as this:
+
+```
+pub fn get8(&mut self, reg: Register8) -> u8 {
+    match reg {
+        Register8::A => self.reg.a,
+        Register8::B => self.reg.b,
+        Register8::C => self.reg.c,
+        Register8::D => self.reg.d,
+        Register8::E => self.reg.e,
+        Register8::H => self.reg.h,
+        Register8::L => self.reg.l,
+        Register8::RegisterAddress(r) => {
+            let addr = self.get16(r);
+            self.mem.read_b(addr)
+        },
+        Register8::Address(addr) => self.mem.read_b(addr),
+        Register8::Immediate => self.get_immediate8(),
+        Register8::Value8(n) => n,
+    }
+}
+```
+
+Here, pattern matching plays well with it and we can cover all cases with appropriate logic.
