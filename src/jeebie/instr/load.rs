@@ -366,7 +366,7 @@ pub fn LD_a_nnm(cpu: &mut CPU) {
     cpu.load_rr(A, RegisterAddress(Immediate16));
 }
 
-// 'LD A,#' 3E 8
+// 'LD A,n' 3E 8
 pub fn LD_a_n(cpu: &mut CPU) {
     cpu.load_rr(A, Immediate);
 }

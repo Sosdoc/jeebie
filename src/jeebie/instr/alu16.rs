@@ -23,7 +23,7 @@ pub fn ADD_hl_sp(cpu: &mut CPU) {
     cpu.compute_add16(HL, SP);
 }
 
-// 'ADD SP,#' E8 16
+// 'ADD SP,*' E8 16
 pub fn ADD_sp_n(cpu: &mut CPU) {
     let value = Value16(cpu.get_immediate8() as u16);
     cpu.compute_add16(SP, value);

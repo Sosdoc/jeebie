@@ -1,9 +1,11 @@
 //! This module contains structs and data related to disassembly of gameboy code.
 
 pub mod metadata;
+pub mod disassembler;
 
 use jeebie::core::cpu::CPU;
 use jeebie::disasm::metadata::{ CB_DISASM_TABLE, DISASM_TABLE };
+
 
 /// Returns an instruction string with the appropriate immediate
 /// values filled in.

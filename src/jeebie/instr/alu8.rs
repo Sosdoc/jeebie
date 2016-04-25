@@ -44,7 +44,7 @@ pub fn ADD_a_hlm(cpu: &mut CPU) {
     cpu.compute_add(A, RegisterAddress(HL));
 }
 
-// 'ADD A,#' C6 8
+// 'ADD A,*' C6 8
 pub fn ADD_a_n(cpu: &mut CPU) {
     cpu.compute_add(A, Immediate);
 }
@@ -89,7 +89,7 @@ pub fn ADC_a_hlm(cpu: &mut CPU) {
     cpu.compute_adc(A, RegisterAddress(HL));
 }
 
-// 'ADC A,#' CE 8
+// 'ADC A,*' CE 8
 pub fn ADC_a_n(cpu: &mut CPU) {
     cpu.compute_adc(A, Immediate);
 }
@@ -134,7 +134,7 @@ pub fn SUB_a_hlm(cpu: &mut CPU) {
     cpu.compute_sub(RegisterAddress(HL));
 }
 
-// 'SUB #' D6 8
+// 'SUB *' D6 8
 pub fn SUB_a_n(cpu: &mut CPU) {
     cpu.compute_sub(Immediate);
 }
@@ -179,7 +179,7 @@ pub fn SBC_a_hlm(cpu: &mut CPU) {
     cpu.compute_sbc(RegisterAddress(HL));
 }
 
-// 'SBC A,#' ?? ? --- manual has no opcode for this... leave it
+// 'SBC A,*' ?? ? --- manual has no opcode for this... leave it
 pub fn SBC_a_n(cpu: &mut CPU) {
     cpu.compute_sbc(Immediate);
 }
@@ -224,7 +224,7 @@ pub fn AND_hlm(cpu: &mut CPU) {
     cpu.compute_and(RegisterAddress(HL));
 }
 
-// 'AND #' E6 8
+// 'AND *' E6 8
 pub fn AND_n(cpu: &mut CPU) {
     cpu.compute_and(Immediate);
 }
@@ -269,7 +269,7 @@ pub fn OR_hlm(cpu: &mut CPU) {
     cpu.compute_or(RegisterAddress(HL));
 }
 
-// 'OR #' F6 8
+// 'OR *' F6 8
 pub fn OR_n(cpu: &mut CPU) {
     cpu.compute_or(Immediate);
 }
@@ -359,7 +359,7 @@ pub fn CP_hlm(cpu: &mut CPU) {
     cpu.compute_cp(RegisterAddress(HL));
 }
 
-// 'CP #' FE 8
+// 'CP *' FE 8
 pub fn CP_n(cpu: &mut CPU) {
     cpu.compute_cp(Immediate);
 }

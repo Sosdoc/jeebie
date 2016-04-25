@@ -21,7 +21,7 @@ pub static DISASM_TABLE : [&'static str; 256] = [
     "JR NC,*", "LD SP,nn", "LDD (HL),A", "INC SP",
     "INC (HL)", "DEC (HL)", "LD (HL),n", "Missing",
     "JR C,*", "ADD HL,SP", "LDD A,(HL)", "DEC SP",
-    "INC A", "DEC A", "LD A,#", "Missing",
+    "INC A", "DEC A", "LD A,n", "Missing",
     // 0x40
     "LD B,B", "LD B,C", "LD B,D", "LD B,E",
     "LD B,H", "LD B,L", "LD B,(HL)", "LD B,A",
@@ -64,24 +64,24 @@ pub static DISASM_TABLE : [&'static str; 256] = [
     "CP H", "CP L", "CP (HL)", "CP A",
     // 0xc0
     "RET NZ", "POP BC", "JP NZ,nn", "JP nn",
-    "CALL NZ,nn", "PUSH BC", "ADD A,#", "RST 00H",
+    "CALL NZ,nn", "PUSH BC", "ADD A,*", "RST 00H",
     "RET Z", "RET", "JP Z,nn", "Missing",
-    "CALL Z,nn", "CALL nn", "ADC A,#", "RST 08H",
+    "CALL Z,nn", "CALL nn", "ADC A,*", "RST 08H",
     // 0xd0
     "RET NC", "POP DE", "JP NC,nn", "Missing",
-    "CALL NC,nn", "PUSH DE", "SUB #", "RST 10H",
+    "CALL NC,nn", "PUSH DE", "SUB *", "RST 10H",
     "RET C", "Missing", "JP C,nn", "Missing",
     "CALL C,nn", "Missing", "Missing", "RST 18H",
     // 0xe0
     "LDH ($FF00+n),A", "POP HL", "LD ($FF00+C),A", "Missing",
-    "Missing", "PUSH HL", "AND #", "RST 20H",
-    "ADD SP,#", "JP (HL)", "LD (nn),A", "Missing",
+    "Missing", "PUSH HL", "AND *", "RST 20H",
+    "ADD SP,*", "JP (HL)", "LD (nn),A", "Missing",
     "Missing", "Missing", "XOR *", "RST 28H",
     // 0xf0
     "LDH A,($FF00+n)", "POP AF", "LD A,($FF00 + C)", "DI",
-    "Missing", "PUSH AF", "OR #", "RST 30H",
+    "Missing", "PUSH AF", "OR *", "RST 30H",
     "LD HL,SP+n", "LD SP,HL", "LD A,(nn)", "EI",
-    "Missing", "Missing", "CP #", "RST 38H",
+    "Missing", "Missing", "CP *", "RST 38H",
 ];
 
 pub static CB_DISASM_TABLE : [&'static str; 256] = [
