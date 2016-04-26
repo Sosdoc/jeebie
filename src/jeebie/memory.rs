@@ -26,7 +26,9 @@ impl fmt::Debug for MMU {
 }
 
 impl MMU {
-    pub fn new() -> MMU {
+
+    /// Creates a new memory controller with no program loaded, except for the bootrom.
+    pub fn new() -> Self {
         MMU {
             loading_bios: Cell::new(true),
             data: [0; 65536],
@@ -34,7 +36,14 @@ impl MMU {
         }
     }
 
-    pub fn load_rom(&mut self, cart: &Cartridge) {
+    /// Creates a memory controller with the specified cartridge loaded.
+    pub fn new_with_rom(cart: &Cartridge) -> Self {
+        let mut mmu = MMU::new();
+        mmu.load_rom(cart);
+        mmu
+    }
+
+    fn load_rom(&mut self, cart: &Cartridge) {
         for i in 0..cart.size {
             self.data[i] = cart.data[i];
         }
