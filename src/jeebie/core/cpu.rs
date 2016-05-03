@@ -3,7 +3,7 @@ use jeebie::core::registers::*;
 
 use jeebie::instr::opcodes::{ CB_OPCODE_TABLE, OPCODE_TABLE };
 use jeebie::instr::timings::{ CB_TIMING_TABLE, TIMING_TABLE };
-use jeebie::utils::{ is_set, swap_bit, set_bit, reset_bit };
+use jeebie::utils::{ is_set, swap_bit, set_bit, reset_bit, combine_as_u16 };
 use jeebie::disasm::get_instruction_str;
 
 #[derive(Debug)]
@@ -67,11 +67,6 @@ impl<'a> CPU<'a> {
         self.mem.gpu.get_framebuffer()
     }
 
-    fn combine_as_u16(high: u8, low: u8) -> u16 {
-        // TODO: write tests for these things, when they fail they make you feel stupid.
-        ((high as u16) << 8) | (low as u16)
-    }
-
     pub fn get8(&mut self, reg: Register8) -> u8 {
         match reg {
             Register8::A => self.reg.a,
@@ -111,10 +106,10 @@ impl<'a> CPU<'a> {
 
     pub fn get16(&mut self, reg: Register16) -> u16 {
         match reg {
-            Register16::AF => CPU::combine_as_u16(self.reg.a, self.reg.f),
-            Register16::BC => CPU::combine_as_u16(self.reg.b, self.reg.c),
-            Register16::DE => CPU::combine_as_u16(self.reg.d, self.reg.e),
-            Register16::HL => CPU::combine_as_u16(self.reg.h, self.reg.l),
+            Register16::AF => combine_as_u16(self.reg.a, self.reg.f),
+            Register16::BC => combine_as_u16(self.reg.b, self.reg.c),
+            Register16::DE => combine_as_u16(self.reg.d, self.reg.e),
+            Register16::HL => combine_as_u16(self.reg.h, self.reg.l),
             Register16::SP => self.reg.sp,
             Register16::PC => self.reg.pc,
             Register16::Immediate16 => self.get_immediate16(),
@@ -521,8 +516,7 @@ impl<'a> CPU<'a> {
         let low = self.mem.read_b(self.reg.sp);
         self.reg.sp = self.reg.sp.wrapping_add(1);
 
-        let result = ((high as u16) << 8) | (low as u16);
-        self.set16(dest, result);
+        self.set16(dest, combine_as_u16(high, low));
     }
 
     /// Retrieves an immediate 8-bit value.
@@ -536,8 +530,8 @@ impl<'a> CPU<'a> {
     /// Retrieves an immediate 16-bit value.
     /// 16-bit immediates are read as two 8-bit immediates, the first being the LSB.
     pub fn get_immediate16(&mut self) -> u16 {
-        let low = self.get_immediate8() as u16;
-        let high = self.get_immediate8() as u16;
-        (high << 8) | low
+        let low = self.get_immediate8();
+        let high = self.get_immediate8();
+        combine_as_u16(high, low)
     }
 }
