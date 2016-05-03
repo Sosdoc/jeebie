@@ -140,6 +140,50 @@ fn inc_test() {
 }
 
 #[test]
+fn dec_test() {
+    let mut mmu = MMU::new();
+    let mut cpu = CPU::new(&mut mmu);
+
+    // NOTE: Carry flag is unmodified
+    // simple dec
+    cpu.set8(A, 0x9);
+    cpu.compute_dec(A);
+
+    assert_eq!(0x8, cpu.get8(A));
+    assert!(cpu.reg.is_set(Sub));
+    assert!(!cpu.reg.is_set(Zero));
+    assert!(!cpu.reg.is_set(HalfCarry));
+
+    // zero
+    cpu.set8(A, 1);
+    cpu.compute_dec(A);
+
+    assert_eq!(0, cpu.get8(A));
+    assert!(cpu.reg.is_set(Zero));
+    assert!(!cpu.reg.is_set(HalfCarry));
+    assert!(cpu.reg.is_set(Sub));
+
+    // halfcarry
+    cpu.set8(A, 0x10);
+    cpu.compute_dec(A);
+
+    assert_eq!(0x0F, cpu.get8(A));
+    assert!(!cpu.reg.is_set(Zero));
+    assert!(cpu.reg.is_set(HalfCarry));
+    assert!(cpu.reg.is_set(Sub));
+
+    // internal RAM, will be initialized to 0
+    cpu.set16(HL, 0xC000);
+    cpu.compute_dec(RegisterAddress(HL));
+
+    assert_eq!(0xFF, cpu.get8(RegisterAddress(HL)));
+    // HC should be set
+    assert!(!cpu.reg.is_set(Zero));
+    assert!(cpu.reg.is_set(Sub));
+    assert!(cpu.reg.is_set(HalfCarry));
+}
+
+#[test]
 fn bit_check_test() {
     let mut mmu = MMU::new();
     let mut cpu = CPU::new(&mut mmu);
@@ -183,4 +227,126 @@ fn swap_test() {
     assert!(!cpu.reg.is_set(Sub));
     assert!(!cpu.reg.is_set(HalfCarry));
     assert!(!cpu.reg.is_set(Carry));
+}
+
+#[test]
+fn and_test() {
+    let mut mmu = MMU::new();
+    let mut cpu = CPU::new(&mut mmu);
+
+    cpu.set8(A, 0x0F);
+    cpu.set8(B, 0xAB);
+    cpu.compute_and(B);
+
+    assert_eq!(0x0B, cpu.get8(A));
+    // Z 0 1 0
+    assert!(!cpu.reg.is_set(Zero));
+    assert!(!cpu.reg.is_set(Sub));
+    assert!(cpu.reg.is_set(HalfCarry));
+    assert!(!cpu.reg.is_set(Carry));
+
+    // internal RAM, will be initialized to 0
+    cpu.set16(HL, 0xC000);
+    cpu.compute_and(RegisterAddress(HL));
+
+    assert_eq!(0, cpu.get8(A));
+    // Zero should be set
+    assert!(cpu.reg.is_set(Zero));
+    assert!(!cpu.reg.is_set(Sub));
+    assert!(cpu.reg.is_set(HalfCarry));
+    assert!(!cpu.reg.is_set(Carry));
+}
+
+#[test]
+fn or_test() {
+    let mut mmu = MMU::new();
+    let mut cpu = CPU::new(&mut mmu);
+
+    cpu.set8(A, 0x0B);
+    cpu.set8(B, 0xA0);
+    cpu.compute_or(B);
+
+    assert_eq!(0xAB, cpu.get8(A));
+    // Z 0 0 0
+    assert!(!cpu.reg.is_set(Zero));
+    assert!(!cpu.reg.is_set(Sub));
+    assert!(!cpu.reg.is_set(HalfCarry));
+    assert!(!cpu.reg.is_set(Carry));
+
+    // internal RAM, will be initialized to 0
+    cpu.set8(A, 0);
+    cpu.set16(HL, 0xC000);
+    cpu.compute_or(RegisterAddress(HL));
+
+    assert_eq!(0, cpu.get8(A));
+    // Zero should be set
+    assert!(cpu.reg.is_set(Zero));
+    assert!(!cpu.reg.is_set(Sub));
+    assert!(!cpu.reg.is_set(HalfCarry));
+    assert!(!cpu.reg.is_set(Carry));
+}
+
+#[test]
+fn xor_test() {
+    let mut mmu = MMU::new();
+    let mut cpu = CPU::new(&mut mmu);
+
+    cpu.set8(A, 0x21);
+    cpu.set8(B, 0x41);
+    cpu.compute_xor(B);
+
+    assert_eq!(0x60, cpu.get8(A));
+    // Z 0 0 0
+    assert!(!cpu.reg.is_set(Zero));
+    assert!(!cpu.reg.is_set(Sub));
+    assert!(!cpu.reg.is_set(HalfCarry));
+    assert!(!cpu.reg.is_set(Carry));
+
+    cpu.set8(A, 0xFF);
+    cpu.set8(B, 0xFF);
+    cpu.compute_xor(B);
+
+    assert_eq!(0, cpu.get8(A));
+    // Z 0 0 0
+    assert!(cpu.reg.is_set(Zero));
+    assert!(!cpu.reg.is_set(Sub));
+    assert!(!cpu.reg.is_set(HalfCarry));
+    assert!(!cpu.reg.is_set(Carry));
+
+    // internal RAM, will be initialized to 0
+    cpu.set8(A, 0);
+    cpu.set16(HL, 0xC000);
+    cpu.compute_xor(RegisterAddress(HL));
+
+    assert_eq!(0, cpu.get8(A));
+    // Zero should be set
+    assert!(cpu.reg.is_set(Zero));
+    assert!(!cpu.reg.is_set(Sub));
+    assert!(!cpu.reg.is_set(HalfCarry));
+    assert!(!cpu.reg.is_set(Carry));
+}
+
+#[test]
+fn cpu_stack_test() {
+    let mut mmu = MMU::new();
+    let mut cpu = CPU::new(&mut mmu);
+
+    cpu.set16(SP, 0xFFFE);
+    cpu.push_stack(Value16(0xCAFE));
+    cpu.push_stack(Value16(0xBABE));
+    cpu.push_stack(Value16(0xFADE));
+
+    assert_eq!(0xFFF8, cpu.get16(SP));
+
+    cpu.pop_stack(HL);
+    assert_eq!(0xFFFA, cpu.get16(SP));
+    assert_eq!(0xFADE, cpu.get16(HL));
+
+    cpu.pop_stack(DE);
+    assert_eq!(0xFFFC, cpu.get16(SP));
+    assert_eq!(0xBABE, cpu.get16(DE));
+
+    cpu.pop_stack(BC);
+    assert_eq!(0xFFFE, cpu.get16(SP));
+    assert_eq!(0xCAFE, cpu.get16(BC));
 }
