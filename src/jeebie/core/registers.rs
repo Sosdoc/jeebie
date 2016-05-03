@@ -74,13 +74,18 @@ impl Registers {
         self.f &= !(flag as u8);
     }
 
+    pub fn set_or_clear(&mut self, flag: Flags, condition: bool) {
+        if condition {
+            self.set_flag(flag);
+        } else {
+            self.clear_flag(flag);
+        }
+    }
+
     /// Returns true if the selected flag is set.
     pub fn is_set(&self, flag: Flags) -> bool {
         let flag_value = flag as u8;
         (self.f & flag_value) == flag_value
     }
-
-    fn combine_as_u16(high: u8, low: u8) -> u16 {
-        ((high as u16) << 8) & (low as u16)
-    }
 }
+

@@ -1,5 +1,6 @@
 use jeebie::memory::MMU;
 use jeebie::core::registers::*;
+use jeebie::core::registers::Flags::*;
 
 use jeebie::instr::opcodes::{ CB_OPCODE_TABLE, OPCODE_TABLE };
 use jeebie::instr::timings::{ CB_TIMING_TABLE, TIMING_TABLE };
@@ -133,10 +134,10 @@ impl<'a> CPU<'a> {
     // Zero flag is set if the bit is 0
     // Sub reset, HC set
     pub fn bit_check(&mut self, b: usize, reg: Register8) {
-        let set = is_set(self.get8(reg), b);
-        if !set { self.reg.set_flag(Flags::Zero) } else { self.reg.clear_flag(Flags::Zero) };
-        self.reg.clear_flag(Flags::Sub);
-        self.reg.set_flag(Flags::HalfCarry);
+        let is_zero = !is_set(self.get8(reg), b);
+        self.reg.set_or_clear(Zero, is_zero);
+        self.reg.clear_flag(Sub);
+        self.reg.set_flag(HalfCarry);
     }
 
     // Swaps the bit b in the specified register.
@@ -167,10 +168,7 @@ impl<'a> CPU<'a> {
         let result = (value << 4) | (value >> 4);
 
         self.reg.clear_all_flags();
-        if result == 0 {
-            self.reg.set_flag(Flags::Zero);
-        }
-
+        self.reg.set_or_clear(Zero, result == 0);
         self.set8(reg, result);
     }
 
@@ -231,21 +229,21 @@ impl<'a> CPU<'a> {
         let result = value.rotate_left(1);
         self.set8(reg, result);
 
-        if is_set(value, 7) { self.reg.set_flag(Flags::Carry); }
-        if result == 0 { self.reg.set_flag(Flags::Zero); }
+        self.reg.set_or_clear(Carry, is_set(value, 7));
+        self.reg.set_or_clear(Zero, result == 0);
     }
 
     // Rotate the register left through carry flag (RL).
     pub fn rotate_left(&mut self, reg: Register8) {
-        let carry = if self.reg.is_set(Flags::Carry) { 1 } else { 0 };
+        let carry = if self.reg.is_set(Carry) { 1 } else { 0 };
         self.reg.clear_all_flags();
 
         let value = self.get8(reg);
         let result = (value << 1) | carry;
         self.set8(reg, result);
 
-        if is_set(value, 7) { self.reg.set_flag(Flags::Carry); }
-        if result == 0 { self.reg.set_flag(Flags::Zero); }
+        self.reg.set_or_clear(Carry, is_set(value, 7));
+        self.reg.set_or_clear(Zero, result == 0);
     }
 
     // Rotate the register right, old bit 0 goes to carry flag (RRC).
@@ -256,44 +254,30 @@ impl<'a> CPU<'a> {
         let result = value.rotate_right(1);
         self.set8(reg, result);
 
-        if is_set(value, 0) { self.reg.set_flag(Flags::Carry); }
-        if result == 0 { self.reg.set_flag(Flags::Zero); }
+        self.reg.set_or_clear(Carry, is_set(value, 0));
+        self.reg.set_or_clear(Zero, result == 0);
     }
 
     // Rotate the register right through carry flag (RR).
     pub fn rotate_right(&mut self, reg: Register8) {
-        let carry = if self.reg.is_set(Flags::Carry) { 1 } else { 0 };
+        let carry = if self.reg.is_set(Carry) { 1 } else { 0 };
         self.reg.clear_all_flags();
 
         let value = self.get8(reg);
         let result = (value >> 1) | carry;
         self.set8(reg, result);
 
-        if is_set(value, 0) { self.reg.set_flag(Flags::Carry); }
-        if result == 0 { self.reg.set_flag(Flags::Zero); }
+        self.reg.set_or_clear(Carry, is_set(value, 0));
+        self.reg.set_or_clear(Zero, result == 0);
     }
 
     // Computes the flags and result for a 16-bit ADD instruction.
     // The result is put in the specified `reg1`.
+    // No flags are affected.
     pub fn compute_add16(&mut self, reg1: Register16, reg2: Register16) {
         let lhs = self.get16(reg1);
         let rhs = self.get16(reg2);
         let result = lhs.wrapping_add(rhs);
-
-        // flag zero is not affected, sub is reset
-        self.reg.clear_flag(Flags::Sub);
-
-        // checked add returns None if add overflows (carry from bit 15)
-        if let None = lhs.checked_add(rhs) {
-            self.reg.set_flag(Flags::Carry);
-        }
-
-        // halfcarry is set if bit 11 has carry
-        // sum the 12 LSb and check bit 12
-        let low_result = (rhs & 0xFFF) + (lhs & 0xFFF);
-        if (low_result >> 12) == 1 {
-            self.reg.set_flag(Flags::HalfCarry);
-        }
 
         self.set16(reg1, result);
     }
@@ -303,29 +287,20 @@ impl<'a> CPU<'a> {
         let lhs = self.get8(reg1);
         let rhs = self.get8(reg2);
         let result = lhs.wrapping_add(rhs);
+        let low_result = (rhs & 0x0F) + (lhs & 0x0F);
 
         self.reg.clear_all_flags();
-
-        if result == 0 {
-            self.reg.set_flag(Flags::Zero);
-        }
-
+        self.reg.set_or_clear(Zero, result == 0);
         // checked add returns None if add overflows
-        if let None = lhs.checked_add(rhs) {
-            self.reg.set_flag(Flags::Carry);
-        }
-
-        let low_result = (rhs & 0x0F) + (lhs & 0x0F);
-        // check if bit 4 is set
-        if (low_result >> 4) == 1 {
-            self.reg.set_flag(Flags::HalfCarry);
-        }
+        self.reg.set_or_clear(Carry, lhs.checked_add(rhs).is_none());
+        // check if bit 4 was set (on the result of adding 4 low bits only)
+        self.reg.set_or_clear(HalfCarry, is_set(low_result, 4));
 
         self.set8(Register8::A, result);
     }
 
     pub fn compute_adc(&mut self, reg1: Register8, reg2: Register8) {
-        let carry = if self.reg.is_set(Flags::Carry) { 1 } else { 0 };
+        let carry = if self.reg.is_set(Carry) { 1 } else { 0 };
         let reg2 = Register8::Value8(self.get8(reg2).wrapping_add(carry));
         self.compute_add(reg1, reg2);
     }
@@ -338,28 +313,18 @@ impl<'a> CPU<'a> {
         let result = lhs.wrapping_sub(rhs);
 
         self.reg.clear_all_flags();
-
-        if result == 0 {
-            self.reg.set_flag(Flags::Zero);
-        }
-
-        self.reg.set_flag(Flags::Sub);
-
+        self.reg.set_flag(Sub);
+        self.reg.set_or_clear(Zero, result == 0);
         // checked sub returns None if sub borrows (carry flag)
-        if let None = lhs.checked_sub(rhs) {
-            self.reg.set_flag(Flags::Carry);
-        }
-
+        self.reg.set_or_clear(Carry, lhs.checked_sub(rhs).is_none());
         // same as carry flag but values limited to their 4 low bits (half carry flag)
-        if let None = (lhs & 0xF).checked_sub(rhs & 0xF) {
-            self.reg.set_flag(Flags::HalfCarry);
-        }
+        self.reg.set_or_clear(HalfCarry, (lhs & 0xF).checked_sub(rhs & 0xF).is_none());
 
         self.set8(Register8::A, result);
     }
 
     pub fn compute_sbc(&mut self, reg: Register8) {
-        let carry = if self.reg.is_set(Flags::Carry) { 1 } else { 0 };
+        let carry = if self.reg.is_set(Carry) { 1 } else { 0 };
         let reg = Register8::Value8(self.get8(reg).wrapping_sub(carry));
         self.compute_sub(reg);
     }
@@ -371,22 +336,14 @@ impl<'a> CPU<'a> {
         let rhs = self.get8(reg);
 
         self.reg.clear_all_flags();
-        self.reg.set_flag(Flags::Sub);
+        self.reg.set_flag(Sub);
 
         // Same as A - n
-        if lhs == rhs {
-            self.reg.set_flag(Flags::Zero);
-        }
-
+        self.reg.set_or_clear(Zero, lhs == rhs);
         // if A < n
-        if lhs < rhs {
-            self.reg.set_flag(Flags::Carry);
-        }
-
+        self.reg.set_or_clear(Carry, lhs < rhs);
         // if 4 low bits of A < 4 low bits of n
-        if (lhs & 0xF) < (rhs & 0xF) {
-            self.reg.set_flag(Flags::HalfCarry);
-        }
+        self.reg.set_or_clear(HalfCarry, (lhs & 0xF) < (rhs & 0xF));
     }
 
     // Computes the flags and result for an AND instruction.
@@ -398,11 +355,8 @@ impl<'a> CPU<'a> {
 
         // HC flag is always set, other flags always cleared except zero.
         self.reg.clear_all_flags();
-        self.reg.set_flag(Flags::HalfCarry);
-
-        if result == 0 {
-            self.reg.set_flag(Flags::Zero);
-        }
+        self.reg.set_flag(HalfCarry);
+        self.reg.set_or_clear(Zero, result == 0);
 
         self.set8(Register8::A, result);
     }
@@ -416,10 +370,7 @@ impl<'a> CPU<'a> {
 
         // all flags are cleared except zero.
         self.reg.clear_all_flags();
-
-        if result == 0 {
-            self.reg.set_flag(Flags::Zero);
-        }
+        self.reg.set_or_clear(Zero, result == 0);
 
         self.set8(Register8::A, result);
     }
@@ -433,10 +384,7 @@ impl<'a> CPU<'a> {
 
         // all flags are cleared except zero.
         self.reg.clear_all_flags();
-
-        if result == 0 {
-            self.reg.set_flag(Flags::Zero);
-        }
+        self.reg.set_or_clear(Zero, result == 0);
 
         self.set8(Register8::A, result);
     }
@@ -445,16 +393,10 @@ impl<'a> CPU<'a> {
     /// Carry flag is left untouched, so they are not cleared.
     pub fn compute_inc(&mut self, reg: Register8) {
         let result = self.get8(reg).wrapping_add(1);
-        self.reg.clear_flag(Flags::Sub);
-
-        if result == 0 {
-            self.reg.set_flag(Flags::Zero);
-        }
-
+        self.reg.clear_flag(Sub);
+        self.reg.set_or_clear(Zero, result == 0);
         // set HC if bit 0-3 were 1 before adding
-        if (result.wrapping_sub(1) & 0x0F) == 0x0F {
-            self.reg.set_flag(Flags::HalfCarry);
-        }
+        self.reg.set_or_clear(HalfCarry, (result.wrapping_sub(1) & 0xF) == 0xF);
 
         self.set8(reg, result);
     }
@@ -477,17 +419,11 @@ impl<'a> CPU<'a> {
     /// Carry flag is left untouched, so no clearing all of them.
     pub fn compute_dec(&mut self, reg: Register8) {
         let result = self.get8(reg).wrapping_sub(1);
-        self.reg.set_flag(Flags::Sub);
-
-        if result == 0 {
-            self.reg.set_flag(Flags::Zero);
-        }
-
+        self.reg.set_flag(Sub);
+        self.reg.set_or_clear(Zero, result == 0);
         // HC is set if bit 4 was borrowed
         // this happens only when bit 0-3 are all 0 before decrementing.
-        if (result.wrapping_add(1) & 0x0F) == 0x00 {
-            self.reg.set_flag(Flags::HalfCarry);
-        }
+        self.reg.set_or_clear(HalfCarry, (result.wrapping_add(1) & 0x0F) == 0x00);
 
         self.set8(reg, result);
     }
