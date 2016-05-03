@@ -279,6 +279,12 @@ impl<'a> CPU<'a> {
         let rhs = self.get16(reg2);
         let result = lhs.wrapping_add(rhs);
 
+        self.reg.clear_flag(Sub);
+        // checked add returns None if add overflows
+        self.reg.set_or_clear(Carry, lhs.checked_add(rhs).is_none());
+        // check if bit 4 was set (on the result of adding 4 low bits only)
+        self.reg.set_or_clear(HalfCarry, (lhs as u8).checked_add(rhs as u8).is_none());
+
         self.set16(reg1, result);
     }
 

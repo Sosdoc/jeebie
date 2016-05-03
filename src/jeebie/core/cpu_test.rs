@@ -42,6 +42,43 @@ fn add_8_bit() {
 }
 
 #[test]
+fn add_16_bit() {
+    let mut mmu = MMU::new();
+    let mut cpu = CPU::new(&mut mmu);
+
+    // simple add, no flags set
+    cpu.set16(BC, 256u16);
+    cpu.set16(DE, 4u16);
+    cpu.compute_add16(BC, DE);
+    assert_eq!(260u16, cpu.get16(BC));
+
+    assert!(!cpu.reg.is_set(Sub));
+    assert!(!cpu.reg.is_set(Carry));
+    assert!(!cpu.reg.is_set(HalfCarry));
+
+    // overflow
+    cpu.set16(BC, 0xFFFF);
+    cpu.set16(DE, 1);
+    cpu.compute_add16(BC, DE);
+    assert_eq!(0, cpu.get16(BC));
+
+    // zero is unaffected
+    assert!(!cpu.reg.is_set(Sub));
+    assert!(cpu.reg.is_set(Carry));
+    assert!(cpu.reg.is_set(HalfCarry));
+
+    // halfcarry only
+    cpu.set16(BC, 0x00FF);
+    cpu.set16(DE, 1);
+    cpu.compute_add16(BC, DE);
+    assert_eq!(0x0100, cpu.get16(BC));
+
+    assert!(!cpu.reg.is_set(Sub));
+    assert!(!cpu.reg.is_set(Carry));
+    assert!(cpu.reg.is_set(HalfCarry));
+}
+
+#[test]
 fn sub_8_bit() {
     let mut mmu = MMU::new();
     let mut cpu = CPU::new(&mut mmu);
