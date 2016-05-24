@@ -3,7 +3,6 @@ use jeebie::core::registers::*;
 use jeebie::core::registers::Flags::*;
 
 use jeebie::instr::opcodes::{ CB_OPCODE_TABLE, OPCODE_TABLE };
-use jeebie::instr::timings::{ CB_TIMING_TABLE, TIMING_TABLE };
 use jeebie::utils::{ is_set, swap_bit, set_bit, reset_bit, combine_as_u16 };
 use jeebie::disasm::get_instruction_str;
 
@@ -39,12 +38,10 @@ impl<'a> CPU<'a> {
                 let second_byte = self.mem.read_b(self.reg.pc);
                 self.reg.pc = self.reg.pc.wrapping_add(1);
 
-                CB_OPCODE_TABLE[second_byte as usize](self);
-                CB_TIMING_TABLE[second_byte as usize]
+                CB_OPCODE_TABLE[second_byte as usize](self)
             },
             _ => {
-                OPCODE_TABLE[opcode as usize](self);
-                TIMING_TABLE[opcode as usize]
+                OPCODE_TABLE[opcode as usize](self)
             }
         };
 

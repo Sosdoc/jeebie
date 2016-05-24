@@ -1,5 +1,4 @@
 pub mod opcodes;
-pub mod timings;
 
 pub mod load;
 pub mod stack;

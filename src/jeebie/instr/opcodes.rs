@@ -10,10 +10,10 @@ use jeebie::instr::stack::*;
 
 use jeebie::core::cpu::CPU;
 /// The type of functions that implement an opcode.
-pub type OpcodeFunc = fn(&mut CPU) -> ();
+pub type OpcodeFunc = fn(&mut CPU) -> i32;
 
-fn missing(cpu: &mut CPU) { panic!("Opcode 0x{:02X} is not implemented!", cpu.mem.read_b(cpu.reg.pc-1)) }
-fn missing_cb(cpu: &mut CPU) { panic!("Opcode 0xCB{:02X} is not implemented!", cpu.mem.read_b(cpu.reg.pc-1)) }
+fn missing(cpu: &mut CPU) -> i32 { panic!("Opcode 0x{:02X} is not implemented!", cpu.mem.read_b(cpu.reg.pc-1)) }
+fn missing_cb(cpu: &mut CPU) -> i32 { panic!("Opcode 0xCB{:02X} is not implemented!", cpu.mem.read_b(cpu.reg.pc-1)) }
 
 
 pub static OPCODE_TABLE : [OpcodeFunc; 256] = [
