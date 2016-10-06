@@ -1,5 +1,4 @@
-
-pub mod glium;
+pub mod piston;
 
 /// A trait for graphical frontends.
 /// Normally, the only thing that the cpu does is send the framebuffer data.
