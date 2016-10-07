@@ -6,7 +6,6 @@ pub mod core;
 pub mod memory;
 pub mod instr;
 pub mod cart;
-pub mod frontend;
 pub mod gpu;
 pub mod utils;
 pub mod bootrom;

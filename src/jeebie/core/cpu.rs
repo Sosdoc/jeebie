@@ -26,7 +26,7 @@ impl<'a> CPU<'a> {
     /// Returns the number of elapsed machine cycles.
     pub fn exec(&mut self) -> u32 {
         // disasm string
-        println!("{}", get_instruction_str(self));
+        // println!("{}", get_instruction_str(self));
 
         // fetch
         let opcode = self.mem.read_b(self.reg.pc);
