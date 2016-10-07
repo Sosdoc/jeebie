@@ -61,7 +61,7 @@ pub fn EI(cpu: &mut CPU) -> i32 {
 }
 
 // 'DI' F3 4
-pub fn FI(cpu: &mut CPU) -> i32 {
+pub fn DI(cpu: &mut CPU) -> i32 {
     cpu.interrupts_enabled = false;
     4
 }

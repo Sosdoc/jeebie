@@ -93,7 +93,7 @@ pub static OPCODE_TABLE : [OpcodeFunc; 256] = [
          ADD_sp_n,         JP_HL,      LD_nnm_A,       missing,
           missing,       missing,         XOR_n,       RST_28h,
     // 0xf0
-         LDH_a_nm,        POP_af,    LD_a_c_mem,            FI,
+         LDH_a_nm,        POP_af,    LD_a_c_mem,            DI,
           missing,       PUSH_af,          OR_n,       RST_30h,
         LDHL_sp_n,      LD_sp_hl,      LD_a_nnm,            EI,
           missing,       missing,          CP_n,       RST_38h,
