@@ -209,3 +209,10 @@ pub fn RET_C(cpu: &mut CPU) -> i32 {
     cpu.return_not_flag(Flags::Carry);
     8
 }
+
+// 'RETI' D9 8
+pub fn RETI(cpu: &mut CPU) -> i32 {
+    cpu.pop_stack(Register16::PC);
+    cpu.interrupts_enabled = true;
+    8
+}
