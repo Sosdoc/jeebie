@@ -214,7 +214,7 @@ pub fn SBC_a_hlm(cpu: &mut CPU) -> i32 {
     8
 }
 
-// 'SBC A,*' ?? ? --- manual has no opcode for this... leave it
+// 'SBC A,*' DE 8
 pub fn SBC_a_n(cpu: &mut CPU) -> i32 {
     cpu.compute_sbc(Immediate);
     0

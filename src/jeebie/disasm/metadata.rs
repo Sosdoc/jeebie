@@ -71,7 +71,7 @@ pub static DISASM_TABLE : [&'static str; 256] = [
     "RET NC", "POP DE", "JP NC,nn", "Missing",
     "CALL NC,nn", "PUSH DE", "SUB *", "RST 10H",
     "RET C", "Missing", "JP C,nn", "Missing",
-    "CALL C,nn", "Missing", "Missing", "RST 18H",
+    "CALL C,nn", "Missing", "SBC A,*", "RST 18H",
     // 0xe0
     "LDH ($FF00+n),A", "POP HL", "LD ($FF00+C),A", "Missing",
     "Missing", "PUSH HL", "AND *", "RST 20H",
