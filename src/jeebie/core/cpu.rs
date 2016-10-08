@@ -412,6 +412,24 @@ impl<'a> CPU<'a> {
         self.set8(reg, result);
     }
 
+    /// Computes a shift of 1 to the right.
+    /// This function *preserves* the MSB, and is only used in SRR instructions (hence why only
+    /// shift right). The LSB is still shifted into the Carry flag.
+    pub fn compute_shift_r(&mut self, reg: Register8) {
+        let data = self.get8(reg);
+
+        self.reg.clear_all_flags();
+        self.reg.set_or_clear(Carry, is_set(data, 0));
+
+        // Check if MSB is set, if it is, set the MSB to 1 after shifting.
+        let msb_set = is_set(data, 7);
+        let mut result = data >> 1;
+        result = if msb_set {set_bit(result, 7)} else {result};
+
+        self.reg.set_or_clear(Zero, result == 0);
+        self.set8(reg, result);
+    }
+
     /// Computes an INC instruction.
     /// Carry flag is left untouched, so they are not cleared.
     pub fn compute_inc(&mut self, reg: Register8) {
