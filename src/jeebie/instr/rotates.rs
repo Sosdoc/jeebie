@@ -218,3 +218,52 @@ pub fn RR_HLm(cpu: &mut CPU) -> i32 {
     cpu.rotate_right(RegisterAddress(HL));
     16
 }
+
+
+ // 'SLA A' CB 27 8
+ pub fn SLA_A(cpu: &mut CPU) -> i32 {
+     cpu.compute_shift(true, A);
+     8
+ }
+
+ // 'SLA B' CB 20 8
+ pub fn SLA_B(cpu: &mut CPU) -> i32 {
+     cpu.compute_shift(true, B);
+     8
+ }
+
+ // 'SLA C' CB 21 8
+ pub fn SLA_C(cpu: &mut CPU) -> i32 {
+     cpu.compute_shift(true, C);
+     8
+ }
+
+ // 'SLA D' CB 22 8
+ pub fn SLA_D(cpu: &mut CPU) -> i32 {
+     cpu.compute_shift(true, D);
+     8
+ }
+
+ // 'SLA E' CB 23 8
+ pub fn SLA_E(cpu: &mut CPU) -> i32 {
+     cpu.compute_shift(true, E);
+     8
+ }
+
+ // 'SLA H' CB 24 8
+ pub fn SLA_H(cpu: &mut CPU) -> i32 {
+     cpu.compute_shift(true, H);
+     8
+ }
+
+ // 'SLA L' CB 25 8
+ pub fn SLA_L(cpu: &mut CPU) -> i32 {
+     cpu.compute_shift(true, L);
+     8
+ }
+
+ // 'SLA (HL)' CB 26 16
+ pub fn SLA_HLm(cpu: &mut CPU) -> i32 {
+     cpu.compute_shift(true, RegisterAddress(HL));
+     16
+ }
