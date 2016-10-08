@@ -1,33 +1,28 @@
 /// Returns true if the bit at index is 1, false otherwise.
 /// Panics in case the index specified is greater than 7 (out of bounds of a byte)
-#[inline(always)]
 pub fn is_set(data: u8, index: usize) -> bool {
     ((data >> index) & 1) == 1
 }
 
 /// Returns the byte with the bit at the specified index swapped.
 /// Panics in case the index specified is greater than 7 (out of bounds of a byte)
-#[inline(always)]
 pub fn swap_bit(data: u8, index: usize) -> u8 {
     data ^ (1 << index)
 }
 
 /// Returns the byte with the bit at the specified index set to 1.
 /// Panics in case the index specified is greater than 7 (out of bounds of a byte)
-#[inline(always)]
 pub fn set_bit(data: u8, index: usize) -> u8 {
     data | (1 << index)
 }
 
 /// Returns the byte with the bit at the specified index reset to 0.
 /// Panics in case the index specified is greater than 7 (out of bounds of a byte)
-#[inline(always)]
 pub fn reset_bit(data: u8, index: usize) -> u8 {
     data & ((1 << index) ^ 0xFF)
 }
 
 /// Returns a single 16 bit unsigned integer by chaining two 8 bit uints.
-#[inline(always)]
 pub fn combine_as_u16(high: u8, low: u8) -> u16 {
     ((high as u16) << 8) | (low as u16)
 }

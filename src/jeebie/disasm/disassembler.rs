@@ -1,6 +1,6 @@
 //! A simple disassembler, useful for showing the actual assembly code and eventually debugging.
 
-use jeebie::disasm::metadata::{ CB_DISASM_TABLE, DISASM_TABLE };
+use jeebie::disasm::metadata::{CB_DISASM_TABLE, DISASM_TABLE};
 use std::cell::Cell;
 
 /// The disassembler struct, it has internal mutable state required to disassemble a binary file
@@ -10,7 +10,6 @@ pub struct Disassembler {
 }
 
 impl Disassembler {
-
     pub fn new() -> Self {
         Disassembler { pc: Cell::new(0) }
     }
@@ -36,7 +35,7 @@ impl Disassembler {
                 } else {
                     Err(String::from("2 Byte opcode incomplete (CB prefix)"))
                 }
-            },
+            }
             Some(byte) => Ok(String::from(DISASM_TABLE[*byte as usize])),
             None => Err(String::from("End of data reached")),
         }
@@ -58,7 +57,7 @@ impl Disassembler {
         if instr.contains("nn") {
             let immediate16 = match (low, high) {
                 (Some(l), Some(h)) => h | l,
-                _ => return Err(String::from("3 Byte opcode incomplete, missing immediate value"))
+                _ => return Err(String::from("3 Byte opcode incomplete, missing immediate value")),
             };
 
             let nn = format!("${:04x}", immediate16);
@@ -66,10 +65,12 @@ impl Disassembler {
             self.pc.set(self.pc.get().wrapping_add(2));
         }
 
-        if instr.contains("n") || instr.contains("*") {
+        if instr.contains('n') || instr.contains('*') {
             let immediate8 = match low {
                 Some(l) => l,
-                None => return Err(String::from("2 Byte opcode incomplete, missing immediate value"))
+                None => {
+                    return Err(String::from("2 Byte opcode incomplete, missing immediate value"))
+                }
             };
 
             let n = format!("${:02x}", immediate8);

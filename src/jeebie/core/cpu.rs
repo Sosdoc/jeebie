@@ -4,7 +4,6 @@ use jeebie::core::registers::Flags::*;
 
 use jeebie::instr::opcodes::{ CB_OPCODE_TABLE, OPCODE_TABLE };
 use jeebie::utils::{ is_set, swap_bit, set_bit, reset_bit, combine_as_u16 };
-use jeebie::disasm::get_instruction_str;
 
 #[derive(Debug)]
 pub struct CPU<'a> {

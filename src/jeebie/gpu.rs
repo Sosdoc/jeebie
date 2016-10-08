@@ -25,21 +25,21 @@ pub struct VideoMemory {
     oam: [u8; 160],
 }
 
-///  Mode 0 (HBlank): The LCD controller is in the H-Blank period and
-///          the CPU can access both the display RAM (8000h-9FFFh)
-///          and OAM (FE00h-FE9Fh)
+///  Mode 0 (`HBlank`): The LCD controller is in the H-Blank period and
+///          the CPU can access both the display RAM (`8000h`-`9FFFh`)
+///          and OAM (`FE00h`-`FE9Fh`)
 ///
-///  Mode 1 (VBlank): The LCD controller is in the V-Blank period (or the
+///  Mode 1 (`VBlank`): The LCD controller is in the V-Blank period (or the
 ///          display is disabled) and the CPU can access both the
-///          display RAM (8000h-9FFFh) and OAM (FE00h-FE9Fh)
+///          display RAM (`8000h`-`9FFFh`) and OAM (`FE00h`-`FE9Fh`)
 ///
-///  Mode 2 (OAMRead): The LCD controller is reading from OAM memory.
-///          The CPU <cannot> access OAM memory (FE00h-FE9Fh)
+///  Mode 2 (`OAMRead`): The LCD controller is reading from OAM memory.
+///          The CPU <cannot> access OAM memory (`FE00h`-`FE9Fh`)
 ///          during this period.
 ///
-///  Mode 3 (VRAMRead): The LCD controller is reading from both OAM and VRAM,
+///  Mode 3 (`VRAMRead`): The LCD controller is reading from both OAM and VRAM,
 ///          The CPU <cannot> access OAM and VRAM during this period.
-///          CGB Mode: Cannot access Palette Data (FF69,FF6B) either.
+///          CGB Mode: Cannot access Palette Data (`FF69h`,`FF6Bh`) either.
 enum Mode {
     HBlank,
     VBlank,
@@ -131,14 +131,14 @@ impl LCDControl {
 
     /// Sets LCDC data from a byte value
     pub fn set_from_u8(&mut self, data: u8) {
-        self.lcd_enable = if is_set(data, 7) { true } else { false };
+        self.lcd_enable = is_set(data, 7);
         self.window_tile_map = if is_set(data, 6) { TileSelector::Set1 } else { TileSelector::Set0 };
-        self.window_enable = if is_set(data, 5) { true } else { false };
+        self.window_enable = is_set(data, 5);
         self.bgw_tile_data_select = if is_set(data, 4) { TileSelector::Set1 } else { TileSelector::Set0 };
         self.bg_tile_map = if is_set(data, 3) { TileSelector::Set1 } else { TileSelector::Set0 };
         self.sprite_size = if is_set(data, 2) { SpriteSize::Size16 } else { SpriteSize::Size8 };
-        self.sprite_enable = if is_set(data, 1) { true } else { false };
-        self.bg_enable = if is_set(data, 0) { true } else { false };
+        self.sprite_enable = is_set(data, 1);
+        self.bg_enable = is_set(data, 0);
     }
 
     /// Retrieves LCDC data as a byte.

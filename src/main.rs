@@ -9,8 +9,6 @@ mod jeebie;
 use jeebie::core::cpu::CPU;
 use jeebie::memory::MMU;
 
-use std::time::Duration;
-
 use piston_window::*;
 
 fn main() {
@@ -19,8 +17,7 @@ fn main() {
     let mut mmu = MMU::new();
     let mut cpu = CPU::new(&mut mmu);
 
-    let mut window : PistonWindow = WindowSettings::new(
-        "Hello Piston!", [640, 480])
+    let mut window: PistonWindow = WindowSettings::new("Hello Piston!", [640, 480])
         .build()
         .unwrap();
 
@@ -29,7 +26,7 @@ fn main() {
     while let Some(e) = window.next() {
 
         // Fit actual emulation in
-        // let _ = cpu.exec_one_frame();
+        let _ = cpu.exec();
 
         window.draw_2d(&e, |_, g| {
             clear([0.66; 4], g);
@@ -39,15 +36,15 @@ fn main() {
         match e.press_args() {
             Some(Button::Keyboard(_)) => {
                 window.set_should_close(true);
-            },
+            }
             Some(Button::Mouse(_)) => {
                 println!("mouse event");
-            },
+            }
             Some(Button::Controller(_)) => {
                 println!("controller event");
             }
             // TODO: handle other keypresses and pass to emulator core
-            None => { },
+            None => {}
         }
     }
 }
