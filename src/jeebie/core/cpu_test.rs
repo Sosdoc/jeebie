@@ -387,3 +387,41 @@ fn cpu_stack_test() {
     assert_eq!(0xFFFE, cpu.get16(SP));
     assert_eq!(0xCAFE, cpu.get16(BC));
 }
+
+#[test]
+fn shift_8bit_test() {
+    let mut mmu = MMU::new();
+    let mut cpu = CPU::new(&mut mmu);
+
+    // 0x80 -- 0b1000_0000
+    // shift left, should be zero and carry 1
+    cpu.set8(A, 0x80);
+    cpu.compute_shift(true, A);
+    assert_eq!(0, cpu.get8(A));
+    assert_eq!(Zero as u8 | Carry as u8, cpu.reg.f);
+
+    // shift right, should be 0x40 and no flags
+    cpu.set8(A, 0x80);
+    cpu.compute_shift(false, A);
+    assert_eq!(0x40, cpu.get8(A));
+    assert_eq!(0, cpu.reg.f);
+
+    // 0xFF -- 0b1111_1111
+    // left, should be 0xFE, carry 1
+    cpu.set8(A, 0xFF);
+    cpu.compute_shift(true, A);
+    assert_eq!(0xFE, cpu.get8(A));
+    assert_eq!(Carry as u8, cpu.reg.f);
+
+    // left, should be 0x7F, carry 1
+    cpu.set8(A, 0xFF);
+    cpu.compute_shift(false, A);
+    assert_eq!(0x7F, cpu.get8(A));
+    assert_eq!(Carry as u8, cpu.reg.f);
+
+    // shift 0x01 right, zero and carry 1
+    cpu.set8(A, 0x01);
+    cpu.compute_shift(false, A);
+    assert_eq!(0, cpu.get8(A));
+    assert_eq!(Zero as u8 | Carry as u8, cpu.reg.f);
+}

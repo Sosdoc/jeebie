@@ -391,6 +391,27 @@ impl<'a> CPU<'a> {
         self.set8(Register8::A, result);
     }
 
+    /// Computes a shift of 1 in the specified direction for the register.
+    /// A 0 bit will be inserted on the other end and the bit shifted out will be stored in the
+    /// Carry flag.
+    pub fn compute_shift(&mut self, left: bool, reg: Register8) {
+        // check bit 7 if shifting left, otherwise bit 0
+        let bit_idx = if left {7} else {0};
+        let data = self.get8(reg);
+
+        self.reg.clear_all_flags();
+        self.reg.set_or_clear(Carry, is_set(data, bit_idx));
+
+        let result = if left {
+            data << 1
+        } else {
+            data >> 1
+        };
+
+        self.reg.set_or_clear(Zero, result == 0);
+        self.set8(reg, result);
+    }
+
     /// Computes an INC instruction.
     /// Carry flag is left untouched, so they are not cleared.
     pub fn compute_inc(&mut self, reg: Register8) {
