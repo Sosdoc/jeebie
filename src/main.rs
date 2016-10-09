@@ -3,6 +3,7 @@
 
 #[macro_use]
 extern crate piston_window;
+extern crate image as im;
 
 mod jeebie;
 
@@ -12,25 +13,58 @@ use jeebie::memory::MMU;
 use piston_window::*;
 
 fn main() {
+    // Size of the framebuffer
+    let fb_size = (160, 144);
 
     // MMU outlives everything
     let mut mmu = MMU::new();
     let mut cpu = CPU::new(&mut mmu);
 
-    let mut window: PistonWindow = WindowSettings::new("Hello Piston!", [640, 480])
+    let mut window: PistonWindow = WindowSettings::new("Hello Piston!", [fb_size.0, fb_size.1])
         .build()
         .unwrap();
 
     window.set_title("Jeebie".to_string());
 
+    // Create an ImageBuffer and fill it
+    let mut img = im::ImageBuffer::new(fb_size.0, fb_size.1);
+
+    for x in 0..fb_size.0 {
+        for y in 0..fb_size.1 {
+            img.put_pixel(x, y, im::Rgba([0, 255, 0, 255]));
+        }
+    }
+
+    // A texture based on framebuffer data
+    let mut texture = Texture::from_image(&mut window.factory, &img, &TextureSettings::new())
+        .unwrap();
+
     while let Some(e) = window.next() {
+        let win_size = window.size();
+        // Emulate until a frame is ready
+        let frame_buffer = cpu.exec_one_frame();
 
-        // Fit actual emulation in
-        let _ = cpu.exec();
+        // Load frame_buffer into ImageBuffer
+        for x in 0..fb_size.0 {
+            for y in 0..fb_size.1 {
+                let fb_pixel = frame_buffer[(fb_size.0 * y + x) as usize];
+                img.put_pixel(
+                    x, y,
+                    im::Rgba([fb_pixel.0, fb_pixel.1, fb_pixel.2, 255]));
+            }
+        }
 
-        window.draw_2d(&e, |_, g| {
-            clear([0.66; 4], g);
-            // TODO: draw images and handle buffers
+        // Update the texture from the new ImageBuffer data
+        texture.update(&mut window.encoder, &img).unwrap();
+
+        window.draw_2d(&e, |c, g| {
+            clear([0.0, 0.0, 0.0, 1.0], g);
+            image(
+                &texture,
+                c.transform.scale(
+                    win_size.width as f64 / fb_size.0 as f64,
+                    win_size.height  as f64 / fb_size.1 as f64),
+                g);
         });
 
         match e.press_args() {
