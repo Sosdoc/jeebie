@@ -96,15 +96,15 @@ pub static CB_DISASM_TABLE : [&'static str; 256] = [
     "RR B", "RR C", "RR D", "RR E",
     "RR H", "RR L", "RR (HL)", "RR A",
     // 0x20
-    "Missing", "Missing", "Missing", "Missing",
-    "Missing", "Missing", "Missing", "Missing",
-    "Missing", "Missing", "Missing", "Missing",
-    "Missing", "Missing", "Missing", "Missing",
+    "SLA B", "SLA C", "SLA D", "SLA E",
+    "SLA H", "SLA L", "SLA (HL)", "SLA A",
+    "SRA B", "SRA C", "SRA D", "SRA E",
+    "SRA H", "SRA L", "SRA (HL)", "SRA A",
     // 0x30
     "SWAP B", "SWAP C", "SWAP D", "SWAP E",
     "SWAP H", "SWAP L", "SWAP (HL)", "SWAP A",
-    "Missing", "Missing", "Missing", "Missing",
-    "Missing", "Missing", "Missing", "Missing",
+    "SRL B", "SRL C", "SRL D", "SRL E",
+    "SRL H", "SRL L", "SRL (HL)", "SRL A",
     // 0x40
     "BIT 0,B", "BIT 0,C", "BIT 0,D", "BIT 0,E",
     "BIT 0,H", "BIT 0,L", "BIT 0,(HL)", "BIT 0,A",

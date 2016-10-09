@@ -111,15 +111,15 @@ pub static CB_OPCODE_TABLE : [OpcodeFunc; 256] = [
              RR_B,          RR_C,          RR_D,          RR_E,
              RR_H,          RR_L,        RR_HLm,          RR_A,
     // 0x20
-       missing_cb,    missing_cb,    missing_cb,    missing_cb,
-       missing_cb,    missing_cb,    missing_cb,    missing_cb,
-       missing_cb,    missing_cb,    missing_cb,    missing_cb,
-       missing_cb,    missing_cb,    missing_cb,    missing_cb,
+            SLA_B,         SLA_C,         SLA_D,         SLA_E,
+            SLA_H,         SLA_L,       SLA_HLm,         SLA_A,
+            SRA_B,         SRA_C,         SRA_D,         SRA_E,
+            SRA_H,         SRA_L,       SRA_HLm,         SRA_A,
     // 0x30
            SWAP_b,        SWAP_c,        SWAP_d,        SWAP_e,
            SWAP_h,        SWAP_l,       SWAP_hl,        SWAP_a,
-       missing_cb,    missing_cb,    missing_cb,    missing_cb,
-       missing_cb,    missing_cb,    missing_cb,    missing_cb,
+            SRL_B,         SRL_C,         SRL_D,         SRL_E,
+            SRL_H,         SRL_L,       SRL_HLm,         SRL_A,
     // 0x40
           BIT_0_B,       BIT_0_C,       BIT_0_D,       BIT_0_E,
           BIT_0_H,       BIT_0_L,     BIT_0_HLm,       BIT_0_A,
