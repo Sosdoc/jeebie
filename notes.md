@@ -206,3 +206,55 @@ pub fn get8(&mut self, reg: Register8) -> u8 {
 ```
 
 Here, pattern matching plays well with it and we can cover all cases with appropriate logic.
+
+#### Instructions
+
+A very tedious part to write for any cpu emulator is certain to be the implementation of the instruction set (IS).
+
+The instructions are of variable length, ranging from 1 to 3 bytes, and the cpu has about 500 of them.
+The operation codes (opcodes) are only one byte long, but the prefix `CB` can be used to address another 256 instructions, thus bringing the total length to 2 bytes and a maximum of 511 addressable instructions (512 minus the `CB` opcode).
+
+Some instructions include what is called an "immediate" value, generally identified in the mnemonics by the characters:
+
+- `n` : 1 byte unsigned integer;
+- `nn` : 2 byte unsigned integer;
+- `*` : 1 byte signed integer.
+
+Immediate values are only present in the unprefixed opcode instructions, so the total length can be a maximum of 3 bytes.
+
+In jeebie, there are two "layers" of functions that implement instruction logic. The first one is found in `cpu.rs`, and is a collection of functions that implement generic functionality, like adding two registers, shifting one, jumping to a certain address, etc.
+
+An example function would be:
+
+```
+/// Check the value of bit b in reg and set flags accordingly
+pub fn bit_check(&mut self, b: usize, reg: Register8) {
+    let is_zero = !is_set(self.get8(reg), b);
+    self.reg.set_or_clear(Zero, is_zero);
+    self.reg.clear_flag(Sub);
+    self.reg.set_flag(HalfCarry);
+}
+```
+
+The second "layer" is found in the `jeebie::instr` module, and this contains multiple source files split by broad instruction "categories".
+These files declare a function for each opcode and implement the functionality by calling the more general cpu function.
+
+For example, using the `bit_check` function above:
+
+```
+// 'BIT 0,D' CB 42 8
+pub fn BIT_0_D(cpu: &mut CPU) -> i32 {
+    cpu.bit_check(0, D);
+    8
+}
+```
+
+Each function has the same signature and returns the amount of cycles that the instruction takes to execute. This is useful for functions that can take a variable amount of cycles to complete, like conditional jumps.
+
+Every single one of these functions has a comment line above it, detailing the mnemonic (name), opcode (can be prefixed by `CB` or just a single byte hex value) and the timing.
+This data is used by a python script (found in the `scripts` folder) that generates mappings for these functions.
+
+All mappings can be found in the file `jeebie\instr\opcodes.rs`, it contains two static arrays of function references, one represents all the instructions with opcodes from `0x00` to `0xFF`, the other all instructions with prefix `0xCB`.
+
+This mapping is simple (although tedious to write and update, hence why the script) and introduces very little overhead when executing, it's a common way of handling instructions in emulators.
+One downside of this would be that repeating instruction code so many times can lead to executable bloating, especially when functions get inlined.
