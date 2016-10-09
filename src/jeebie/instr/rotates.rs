@@ -267,3 +267,99 @@ pub fn RR_HLm(cpu: &mut CPU) -> i32 {
      cpu.compute_shift(true, RegisterAddress(HL));
      16
  }
+
+ // 'SRA A' CB 2F 8
+ pub fn SRA_A(cpu: &mut CPU) -> i32 {
+     cpu.compute_shift_r(A);
+     8
+ }
+
+ // 'SRA B' CB 28 8
+ pub fn SRA_B(cpu: &mut CPU) -> i32 {
+     cpu.compute_shift_r(B);
+     8
+ }
+
+ // 'SRA C' CB 29 8
+ pub fn SRA_C(cpu: &mut CPU) -> i32 {
+     cpu.compute_shift_r(C);
+     8
+ }
+
+ // 'SRA D' CB 2A 8
+ pub fn SRA_D(cpu: &mut CPU) -> i32 {
+     cpu.compute_shift_r(D);
+     8
+ }
+
+ // 'SRA E' CB 2B 8
+ pub fn SRA_E(cpu: &mut CPU) -> i32 {
+     cpu.compute_shift_r(E);
+     8
+ }
+
+ // 'SRA H' CB 2C 8
+ pub fn SRA_H(cpu: &mut CPU) -> i32 {
+     cpu.compute_shift_r(H);
+     8
+ }
+
+ // 'SRA L' CB 2D 8
+ pub fn SRA_L(cpu: &mut CPU) -> i32 {
+     cpu.compute_shift_r(L);
+     8
+ }
+
+ // 'SRA (HL)' CB 2E 16
+ pub fn SRA_HLm(cpu: &mut CPU) -> i32 {
+     cpu.compute_shift_r(RegisterAddress(HL));
+     16
+ }
+
+ // 'SRL A' CB 3F 8
+ pub fn SRL_A(cpu: &mut CPU) -> i32 {
+     cpu.compute_shift(false, A);
+     8
+ }
+
+ // 'SRL B' CB 38 8
+ pub fn SRL_B(cpu: &mut CPU) -> i32 {
+     cpu.compute_shift(false, B);
+     8
+ }
+
+ // 'SRL C' CB 39 8
+ pub fn SRL_C(cpu: &mut CPU) -> i32 {
+     cpu.compute_shift(false, C);
+     8
+ }
+
+ // 'SRL D' CB 3A 8
+ pub fn SRL_D(cpu: &mut CPU) -> i32 {
+     cpu.compute_shift(false, D);
+     8
+ }
+
+ // 'SRL E' CB 3B 8
+ pub fn SRL_E(cpu: &mut CPU) -> i32 {
+     cpu.compute_shift(false, E);
+     8
+ }
+
+ // 'SRL H' CB 3C 8
+ pub fn SRL_H(cpu: &mut CPU) -> i32 {
+     cpu.compute_shift(false, H);
+     8
+ }
+
+ // 'SRL L' CB 3D 8
+ pub fn SRL_L(cpu: &mut CPU) -> i32 {
+     cpu.compute_shift(false, L);
+     8
+ }
+
+ // 'SRL (HL)' CB 3E 16
+ pub fn SRL_HLm(cpu: &mut CPU) -> i32 {
+     cpu.compute_shift(false, RegisterAddress(HL));
+     16
+ }

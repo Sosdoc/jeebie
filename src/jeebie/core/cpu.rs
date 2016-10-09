@@ -413,7 +413,7 @@ impl<'a> CPU<'a> {
     }
 
     /// Computes a shift of 1 to the right.
-    /// This function *preserves* the MSB, and is only used in SRR instructions (hence why only
+    /// This function *preserves* the MSB, and is only used in SRA instructions (hence why only
     /// shift right). The LSB is still shifted into the Carry flag.
     pub fn compute_shift_r(&mut self, reg: Register8) {
         let data = self.get8(reg);
