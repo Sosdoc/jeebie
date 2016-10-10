@@ -145,14 +145,82 @@ impl LCDControl {
     pub fn as_u8(&self) -> u8 {
         let mut result = 0;
 
-        if self.lcd_enable { result |= 7 };
-        if let TileSelector::Set1 = self.window_tile_map { result |= 6 };
-        if self.window_enable { result |= 5 };
-        if let TileSelector::Set1 = self.bgw_tile_data_select { result |= 4 };
-        if let TileSelector::Set1 = self.bg_tile_map  { result |= 3 };
-        if let SpriteSize::Size16 = self.sprite_size { result |= 2 };
-        if self.sprite_enable { result |= 1 };
-        if self.bg_enable { result |= 0 };
+        if self.lcd_enable { result |= 0x80 };
+        if let TileSelector::Set1 = self.window_tile_map { result |= 0x40 };
+        if self.window_enable { result |= 0x20 };
+        if let TileSelector::Set1 = self.bgw_tile_data_select { result |= 0x10 };
+        if let TileSelector::Set1 = self.bg_tile_map  { result |= 0x08 };
+        if let SpriteSize::Size16 = self.sprite_size { result |= 0x04 };
+        if self.sprite_enable { result |= 0x02 };
+        if self.bg_enable { result |= 0x01 };
+
+        result
+    }
+}
+
+/// The LCD status register, holds information about the gpu.
+/// - Bit 6 - LYC=LY Coincidence Interrupt (1=Enable) (Read/Write)
+/// - Bit 5 - Mode 2 OAM Interrupt         (1=Enable) (Read/Write)
+/// - Bit 4 - Mode 1 V-Blank Interrupt     (1=Enable) (Read/Write)
+/// - Bit 3 - Mode 0 H-Blank Interrupt     (1=Enable) (Read/Write)
+/// - Bit 2 - Coincidence Flag  (0:LYC<>LY, 1:LYC=LY) (Read Only)
+/// - Bit 1-0 - Mode Flag       (Mode 0-3, see below) (Read Only)
+///             0: During H-Blank
+///             1: During V-Blank
+///             2: During Searching OAM-RAM
+///             3: During Transfering Data to LCD Driver
+struct LCDStatus {
+    coincidence_irq: bool,
+    oam_irq: bool,
+    vblank_irq: bool,
+    hblank_irq: bool,
+    coincidence_flag: bool,
+    mode: Mode,
+}
+
+impl LCDStatus {
+     pub fn new() -> LCDStatus {
+        LCDStatus {
+            coincidence_irq: false,
+            oam_irq: false,
+            vblank_irq: false,
+            hblank_irq: false,
+            coincidence_flag: false,
+            mode: Mode::HBlank,
+        }
+    }
+
+    pub fn set_from_u8(&mut self, data: u8) {
+        self.coincidence_irq = is_set(data, 6);
+        self.oam_irq = is_set(data, 5);
+        self.vblank_irq = is_set(data, 4);
+        self.hblank_irq = is_set(data, 3);
+        self.coincidence_flag = is_set(data, 2);
+
+        self.mode = match data & 0x3 {
+            0 => Mode::HBlank,
+            1 => Mode::VBlank,
+            2 => Mode::OAMRead,
+            3 => Mode::VRAMRead,
+            _ => panic!("invalid mode flag {:?}", data & 0x3)
+        };
+    }
+
+    pub fn to_u8(&self) -> u8 {
+        let mut result = 0;
+
+        if self.coincidence_irq { result |= 0x40 };
+        if self.oam_irq { result |= 0x20 };
+        if self.vblank_irq { result |= 0x10 };
+        if self.hblank_irq { result |= 0x08 };
+        if self.coincidence_flag  { result |= 0x04 };
+
+        result |= match self.mode {
+            Mode::HBlank => 0,
+            Mode::VBlank => 1,
+            Mode::OAMRead => 2,
+            Mode::VRAMRead => 3,
+        };
 
         result
     }
