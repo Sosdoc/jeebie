@@ -146,6 +146,7 @@ impl GPU {
     pub fn read_register(&self, addr: usize) -> u8 {
         match addr {
             0xFF40 => self.lcdc.as_u8(), // LCDC
+            0xFF41 => self.lcds.to_u8(), // LCDStat
             0xFF42 => self.lcdp.scroll_x,
             0xFF43 => self.lcdp.scroll_y,
             0xFF44 => self.line, // current scanline
@@ -157,6 +158,7 @@ impl GPU {
     pub fn write_register(&mut self, addr: usize, data: u8) {
         match addr {
             0xFF40 => self.lcdc.set_from_u8(data), // LCDC
+            0xFF41 => self.lcds.set_from_u8(data), // LCDStat
             0xFF42 => { self.lcdp.scroll_x = data },
             0xFF43 => { self.lcdp.scroll_y = data },
             0xFF44 => { self.line = data }, // current scanline
