@@ -3,10 +3,10 @@
 #![allow(unused_variables)]
 
 pub mod core;
+pub mod video;
 pub mod memory;
 pub mod instr;
 pub mod cart;
-pub mod gpu;
 pub mod utils;
 pub mod bootrom;
 pub mod disasm;

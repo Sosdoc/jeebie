@@ -5,7 +5,7 @@
 use std::fmt;
 use std::cell::Cell;
 
-use jeebie::gpu::GPU;
+use jeebie::video::gpu::GPU;
 use jeebie::cart::Cartridge;
 use jeebie::bootrom::DMG_BOOTROM;
 
