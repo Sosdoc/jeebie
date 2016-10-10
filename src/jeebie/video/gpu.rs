@@ -3,26 +3,24 @@ use super::data::*;
 /// Holds all information relative to the graphics subsystem.
 /// Includes computed data like the framebuffer, in a format that can be drawn to screen.
 pub struct GPU {
-    mode: Mode,
-    vblank_int: bool,
     line: u8,
     cycles: u32,
     vram: VideoMemory,
     lcdc: LCDControl,
     lcdp: LCDPosition,
+    lcds: LCDStatus,
     framebuffer: [(u8, u8, u8); 160 * 144]
 }
 
 impl GPU {
     pub fn new() -> GPU {
         GPU {
-            mode: Mode::HBlank,
-            vblank_int: false,
             line: 0,
             cycles: 0,
             vram: VideoMemory { data: [0; 8192], oam: [0; 160] },
             lcdc: LCDControl::new(),
             lcdp: LCDPosition::new(),
+            lcds: LCDStatus::new(),
             framebuffer: [(0, 0, 0); 160 * 144],
         }
     }
@@ -76,8 +74,8 @@ impl GPU {
 
     /// Retrieves a slice of the framebuffer.
     pub fn get_framebuffer(&mut self) -> &[(u8, u8, u8)]{
-        if self.vblank_int {
-            self.vblank_int = false;
+        if self.lcds.vblank_irq {
+            self.lcds.vblank_irq = false;
         }
 
         &self.framebuffer
@@ -126,22 +124,22 @@ impl GPU {
     }
 
     pub fn write_vram(&mut self, addr: usize, value: u8) {
-        // if let Mode::VRAMRead = self.mode { panic!("Attempted write to VRAM during VRAMRead mode") };
+        // if let Mode::VRAMRead = self.lcds.mode { panic!("Attempted write to VRAM during VRAMRead mode") };
         self.vram.data[addr] = value;
     }
 
     pub fn read_vram(&self, addr: usize) -> u8 {
-        // if let Mode::VRAMRead = self.mode { panic!("Attempted access to VRAM during VRAMRead mode") };
+        // if let Mode::VRAMRead = self.lcds.mode { panic!("Attempted access to VRAM during VRAMRead mode") };
         self.vram.data[addr]
     }
 
     pub fn write_oam(&mut self, addr: usize, value: u8) {
-        // if let Mode::OAMRead = self.mode { panic!("Attempted write to OAM during OAMRead mode") };
+        // if let Mode::OAMRead = self.lcds.mode { panic!("Attempted write to OAM during OAMRead mode") };
         self.vram.oam[addr] = value;
     }
 
     pub fn read_oam(&self, addr: usize) -> u8 {
-        // if let Mode::OAMRead = self.mode { panic!("Attempted access to OAM during OAMRead mode") };
+        // if let Mode::OAMRead = self.lcds.mode { panic!("Attempted access to OAM during OAMRead mode") };
         self.vram.oam[addr]
     }
 
@@ -176,17 +174,17 @@ impl GPU {
 
         self.cycles += delta;
 
-        match self.mode {
+        match self.lcds.mode {
             Mode::OAMRead => {
                 if self.cycles >= 80 {
                     self.cycles = 0;
-                    self.mode = Mode::VRAMRead;
+                    self.lcds.mode = Mode::VRAMRead;
                 }
             }
             Mode::VRAMRead => {
                 if self.cycles >= 172 {
                     self.cycles = 0;
-                    self.mode = Mode::HBlank;
+                    self.lcds.mode = Mode::HBlank;
 
                     // scanline is done, write it to framebuffer
                     self.render_scanline();
@@ -197,9 +195,9 @@ impl GPU {
                     self.cycles = 0;
                     self.line += 1;
 
-                    self.mode = if self.line == 143 {
+                    self.lcds.mode = if self.line == 143 {
                         // TODO: push framebuffer data to frontend now (interrupt)
-                        self.vblank_int = true;
+                        self.lcds.vblank_irq = true;
                         Mode::VBlank
 
                     } else {
@@ -213,7 +211,7 @@ impl GPU {
                     self.line += 1;
 
                     if self.line > 153 {
-                        self.mode = Mode::OAMRead;
+                        self.lcds.mode = Mode::OAMRead;
                         self.line = 0;
                     }
                 }
