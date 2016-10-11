@@ -1,5 +1,7 @@
 use super::data::*;
 
+use jeebie::utils::is_set;
+
 /// Holds all information relative to the graphics subsystem.
 /// Includes computed data like the framebuffer, in a format that can be drawn to screen.
 pub struct GPU {
@@ -79,6 +81,86 @@ impl GPU {
         }
 
         &self.framebuffer
+    }
+
+    /// Renders the current window.
+    /// The window is an alternate background area that can be rendered above the normal background.
+    ///
+    /// The window becomes visible (if enabled) when positions are set in range WX=0..166, WY=0..143.
+    /// A position of WX=7, WY=0 locates the window at upper left, it is then completely covering normal background.
+    fn render_window(&mut self) {
+        // get window X and Y, X is offset by 7 so we subtract 7
+        let wy = self.lcdp.window_y;
+        let wx = self.lcdp.window_x as i32 - 7;
+
+        // continue rendering only if wx/wy are in range (0 to 160 and 0 to 144)
+        // also, the current line being rendered must be inside the window (line < wy)
+        match (wx, wy) {
+            (0...159, 0...143) if self.line < wy => {}
+            (_, _) => { return; }
+        };
+
+        // Tile data start offset (0=8800-97FF, 1=8000-8FFF)
+        let tiles_start = match self.lcdc.bgw_tile_data_select {
+            TileSelector::Set0 => 0 as u16,
+            TileSelector::Set1 => 0x800,
+        };
+
+        // Window tile map start (0=9800-9BFF, 1=9C00-9FFF)
+        let tilemap_start = match self.lcdc.window_tile_map {
+            TileSelector::Set0 => 0x1800,
+            TileSelector::Set1 => 0x1C00,
+        };
+
+        // offset for the tile map given by the current line value
+        let tilemap_y_offset = ((self.line / 8) * 32) as usize;
+        // y value inside a tile identified by the current line
+        let y_offset = ((self.line % 8) * 2) as u16;
+
+        for x in 0..32 {
+
+            // Read the tile index from the map in memory
+            let tile_index = match self.lcdc.window_tile_map {
+                TileSelector::Set0 => self.vram.data[tilemap_start + tilemap_y_offset + x],
+                TileSelector::Set1 => {
+                    // set 1 is indexed from -128 to 127, indexes are signed bytes
+                    let tile_signed = self.vram.data[tilemap_start + tilemap_y_offset + x] as i16;
+                    (tile_signed + 128) as u8
+                },
+            };
+
+            // offset in the map for x value, it's x (current x in tile) times 8 (tile width)
+            let map_offset = x * 8;
+
+            // index of a tile in a byte array (tiles are 16 bytes long)
+            let tile_byte_idx = (tile_index * 16) as u16;
+
+            // actual address for tile data
+            let tile_address = tiles_start + tile_byte_idx + y_offset;
+
+            let high_byte = self.vram.data[tile_address as usize];
+            let low_byte = self.vram.data[tile_address as usize + 1];
+
+            // compute each of the 8 pixels in the 2 bytes, starting from bit 7
+            let mut pixel_idx = 7;
+            while pixel_idx >= 0 {
+                // the offset given by the windowX
+                let buffer_x_offset = map_offset as i32 + pixel_idx + wx;
+
+                let pixel = if is_set(high_byte, pixel_idx as usize) { 1 } else { 0 } |
+                            if is_set(low_byte, pixel_idx as usize) { 2 } else { 0 };
+
+                // final position of this pixel offset by line * line_width
+                let position = 144 * self.line as usize + buffer_x_offset as usize;
+
+                let color = GBColor::from_u8(pixel);
+                self.framebuffer[position] = color.to_u8u8u8();
+
+                pixel_idx -= 1;
+            }
+
+            // TODO update line value?
+        }
     }
 
     /// Renders a single scanline to the framebuffer, from the internal tile data.

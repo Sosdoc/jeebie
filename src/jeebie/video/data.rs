@@ -3,7 +3,7 @@ use jeebie::utils::is_set;
 /// Video memory and related data/registers
 /// The main VRAM (`data`) is used for the following values:
 ///     8000-87FF	Tile set #1: tiles 0-127
-///     8800-8FFF	Tile set #1: tiles 128-255 Tile set #0: tiles -1 to -128
+///     8800-8FFF	Tile set #1: tiles 128-255 Tile set #0: tiles -128 to -1
 ///     9000-97FF	Tile set #0: tiles 0-127
 ///     9800-9BFF	Tile map #0
 ///     9C00-9FFF	Tile map #1
