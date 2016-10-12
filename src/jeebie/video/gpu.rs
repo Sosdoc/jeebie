@@ -163,6 +163,114 @@ impl GPU {
         }
     }
 
+
+    fn render_sprites(&mut self) {
+
+        if !self.lcdc.sprite_enable {
+            return;
+        }
+
+        let sprite_height = self.lcdc.sprite_size as u8;
+        let line_width = self.line * 144;
+
+        // 40 sprites can be displayed
+        let mut sprite = 39;
+        while sprite >= 0 {
+            let sprite_offset = sprite * 4;
+
+            // Sprite data is 4 bytes with the following information
+            //   Byte0  Y position on the screen
+            //   Byte1  X position on the screen
+            //   Byte2  Tile map index, like with tiles an index from 0 to 255
+            //   Byte3  Flags:
+            //     Bit7  Priority
+            //       Sprite is displayed in front of the window if this bit is set to 1.
+            //       Otherwise, sprite is shown behind the window but in front of the background.
+            //     Bit6  Y flip
+            //       Sprite pattern is flipped vertically if this bit is set to 1.
+            //     Bit5  X flip
+            //       Sprite pattern is flipped horizontally if this bit is set to 1.
+            //     Bit4  Palette number
+            //       Use colors from OBJ1PAL if this bit is set and from OBJ0PAL otherwise.
+
+
+            let sprite_y = self.vram.oam[sprite_offset as usize] as i32 - 16;
+            let sprite_x = self.vram.oam[(sprite_offset + 1) as usize] as i32 - 8;
+
+            // skip sprite if outside boundaries
+            if (sprite_y > self.line as i32) || (sprite_y + sprite_height as i32) <= self.line as i32 {
+                continue;
+            }
+
+            if (sprite_x < -7) || (sprite_x >= 144) {
+                continue;
+            }
+
+            // TODO what if sprite height is 16? any changes?
+            let sprite_tile = self.vram.oam[(sprite_offset + 2) as usize];
+            let sprite_flags = self.vram.oam[(sprite_offset + 3) as usize];
+
+            // TODO refactor this into a struct?
+            let sprite_palette = if is_set(sprite_flags, 4) { 1 } else { 0 };
+            let x_flip = is_set(sprite_flags, 5);
+            let y_flip = is_set(sprite_flags, 6);
+            let over_window = is_set(sprite_flags, 7);
+
+            let pixel_y = if y_flip {
+                // sprite is flipped vertically
+                (sprite_height as i32 - 1) - (self.line as i32 - sprite_y)
+            } else {
+                self.line as i32- sprite_y
+            };
+
+            // offset in tile map due to y position
+            let pixel_y_offset = if sprite_height == 16 && pixel_y >= 8 {
+                ((pixel_y - 8) * 2) + 16
+            } else {
+                pixel_y * 2
+            };
+
+            let tile_address = sprite_tile as i32 + pixel_y_offset as i32;
+            // retrieve the pixel data
+            let high_byte = self.vram.data[tile_address as usize];
+            let low_byte = self.vram.data[(tile_address + 1) as usize];
+
+            // compute each pixel and render
+            for x in 0..8 {
+                let pixel_idx = if x_flip { x } else { 7 - x };
+
+                let pixel = if is_set(high_byte, pixel_idx as usize) { 1 } else { 0 } |
+                            if is_set(low_byte, pixel_idx as usize) { 2 } else { 0 };
+
+                // skip transparent pixels (value == 0)
+                if pixel == 0 {
+                    continue;
+                }
+
+                // skip pixels outside boundaries
+                let x_pos = x + sprite_x;
+
+                if x_pos < 0 || x_pos >= 144 {
+                    continue;
+                }
+
+                // index in the framebuffer
+                let position = line_width as i32 + x_pos;
+
+                // TODO skip pixel if it is above the BG (need to keep BG data)
+                // if !over_window {
+                //
+                // }
+
+                // TODO: read palette from memory (0xFF49 for OBJ1, 0xFF48 for OBJ0)
+                let color = GBColor::from_u8(pixel);
+                self.framebuffer[position as usize] = color.to_u8u8u8();
+            }
+
+            sprite -= 1;
+        }
+    }
+
     /// Renders a single scanline to the framebuffer, from the internal tile data.
     fn render_scanline(&mut self) {
         // map offset starts from 0x1C00 (for tileset #1) or 0x1800 (for tileset #0)

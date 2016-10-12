@@ -91,7 +91,8 @@ pub enum TileSelector {
 /// An enum for sprite size mode (8x8 or 8x16)
 #[derive(Copy, Clone)]
 pub enum SpriteSize {
-    Size8, Size16
+    Size8 = 8,
+    Size16 = 16,
 }
 
 /// LCD Control register data
