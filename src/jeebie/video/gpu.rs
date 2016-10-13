@@ -2,6 +2,10 @@ use super::data::*;
 
 use jeebie::utils::is_set;
 
+
+const SCREEN_WIDTH: i32 = 160;
+const SCREEN_HEIGHT: i32 = 144;
+
 /// Holds all information relative to the graphics subsystem.
 /// Includes computed data like the framebuffer, in a format that can be drawn to screen.
 pub struct GPU {
@@ -11,7 +15,7 @@ pub struct GPU {
     lcdc: LCDControl,
     lcdp: LCDPosition,
     lcds: LCDStatus,
-    framebuffer: [(u8, u8, u8); 160 * 144]
+    framebuffer: [(u8, u8, u8); (SCREEN_WIDTH * SCREEN_HEIGHT) as usize]
 }
 
 impl GPU {
@@ -23,7 +27,64 @@ impl GPU {
             lcdc: LCDControl::new(),
             lcdp: LCDPosition::new(),
             lcds: LCDStatus::new(),
-            framebuffer: [(0, 0, 0); 160 * 144],
+            framebuffer: [(0, 0, 0); (SCREEN_WIDTH * SCREEN_HEIGHT) as usize],
+        }
+    }
+
+    /// Emulates the GPU.
+    /// This function should be called after an instruction is executed by the CPU,
+    /// `delta` is the number of cycles passed from the last instruction.
+    pub fn emulate(&mut self, delta: u32) {
+
+        // If screen is disabled
+        if !self.lcdc.lcd_enable {
+            return;
+        }
+
+        self.cycles += delta;
+
+        match self.lcds.mode {
+            Mode::OAMRead => {
+                if self.cycles >= 80 {
+                    self.cycles = 0;
+                    self.lcds.mode = Mode::VRAMRead;
+                }
+            }
+            Mode::VRAMRead => {
+                if self.cycles >= 172 {
+                    self.cycles = 0;
+                    self.lcds.mode = Mode::HBlank;
+
+                    // scanline is done, write it to framebuffer
+                    self.render_scanline();
+                }
+            }
+            Mode::HBlank => {
+                if self.cycles >= 204 {
+                    self.cycles = 0;
+                    self.line += 1;
+
+                    self.lcds.mode = if self.line == 143 {
+                        // TODO: push framebuffer data to frontend now (interrupt)
+                        self.lcds.vblank_irq = true;
+                        Mode::VBlank
+
+                    } else {
+                        Mode::OAMRead
+                    };
+                }
+            }
+            Mode::VBlank => {
+                if self.cycles >= 456 {
+                    self.cycles = 0;
+                    self.line += 1;
+
+                    if self.line > 153 {
+                        self.lcds.mode = Mode::OAMRead;
+                        self.line = 0;
+                    }
+                }
+            }
         }
     }
 
@@ -151,7 +212,7 @@ impl GPU {
                             if is_set(low_byte, pixel_idx as usize) { 2 } else { 0 };
 
                 // final position of this pixel offset by line * line_width
-                let position = 144 * self.line as usize + buffer_x_offset as usize;
+                let position = SCREEN_WIDTH as usize * self.line as usize + buffer_x_offset as usize;
 
                 let color = GBColor::from_u8(pixel);
                 self.framebuffer[position] = color.to_u8u8u8();
@@ -171,7 +232,7 @@ impl GPU {
         }
 
         let sprite_height = self.lcdc.sprite_size as u8;
-        let line_width = self.line * 144;
+        let line_width = self.line as i32 * SCREEN_WIDTH;
 
         // 40 sprites can be displayed
         let mut sprite = 39;
@@ -202,7 +263,7 @@ impl GPU {
                 continue;
             }
 
-            if (sprite_x < -7) || (sprite_x >= 144) {
+            if (sprite_x < -7) || (sprite_x >= SCREEN_WIDTH) {
                 continue;
             }
 
@@ -289,17 +350,17 @@ impl GPU {
         let mut x = (x_offset & 0x07) as usize;
 
         // starting scanline where we will write on the framebuffer
-        let fb_offset = (self.line as usize) * 160;
+        let fb_offset = (self.line as usize) * SCREEN_WIDTH as usize;
 
         // read the tile index from the vram at the computed offset
         let mut tile_index = self.read_vram((y_offset + x_offset) as usize);
 
         // compute each of the 160 pixels in a scanline
-        for i in 0..160 {
+        for i in 0..SCREEN_WIDTH {
             // TODO: maybe load tile lines instead of single pixels, less function calls.
             let pixel = self.get_tile_pixel(self.lcdc.bg_tile_map, tile_index as usize, x + y);
 
-            self.framebuffer[fb_offset + i] = pixel.to_u8u8u8();
+            self.framebuffer[fb_offset + i as usize] = pixel.to_u8u8u8();
             x += 1;
 
             if x == 8 {
@@ -357,58 +418,6 @@ impl GPU {
              },
             _ => panic!("Attempted GPU register write with addr {:4x}", addr),
         };
-    }
-
-    /// Emulates the GPU.
-    /// This function should be called after an instruction is executed by the CPU,
-    /// `delta` is the number of cycles passed from the last instruction.
-    pub fn emulate(&mut self, delta: u32) {
-
-        self.cycles += delta;
-
-        match self.lcds.mode {
-            Mode::OAMRead => {
-                if self.cycles >= 80 {
-                    self.cycles = 0;
-                    self.lcds.mode = Mode::VRAMRead;
-                }
-            }
-            Mode::VRAMRead => {
-                if self.cycles >= 172 {
-                    self.cycles = 0;
-                    self.lcds.mode = Mode::HBlank;
-
-                    // scanline is done, write it to framebuffer
-                    self.render_scanline();
-                }
-            }
-            Mode::HBlank => {
-                if self.cycles >= 204 {
-                    self.cycles = 0;
-                    self.line += 1;
-
-                    self.lcds.mode = if self.line == 143 {
-                        // TODO: push framebuffer data to frontend now (interrupt)
-                        self.lcds.vblank_irq = true;
-                        Mode::VBlank
-
-                    } else {
-                        Mode::OAMRead
-                    };
-                }
-            }
-            Mode::VBlank => {
-                if self.cycles >= 456 {
-                    self.cycles = 0;
-                    self.line += 1;
-
-                    if self.line > 153 {
-                        self.lcds.mode = Mode::OAMRead;
-                        self.line = 0;
-                    }
-                }
-            }
-        }
     }
 }
 
