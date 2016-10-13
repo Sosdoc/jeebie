@@ -10,6 +10,7 @@ const SCREEN_HEIGHT: i32 = 144;
 /// Includes computed data like the framebuffer, in a format that can be drawn to screen.
 pub struct GPU {
     line: u8,
+    lyc: u8, // LYC (line Y compare) register
     cycles: u32,
     vram: VideoMemory,
     lcdc: LCDControl,
@@ -22,6 +23,7 @@ impl GPU {
     pub fn new() -> GPU {
         GPU {
             line: 0,
+            lyc: 0,
             cycles: 0,
             vram: VideoMemory { data: [0; 8192], oam: [0; 160] },
             lcdc: LCDControl::new(),
@@ -401,6 +403,7 @@ impl GPU {
             0xFF42 => self.lcdp.scroll_x,
             0xFF43 => self.lcdp.scroll_y,
             0xFF44 => self.line, // current scanline
+            0xFF45 => self.lyc,
             0xFF47 => panic!("Palette is write only!"),
             _ => panic!("Attempted GPU register access with addr {:4x}", addr),
         }
@@ -413,6 +416,7 @@ impl GPU {
             0xFF42 => { self.lcdp.scroll_x = data },
             0xFF43 => { self.lcdp.scroll_y = data },
             0xFF44 => { self.line = data }, // current scanline
+            0xFF45 => { self.lyc = data },
             0xFF47 => {
                 // TODO: figure palette writing (is it needed for CGB only?)
              },

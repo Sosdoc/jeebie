@@ -86,7 +86,7 @@ impl MMU {
             // I/O ports
             0xFF00...0xFF4B => {
                 match addr & 0xFF {
-                    0x40 | 0x41 | 0x42 | 0x43 | 0x44 | 0x47 => self.gpu.read_register(addr as usize),
+                    0x40...0x47 => self.gpu.read_register(addr as usize),
                     _ => unimplemented!(),
                 }
             },
@@ -131,7 +131,7 @@ impl MMU {
             // I/O ports
             0xFF00...0xFF4B => {
                 match addr & 0xFF {
-                    0x40 | 0x41 | 0x42 | 0x43 | 0x44 | 0x47 => self.gpu.write_register(addr as usize, data),
+                    0x40...0x47 => self.gpu.write_register(addr as usize, data),
                     _ => {},
                 }
             },
