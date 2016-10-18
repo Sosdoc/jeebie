@@ -90,6 +90,13 @@ impl GPU {
         }
     }
 
+    /// Renders a single scanline to the framebuffer, from the internal tile data.
+    fn render_scanline(&mut self) {
+        self.render_background();
+        self.render_window();
+        self.render_sprites();
+    }
+
     /// Retrieves Tile information from the VRAM.
     /// A tile is held in 16 bytes in the VRAM, enough information for 64 pixels (8x8 matrix, 2 bits per pixel).
     /// When selecting tiles from Set #1, the index 0 represents tile -128 (equal to tile 128 from Set #0)
@@ -334,8 +341,8 @@ impl GPU {
         }
     }
 
-    /// Renders a single scanline to the framebuffer, from the internal tile data.
-    fn render_scanline(&mut self) {
+    /// Renders the background
+    fn render_background(&mut self) {
         // map offset starts from 0x1C00 (for tileset #1) or 0x1800 (for tileset #0)
         let mut y_offset : u16 = if let TileSelector::Set1 = self.lcdc.bg_tile_map { 0x1C00 } else { 0x1800 };
 
