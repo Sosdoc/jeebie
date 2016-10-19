@@ -6,19 +6,19 @@ use jeebie::instr::opcodes::{ CB_OPCODE_TABLE, OPCODE_TABLE };
 use jeebie::utils::{ is_set, swap_bit, set_bit, reset_bit, combine_as_u16 };
 
 #[derive(Debug)]
-pub struct CPU<'a> {
+pub struct CPU {
     pub reg: Registers,
-    pub mem: &'a mut MMU,
+    pub mem: Box<MMU>,
     pub interrupts_enabled: bool,
 
     // amount of machine cycles (as reported in timing tables) elapsed.
     cycles: u64,
 }
 
-impl<'a> CPU<'a> {
-    pub fn new(mmu: &'a mut MMU) -> CPU<'a> {
+impl CPU {
+    pub fn new(mmu: MMU) -> CPU {
         let r = Registers::new();
-        CPU { reg: r, mem: mmu, cycles: 0, interrupts_enabled: false}
+        CPU { reg: r, mem: Box::new(mmu), cycles: 0, interrupts_enabled: false}
     }
 
     /// Executes one instruction, updating cycles and PC register accordingly.

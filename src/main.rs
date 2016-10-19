@@ -16,9 +16,7 @@ fn main() {
     // Size of the framebuffer
     let fb_size = (160, 144);
 
-    // MMU outlives everything
-    let mut mmu = MMU::new();
-    let mut cpu = CPU::new(&mut mmu);
+    let mut cpu = CPU::new(MMU::new());
 
     let mut window: PistonWindow = WindowSettings::new("Hello Piston!", [fb_size.0, fb_size.1])
         .build()
