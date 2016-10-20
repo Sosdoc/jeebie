@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::Read;
+use std::io::{Read, Error};
 
 use jeebie::utils::combine_as_u16;
 
@@ -10,13 +10,16 @@ use jeebie::utils::combine_as_u16;
 pub struct Cartridge {
     pub size: usize,
     pub name: String,
+    pub licensee: String,
     pub data: Vec<u8>,
 }
 
 impl Cartridge {
     /// Creates a Cartridge by loading the file at the specified path.
-    pub fn new_with_path(path: &str) -> Cartridge {
-        Cartridge::new_with_vec(Cartridge::load_rom_file(path))
+    pub fn new_with_path(path: &str) -> Result<Cartridge, Error> {
+        let data = try!(Cartridge::load_rom_file(path));
+        let cart = Cartridge::new_with_vec(data);
+        Ok(cart)
     }
 
     /// Creates a new Cartridge struct from a vector buffer.
@@ -33,7 +36,7 @@ impl Cartridge {
         let licensee_code_data : Vec<u8> = (&data[0x144..0x145]).to_vec();
 
         // read licensee code as ASCII string
-        let name : String = licensee_code_data.into_iter()
+        let licensee : String = licensee_code_data.into_iter()
             .map(| c | { c as char })
             .collect();
 
@@ -55,20 +58,16 @@ impl Cartridge {
         Cartridge {
             size: data.len(),
             name: name,
+            licensee: licensee,
             data: data,
         }
     }
 
     /// Loads binary data from a file into a vector buffer.
-    fn load_rom_file(path: &str) -> Vec<u8> {
+    fn load_rom_file(path: &str) -> Result<Vec<u8>, Error> {
         let mut buf: Vec<u8> = vec![];
-
-        if let Ok(mut file) = File::open(path) {
-            match file.read_to_end(&mut buf) {
-                Ok(_) => {},
-                Err(e) => println!("{:?}", e),
-            }
-        }
-        buf
+        let mut file = try!(File::open(path));
+        try!(file.read_to_end(&mut buf));
+        Ok(buf)
     }
 }
