@@ -13,7 +13,7 @@ use jeebie::bootrom::DMG_BOOTROM;
 /// Provides access to all mapped memory in the system, including I/O and graphics.
 pub struct MMU {
     // TODO: MMU should own RAM/High RAM (8k + 256 bytes), maybe some registers.
-    data: [u8; 65536],
+    data: Vec<u8>,
     loading_bios: Cell<bool>,
 
     pub gpu: GPU,
@@ -31,7 +31,7 @@ impl MMU {
     pub fn new() -> Self {
         MMU {
             loading_bios: Cell::new(true),
-            data: [0; 65536],
+            data: vec![0; 65536],
             gpu: GPU::new(),
         }
     }
