@@ -21,8 +21,17 @@ use jeebie::utils::is_set;
 /// The rest of the memory (`oam`) is used for sprite data and addressed separately
 /// from FE00 to FE9F.
 pub struct VideoMemory {
-    pub data: [u8; 8192],
-    pub oam: [u8; 160],
+    pub data: Vec<u8>,
+    pub oam: Vec<u8>,
+}
+
+impl VideoMemory {
+    pub fn new() -> Self {
+        VideoMemory {
+            data: vec![0; 8192],
+            oam: vec![0; 160],
+        }
+    }
 }
 
 ///  Mode 0 (`HBlank`): The LCD controller is in the H-Blank period and

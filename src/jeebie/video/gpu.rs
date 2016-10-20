@@ -25,7 +25,7 @@ impl GPU {
             line: 0,
             lyc: 0,
             cycles: 0,
-            vram: VideoMemory { data: [0; 8192], oam: [0; 160] },
+            vram: VideoMemory::new(),
             lcdc: LCDControl::new(),
             lcdp: LCDPosition::new(),
             lcds: LCDStatus::new(),

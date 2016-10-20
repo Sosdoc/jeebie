@@ -5,8 +5,17 @@ use super::MemoryBankController;
 /// Some cartridges that specify no MBC might also pack up to 8KB of RAM at the
 /// addresses 0xA000 to 0xBFFF.
 struct RomOnly {
-    data: [u8; 32768],
-    ram: [u8; 8192]
+    data: Vec<u8>,
+    ram: Vec<u8>,
+}
+
+impl RomOnly {
+    pub fn with_data(rom_data: Vec<u8>) -> Self {
+        RomOnly {
+            data: rom_data,
+            ram: vec![0; 8192],
+        }
+    }
 }
 
 impl MemoryBankController for RomOnly {

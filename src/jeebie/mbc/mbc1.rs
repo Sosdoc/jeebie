@@ -9,9 +9,20 @@ use super::MemoryBankController;
 /// 0x60 are not usable, thus the total bank number is 125.
 struct MBC1 {
     data: Vec<u8>,
-    ram: [u8; 32768], // 32KB RAM
+    ram: Vec<u8>,
     selected_rom_bank: u8,
     selected_ram_bank: u8,
+}
+
+impl MBC1 {
+    pub fn with_data(rom_data: Vec<u8>) -> Self {
+        MBC1 {
+            data: rom_data,
+            ram: vec![0; 32768], // 32KB RAM
+            selected_rom_bank: 1,
+            selected_ram_bank: 0,
+        }
+    }
 }
 
 impl MemoryBankController for MBC1 {
