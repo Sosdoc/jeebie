@@ -7,22 +7,49 @@ extern crate image as im;
 
 mod jeebie;
 
+use std::env;
+
 use jeebie::core::cpu::CPU;
 use jeebie::memory::MMU;
+use jeebie::cart::Cartridge;
 
 use piston_window::*;
 
 fn main() {
+    let args: Vec<String> = env::args().collect();
+
+    let mut cpu = match args.len() {
+        1 => {
+            CPU::new(MMU::new())
+        },
+        _ => {
+            // ignore other args
+            let file_path = &args[1];
+
+            let cart = match Cartridge::new_with_path(file_path) {
+                Ok(c) => c,
+                Err(e) => {
+                    println!("Error: {:?}", e);
+                    return
+                },
+            };
+
+            let mmu = MMU::new_with_rom(&cart);
+            CPU::new(mmu)
+        },
+    };
+
+    emulator_loop(&mut cpu);
+}
+
+// Create the window and run the update/render loop
+fn emulator_loop(cpu: &mut CPU) {
     // Size of the framebuffer
     let fb_size = (160, 144);
 
-    let mut cpu = CPU::new(MMU::new());
-
-    let mut window: PistonWindow = WindowSettings::new("Hello Piston!", [fb_size.0, fb_size.1])
+    let mut window: PistonWindow = WindowSettings::new("Jeebie", [fb_size.0, fb_size.1])
         .build()
         .unwrap();
-
-    window.set_title("Jeebie".to_string());
 
     // Create an ImageBuffer and fill it
     let mut img = im::ImageBuffer::new(fb_size.0, fb_size.1);
