@@ -7,6 +7,8 @@ use std::cell::Cell;
 
 use jeebie::video::gpu::GPU;
 use jeebie::cart::Cartridge;
+use jeebie::mbc::MemoryBankController;
+use jeebie::mbc::nombc::RomOnly;
 use jeebie::bootrom::DMG_BOOTROM;
 
 /// The Memory Management Unit.
@@ -15,7 +17,7 @@ pub struct MMU {
     // TODO: MMU should own RAM/High RAM (8k + 256 bytes), maybe some registers.
     data: Vec<u8>,
     loading_bios: Cell<bool>,
-
+    mbc: Box<MemoryBankController>,
     pub gpu: GPU,
 }
 
@@ -32,6 +34,7 @@ impl MMU {
         MMU {
             loading_bios: Cell::new(true),
             data: vec![0; 65536],
+            mbc: Box::new(RomOnly::new()),
             gpu: GPU::new(),
         }
     }
