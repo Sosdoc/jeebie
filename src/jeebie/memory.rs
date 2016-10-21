@@ -63,21 +63,14 @@ impl MMU {
         }
 
         match addr {
-            // bios area, 256B long for regular gameboy.
-            0...0x00FF if self.loading_bios.get() => DMG_BOOTROM[(addr & 0xFF) as usize],
-            // ROM0 area accessible only when bootrom is disabled (first 256 bytes).
-            0x0000...0x00FF if !self.loading_bios.get() => self.data[addr as usize],
-            // ROM0 area, this is banked memory, it will swap according to selected bank
-            0x0100...0x3FFF => self.data[addr as usize],
-            // ROM1 area, 16kB unbanked data
-            0x4000...0x7FFF => self.data[addr as usize],
+            // bios area, 256B long for regular gameboy, only accessible if loading_bios is true.
+            0x0000...0x00FF if self.loading_bios.get() => DMG_BOOTROM[(addr & 0xFF) as usize],
+            // ROM area, this is handled by the MBC
+            0x0000...0x7FFF => self.mbc.read(addr),
             // Graphics, 8kB VRAM
             0x8000...0x9FFF => self.gpu.read_vram((addr & 0x1FFF) as usize),
-            // Switchable RAM bank, 8kB
-            0xA000...0xBFFF => {
-                // TODO: handle RAM banks
-                self.data[addr as usize]
-            }
+            // Switchable RAM bank, 8kB, handled by MBC
+            0xA000...0xBFFF => self.mbc.read(addr),
             // Internal RAM, 8kB
             0xC000...0xDFFF => self.data[addr as usize],
             // Echo of internal RAM, this is less than 8k, up to 0xFDFF,
@@ -105,32 +98,21 @@ impl MMU {
     pub fn write_b(&mut self, addr: u16, data: u8) {
         match addr {
             // bios area, 256B long for regular gameboy.
-            0...0x00FF if self.loading_bios.get() => panic!("Writing to bootrom ${:04x} <- {:02x}", addr, data),
-            // ROM0 area, this is banked memory, it will swap according to selected bank
-            0x0000...0x3FFF => panic!("Writing to ROM0 ${:04x} <- {:02x}", addr, data),
-            // ROM1 area, 16kB unbanked data
-            0x4000...0x7FFF => panic!("Writing to ROM1 ${:04x} <- {:02x}", addr, data),
+            0x0000...0x00FF if self.loading_bios.get() => panic!("Writing to bootrom ${:04x} <- {:02x}", addr, data),
+            // ROM area, this is banked memory, it will swap according to selected bank
+            0x0000...0x7FFF => self.mbc.write(addr, data),
             // Graphics, 8kB VRAM
             0x8000...0x9FFF => self.gpu.write_vram((addr & 0x1FFF) as usize, data),
             // Switchable RAM bank, 8kB
-            0xA000...0xBFFF => {
-                // TODO: handle RAM banks
-                self.data[addr as usize] = data;
-            }
+            0xA000...0xBFFF => self.mbc.write(addr, data),
             // Internal RAM, 8kB
-            0xC000...0xDFFF => {
-                self.data[addr as usize] = data;
-            },
+            0xC000...0xDFFF => self.data[addr as usize] = data,
             // Echo of internal RAM, this is less than 8k, up to 0xFDFF,
-            0xE000...0xFDFF => {
-                self.data[(addr - 0x2000) as usize] = data;
-            },
+            0xE000...0xFDFF => self.data[(addr - 0x2000) as usize] = data,
             // Sprite attribute memory, 160B
-            0xFE00...0xFE9F => {
-                self.gpu.write_oam((addr - 0xFE00) as usize, data);
-            }
+            0xFE00...0xFE9F => self.gpu.write_oam((addr - 0xFE00) as usize, data),
             // empty
-            0xFEA0...0xFEFF | 0xFF4C...0xFF7F => {},
+            0xFEA0...0xFEFF | 0xFF4C...0xFF7F => (),
             // I/O ports
             0xFF00...0xFF4B => {
                 match addr & 0xFF {
@@ -139,7 +121,7 @@ impl MMU {
                 }
             },
             // High RAM (zero page), used with LDH instructions
-            0xFF80...0xFFFE => { self.data[addr as usize] = data; },
+            0xFF80...0xFFFE => self.data[addr as usize] = data,
             // Interrupt Enable register
             0xFFFF => unimplemented!(),
 
