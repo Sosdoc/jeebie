@@ -47,3 +47,31 @@ impl MemoryBankController for RomOnly {
         };
     }
 }
+
+#[test]
+fn nombc_loads_vec() {
+    let mbc = RomOnly::with_data(vec![0xFF; 0x8000]);
+
+    // ROM
+    assert_eq!(0xFF, mbc.read(0x0));
+    assert_eq!(0xFF, mbc.read(0x7FFF));
+    // RAM
+    assert_eq!(0x0, mbc.read(0xA000));
+    assert_eq!(0x0, mbc.read(0xBFFF));
+}
+
+#[test]
+fn nombc_write() {
+    let mut mbc = RomOnly::with_data(vec![0xFF; 0x8000]);
+
+    // ROM write should do nothing
+    mbc.write(0x0, 0xAF);
+    mbc.write(0x7FFF, 0xAF);
+    assert_eq!(0xFF, mbc.read(0x0));
+    assert_eq!(0xFF, mbc.read(0x7FFF));
+    // RAM write
+    mbc.write(0xA000, 0xAF);
+    mbc.write(0xBFFF, 0xAF);
+    assert_eq!(0xAF, mbc.read(0xA000));
+    assert_eq!(0xAF, mbc.read(0xBFFF));
+}
