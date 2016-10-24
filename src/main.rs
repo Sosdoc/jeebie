@@ -20,7 +20,7 @@ fn main() {
 
     let mut cpu = match args.len() {
         1 => {
-            CPU::new(MMU::new())
+            CPU::new()
         },
         _ => {
             // ignore other args
@@ -35,7 +35,7 @@ fn main() {
             };
 
             let mmu = MMU::new_with_rom(&cart);
-            CPU::new(mmu)
+            CPU::with_mmu(mmu)
         },
     };
 

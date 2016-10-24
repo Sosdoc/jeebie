@@ -6,7 +6,7 @@ use jeebie::core::registers::Flags::*;
 
 #[test]
 fn add_8_bit() {
-    let mut cpu = CPU::new(MMU::new());
+    let mut cpu = CPU::new();
     // simple add, 2 + 2
     cpu.set8(A, 2u8);
     cpu.compute_add(A, A);
@@ -42,7 +42,7 @@ fn add_8_bit() {
 
 #[test]
 fn add_16_bit() {
-    let mut cpu = CPU::new(MMU::new());
+    let mut cpu = CPU::new();
 
     // simple add, no flags set
     cpu.set16(BC, 256u16);
@@ -78,7 +78,7 @@ fn add_16_bit() {
 
 #[test]
 fn sub_8_bit() {
-    let mut cpu = CPU::new(MMU::new());
+    let mut cpu = CPU::new();
     // simple sub
     cpu.set8(A, 8u8);
     cpu.set8(B, 2u8);
@@ -115,7 +115,7 @@ fn sub_8_bit() {
 
 #[test]
 fn cp_test() {
-    let mut cpu = CPU::new(MMU::new());
+    let mut cpu = CPU::new();
 
     // simple sub
     cpu.set8(A, 10);
@@ -140,7 +140,7 @@ fn cp_test() {
 
 #[test]
 fn inc_test() {
-    let mut cpu = CPU::new(MMU::new());
+    let mut cpu = CPU::new();
 
     // NOTE: Carry flag is unmodified
     // simple inc
@@ -173,7 +173,7 @@ fn inc_test() {
 
 #[test]
 fn dec_test() {
-    let mut cpu = CPU::new(MMU::new());
+    let mut cpu = CPU::new();
 
     // NOTE: Carry flag is unmodified
     // simple dec
@@ -216,7 +216,7 @@ fn dec_test() {
 
 #[test]
 fn bit_check_test() {
-    let mut cpu = CPU::new(MMU::new());
+    let mut cpu = CPU::new();
 
     cpu.set8(B, 0b1000_0001u8);
     cpu.bit_check(0, B);
@@ -234,7 +234,7 @@ fn bit_check_test() {
 
 #[test]
 fn swap_test() {
-    let mut cpu = CPU::new(MMU::new());
+    let mut cpu = CPU::new();
 
     cpu.set8(B, 0xAB);
     cpu.compute_swap(B);
@@ -260,7 +260,7 @@ fn swap_test() {
 
 #[test]
 fn and_test() {
-    let mut cpu = CPU::new(MMU::new());
+    let mut cpu = CPU::new();
 
     cpu.set8(A, 0x0F);
     cpu.set8(B, 0xAB);
@@ -287,7 +287,7 @@ fn and_test() {
 
 #[test]
 fn or_test() {
-    let mut cpu = CPU::new(MMU::new());
+    let mut cpu = CPU::new();
 
     cpu.set8(A, 0x0B);
     cpu.set8(B, 0xA0);
@@ -315,7 +315,7 @@ fn or_test() {
 
 #[test]
 fn xor_test() {
-    let mut cpu = CPU::new(MMU::new());
+    let mut cpu = CPU::new();
 
     cpu.set8(A, 0x21);
     cpu.set8(B, 0x41);
@@ -354,7 +354,7 @@ fn xor_test() {
 
 #[test]
 fn cpu_stack_test() {
-    let mut cpu = CPU::new(MMU::new());
+    let mut cpu = CPU::new();
 
     cpu.set16(SP, 0xFFFE);
     cpu.push_stack(Value16(0xCAFE));
@@ -378,7 +378,7 @@ fn cpu_stack_test() {
 
 #[test]
 fn shift_test() {
-    let mut cpu = CPU::new(MMU::new());
+    let mut cpu = CPU::new();
 
     // 0x80 -- 0b1000_0000
     // shift left, should be zero and carry 1
@@ -415,7 +415,7 @@ fn shift_test() {
 
 #[test]
 fn shift_r_test() {
-    let mut cpu = CPU::new(MMU::new());
+    let mut cpu = CPU::new();
 
     // 0x80 -- 0b1000_0000
     // shift right and preserve MSB -> 0b1100_0000 / 0xC0

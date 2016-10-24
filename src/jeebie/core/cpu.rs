@@ -16,7 +16,20 @@ pub struct CPU {
 }
 
 impl CPU {
-    pub fn new(mmu: MMU) -> CPU {
+
+    /// Creates a CPU with default parameters. No ROM code is loaded, so only the
+    /// bootloader will run when executing.
+    pub fn new() -> Self {
+        CPU {
+            reg: Registers::new(),
+            mem: Box::new(MMU::new()),
+            cycles: 0,
+            interrupts_enabled: false,
+        }
+    }
+
+    /// Creates a CPU with the provided MMU.
+    pub fn with_mmu(mmu: MMU) -> CPU {
         let r = Registers::new();
         CPU { reg: r, mem: Box::new(mmu), cycles: 0, interrupts_enabled: false}
     }
