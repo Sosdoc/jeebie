@@ -1,19 +1,23 @@
-#![cfg_attr(feature="clippy", feature(plugin))]
-#![cfg_attr(feature="clippy", plugin(clippy))]
+#![cfg_attr(feature = "clippy", feature(plugin))]
+#![cfg_attr(feature = "clippy", plugin(clippy))]
 
-#[macro_use]
-extern crate piston_window;
-extern crate image as im;
+extern crate sdl2;
 
 mod jeebie;
-
-use std::env;
 
 use jeebie::core::cpu::CPU;
 use jeebie::memory::MMU;
 use jeebie::cart::Cartridge;
 
-use piston_window::*;
+use std::env;
+use std::thread;
+use std::time::Duration;
+use std::error::Error;
+
+use sdl2::render::{Renderer, Texture};
+use sdl2::pixels::PixelFormatEnum;
+use sdl2::event::Event;
+use sdl2::keyboard::Keycode;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -39,71 +43,67 @@ fn main() {
         },
     };
 
-    emulator_loop(&mut cpu);
+    run_emulator(&mut cpu).expect("error during execution");
 }
 
-// Create the window and run the update/render loop
-fn emulator_loop(cpu: &mut CPU) {
-    // Size of the framebuffer
-    let fb_size = (160, 144);
+pub fn run_emulator(emulator: &mut CPU) -> Result<(), Box<Error>> {
+    let sdl_context = sdl2::init()?;
+    let video_subsystem = sdl_context.video()?;
+    let (width, height) = (160, 144);
 
-    let mut window: PistonWindow = WindowSettings::new("Jeebie", [fb_size.0, fb_size.1])
-        .build()
-        .unwrap();
+    let window = video_subsystem.window("Jeebie", width * 3, height * 3)
+        .position_centered()
+        .resizable()
+        .opengl()
+        .build()?;
+        
+    let mut renderer = window.renderer().build()?;
+    let mut texture = renderer.create_texture_streaming(PixelFormatEnum::RGB24, width, height)?;
+    let mut event_pump = sdl_context.event_pump()?;
 
-    // Create an ImageBuffer and fill it
-    let mut img = im::ImageBuffer::new(fb_size.0, fb_size.1);
-
-    for x in 0..fb_size.0 {
-        for y in 0..fb_size.1 {
-            img.put_pixel(x, y, im::Rgba([0, 255, 0, 255]));
+    'running: loop {
+        // Handle inputs
+        for event in event_pump.poll_iter() {
+            match event {
+                Event::Quit {..} | Event::KeyDown { keycode: Some(Keycode::Escape), .. } => break 'running,
+                _ => {},
+            };
         }
+
+        // Execute
+        let fb = emulator.exec_one_frame();
+
+        // Draw
+        draw_step(&mut renderer, &mut texture, &fb)?;
+
+        thread::sleep(Duration::from_millis(16));
     }
 
-    // A texture based on framebuffer data
-    let mut texture = Texture::from_image(&mut window.factory, &img, &TextureSettings::new())
-        .unwrap();
+    Ok(())
+}
 
-    while let Some(e) = window.next() {
-        let win_size = window.size();
-        // Emulate until a frame is ready
-        let frame_buffer = cpu.exec_one_frame();
+fn draw_step(renderer: &mut Renderer, texture: &mut Texture, framebuffer: &[(u8, u8, u8)]) -> Result<(), Box<Error>> {
+    renderer.clear();
 
-        // Load frame_buffer into ImageBuffer
-        for x in 0..fb_size.0 {
-            for y in 0..fb_size.1 {
-                let fb_pixel = frame_buffer[(fb_size.0 * y + x) as usize];
-                img.put_pixel(
-                    x, y,
-                    im::Rgba([fb_pixel.0, fb_pixel.1, fb_pixel.2, 255]));
+    let (width, height) = (160, 144);
+
+    texture.with_lock(None, |buffer: &mut [u8], pitch: usize| {
+
+        for y in 0..height {
+            for x in 0..width {
+                let offset = x * 3 + pitch * y;
+                let fb_index = x + (y * height);
+                let (r, g, b) = framebuffer[fb_index];
+
+                buffer[offset] = r;
+                buffer[offset + 1] = g;
+                buffer[offset + 2] = b;
             }
         }
+    })?;
 
-        // Update the texture from the new ImageBuffer data
-        texture.update(&mut window.encoder, &img).unwrap();
+    renderer.copy(&texture, None, None)?;
+    renderer.present();
 
-        window.draw_2d(&e, |c, g| {
-            clear([0.0, 0.0, 0.0, 1.0], g);
-            image(
-                &texture,
-                c.transform.scale(
-                    win_size.width as f64 / fb_size.0 as f64,
-                    win_size.height  as f64 / fb_size.1 as f64),
-                g);
-        });
-
-        match e.press_args() {
-            Some(Button::Keyboard(_)) => {
-                window.set_should_close(true);
-            }
-            Some(Button::Mouse(_)) => {
-                println!("mouse event");
-            }
-            Some(Button::Controller(_)) => {
-                println!("controller event");
-            }
-            // TODO: handle other keypresses and pass to emulator core
-            None => {}
-        }
-    }
+    Ok(())
 }

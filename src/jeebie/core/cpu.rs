@@ -37,9 +37,6 @@ impl CPU {
     /// Executes one instruction, updating cycles and PC register accordingly.
     /// Returns the number of elapsed machine cycles.
     pub fn exec(&mut self) -> u32 {
-        // disasm string
-        // println!("{}", get_instruction_str(self));
-
         // fetch
         let opcode = self.mem.read_b(self.reg.pc);
         self.reg.pc = self.reg.pc.wrapping_add(1);

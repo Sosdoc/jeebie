@@ -5,8 +5,7 @@ authors = ["Valerio Pipolo <valep27@gmail.com>"]
 
 [dependencies]
 clippy = {version = "*", optional = true}
-piston_window = "0.53.0"
-image = "0.10.0"
+sdl2 = "0.29"
 
 [features]
 default=[]

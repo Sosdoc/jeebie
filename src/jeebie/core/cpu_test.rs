@@ -1,5 +1,4 @@
 use jeebie::core::cpu::CPU;
-use jeebie::memory::MMU;
 use jeebie::core::registers::Register8::*;
 use jeebie::core::registers::Register16::*;
 use jeebie::core::registers::Flags::*;
