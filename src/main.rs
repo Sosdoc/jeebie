@@ -14,7 +14,7 @@ use std::thread;
 use std::time::Duration;
 use std::error::Error;
 
-use sdl2::render::{Renderer, Texture};
+use sdl2::render::{Canvas, Texture};
 use sdl2::pixels::PixelFormatEnum;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
@@ -56,11 +56,16 @@ pub fn run_emulator(emulator: &mut CPU) -> Result<(), Box<Error>> {
         .resizable()
         .opengl()
         .build()?;
-        
-    let mut renderer = window.renderer().build()?;
-    let mut texture = renderer.create_texture_streaming(PixelFormatEnum::RGB24, width, height)?;
-    let mut event_pump = sdl_context.event_pump()?;
 
+    let mut event_pump = sdl_context.event_pump()?;
+    let mut canvas = window.into_canvas()
+                    .present_vsync()
+                    .accelerated()
+                    .build()?;
+
+    let tc = canvas.texture_creator();
+    let mut texture = tc.create_texture_streaming(PixelFormatEnum::RGB24, width, height)?;
+    
     'running: loop {
         // Handle inputs
         for event in event_pump.poll_iter() {
@@ -74,7 +79,7 @@ pub fn run_emulator(emulator: &mut CPU) -> Result<(), Box<Error>> {
         let fb = emulator.exec_one_frame();
 
         // Draw
-        draw_step(&mut renderer, &mut texture, &fb)?;
+        draw_step(&mut canvas, &mut texture, &fb)?;
 
         thread::sleep(Duration::from_millis(16));
     }
@@ -82,8 +87,8 @@ pub fn run_emulator(emulator: &mut CPU) -> Result<(), Box<Error>> {
     Ok(())
 }
 
-fn draw_step(renderer: &mut Renderer, texture: &mut Texture, framebuffer: &[(u8, u8, u8)]) -> Result<(), Box<Error>> {
-    renderer.clear();
+fn draw_step(canvas: &mut Canvas<sdl2::video::Window>, texture: &mut Texture, framebuffer: &[(u8, u8, u8)]) -> Result<(), Box<Error>> {
+    canvas.clear();
 
     let (width, height) = (160, 144);
 
@@ -102,8 +107,8 @@ fn draw_step(renderer: &mut Renderer, texture: &mut Texture, framebuffer: &[(u8,
         }
     })?;
 
-    renderer.copy(&texture, None, None)?;
-    renderer.present();
+    canvas.copy(&texture, None, None)?;
+    canvas.present();
 
     Ok(())
 }
