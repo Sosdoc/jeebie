@@ -6,8 +6,6 @@ extern crate sdl2;
 mod jeebie;
 
 use jeebie::core::cpu::CPU;
-use jeebie::memory::MMU;
-use jeebie::cart::Cartridge;
 
 use std::env;
 use std::thread;
@@ -21,32 +19,11 @@ use sdl2::keyboard::Keycode;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-
-    let mut cpu = match args.len() {
-        1 => {
-            CPU::new()
-        },
-        _ => {
-            // ignore other args
-            let file_path = &args[1];
-
-            let cart = match Cartridge::new_with_path(file_path) {
-                Ok(c) => c,
-                Err(e) => {
-                    println!("Error: {:?}", e);
-                    return
-                },
-            };
-
-            let mmu = MMU::new_with_rom(&cart);
-            CPU::with_mmu(mmu)
-        },
-    };
-
-    run_emulator(&mut cpu).expect("error during execution");
+    run_emulator(&args[1]).expect("error during execution");
 }
 
-pub fn run_emulator(emulator: &mut CPU) -> Result<(), Box<Error>> {
+pub fn run_emulator(path: &str) -> Result<(), Box<Error>> {
+    let mut emulator = CPU::new_with_path(path)?;
     let sdl_context = sdl2::init()?;
     let video_subsystem = sdl_context.video()?;
     let (width, height) = (160, 144);
