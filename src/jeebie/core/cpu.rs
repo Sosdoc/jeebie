@@ -1,6 +1,9 @@
+use std::error::Error;
+
 use jeebie::memory::MMU;
 use jeebie::core::registers::*;
 use jeebie::core::registers::Flags::*;
+use jeebie::cart::Cartridge;
 
 use jeebie::instr::opcodes::{ CB_OPCODE_TABLE, OPCODE_TABLE };
 use jeebie::utils::{ is_set, swap_bit, set_bit, reset_bit, combine_as_u16 };
@@ -32,6 +35,13 @@ impl CPU {
     pub fn with_mmu(mmu: MMU) -> CPU {
         let r = Registers::new();
         CPU { reg: r, mem: Box::new(mmu), cycles: 0, interrupts_enabled: false}
+    }
+
+    pub fn new_with_path(path: &str) -> Result<CPU, Box<Error>>{
+        let cart = Cartridge::new_with_path(path)?;
+        let mmu = MMU::new_with_rom(&cart);
+
+        Ok(CPU::with_mmu(mmu))
     }
 
     /// Executes one instruction, updating cycles and PC register accordingly.
