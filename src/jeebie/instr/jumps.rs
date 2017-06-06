@@ -13,25 +13,25 @@ pub fn JP_nn(cpu: &mut CPU) -> i32 {
 
 // 'JP NZ,nn' C2 12
 pub fn JP_NZ_nn(cpu: &mut CPU) -> i32 {
-    cpu.jump_not_flag(Flags::Zero, Register16::Immediate16);
+    cpu.jump_not_flag(Flags::Zero, Register16::NN);
     12
 }
 
 // 'JP Z,nn' CA 12
 pub fn JP_Z_nn(cpu: &mut CPU) -> i32 {
-    cpu.jump_flag(Flags::Zero, Register16::Immediate16);
+    cpu.jump_flag(Flags::Zero, Register16::NN);
     12
 }
 
 // 'JP NC,nn' D2 12
 pub fn JP_NC_nn(cpu: &mut CPU) -> i32 {
-    cpu.jump_not_flag(Flags::Carry, Register16::Immediate16);
+    cpu.jump_not_flag(Flags::Carry, Register16::NN);
     12
 }
 
 // 'JP C,nn' DA 12
 pub fn JP_C_nn(cpu: &mut CPU) -> i32 {
-    cpu.jump_flag(Flags::Zero, Register16::Immediate16);
+    cpu.jump_flag(Flags::Zero, Register16::NN);
     12
 }
 
@@ -93,7 +93,7 @@ pub fn JR_C_n(cpu: &mut CPU) -> i32 {
 
 // 'CALL nn' CD 12
 pub fn CALL_nn(cpu: &mut CPU) -> i32 {
-    let call_addr = cpu.get16(Register16::Immediate16);
+    let call_addr = cpu.get16(Register16::NN);
     let next_instr = cpu.reg.pc;
     cpu.push_stack(Register16::Value16(next_instr));
     cpu.jump(call_addr);

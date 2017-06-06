@@ -88,7 +88,7 @@ impl CPU {
                 self.mem.read_b(addr)
             },
             Register8::Address(addr) => self.mem.read_b(addr),
-            Register8::Immediate => self.get_immediate8(),
+            Register8::N => self.get_immediate8(),
             Register8::Value8(n) => n,
         }
     }
@@ -119,7 +119,7 @@ impl CPU {
             Register16::HL => combine_as_u16(self.reg.h, self.reg.l),
             Register16::SP => self.reg.sp,
             Register16::PC => self.reg.pc,
-            Register16::Immediate16 => self.get_immediate16(),
+            Register16::NN => self.get_immediate16(),
             Register16::Value16(n) => n,
         }
     }

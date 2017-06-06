@@ -23,13 +23,13 @@ pub enum Flags {
 pub enum Register8 {
     A, B, C, D, E, H, L,
     RegisterAddress(Register16),
-    Address(u16), Immediate, Value8(u8)
+    Address(u16), N, Value8(u8)
 }
 
 #[derive(Clone, Copy)]
 pub enum Register16 {
     AF, BC, DE, HL, SP, PC,
-    Immediate16, Value16(u16)
+    NN, Value16(u16)
 }
 
 /// The main registers in a gameboy CPU.

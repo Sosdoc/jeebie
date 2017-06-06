@@ -54,7 +54,7 @@ pub fn ADD_a_hlm(cpu: &mut CPU) -> i32 {
 
 // 'ADD A,*' C6 8
 pub fn ADD_a_n(cpu: &mut CPU) -> i32 {
-    cpu.compute_add(A, Immediate);
+    cpu.compute_add(A, N);
     8
 }
 
@@ -108,7 +108,7 @@ pub fn ADC_a_hlm(cpu: &mut CPU) -> i32 {
 
 // 'ADC A,*' CE 8
 pub fn ADC_a_n(cpu: &mut CPU) -> i32 {
-    cpu.compute_adc(A, Immediate);
+    cpu.compute_adc(A, N);
     8
 }
 
@@ -162,7 +162,7 @@ pub fn SUB_a_hlm(cpu: &mut CPU) -> i32 {
 
 // 'SUB *' D6 8
 pub fn SUB_a_n(cpu: &mut CPU) -> i32 {
-    cpu.compute_sub(Immediate);
+    cpu.compute_sub(N);
     8
 }
 
@@ -216,7 +216,7 @@ pub fn SBC_a_hlm(cpu: &mut CPU) -> i32 {
 
 // 'SBC A,*' DE 8
 pub fn SBC_a_n(cpu: &mut CPU) -> i32 {
-    cpu.compute_sbc(Immediate);
+    cpu.compute_sbc(N);
     0
 }
 
@@ -270,7 +270,7 @@ pub fn AND_hlm(cpu: &mut CPU) -> i32 {
 
 // 'AND *' E6 8
 pub fn AND_n(cpu: &mut CPU) -> i32 {
-    cpu.compute_and(Immediate);
+    cpu.compute_and(N);
     8
 }
 
@@ -324,7 +324,7 @@ pub fn OR_hlm(cpu: &mut CPU) -> i32 {
 
 // 'OR *' F6 8
 pub fn OR_n(cpu: &mut CPU) -> i32 {
-    cpu.compute_or(Immediate);
+    cpu.compute_or(N);
     8
 }
 
@@ -378,7 +378,7 @@ pub fn XOR_hlm(cpu: &mut CPU) -> i32 {
 
 // 'XOR *' EE 8
 pub fn XOR_n(cpu: &mut CPU) -> i32 {
-    cpu.compute_xor(Immediate);
+    cpu.compute_xor(N);
     8
 }
 
@@ -432,7 +432,7 @@ pub fn CP_hlm(cpu: &mut CPU) -> i32 {
 
 // 'CP *' FE 8
 pub fn CP_n(cpu: &mut CPU) -> i32 {
-    cpu.compute_cp(Immediate);
+    cpu.compute_cp(N);
     8
 }
 

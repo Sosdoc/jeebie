@@ -4,36 +4,36 @@ use jeebie::core::registers::Register16::*;
 
 // 'LD B,n' 06 8
 pub fn LD_B_n(cpu: &mut CPU) -> i32 {
-    cpu.load_rr(B, Immediate); 8
+    cpu.load_rr(B, N); 8
 }
 
 // 'LD C,n' 0E 8
 pub fn LD_C_n(cpu: &mut CPU) -> i32 {
-    cpu.load_rr(C, Immediate);
+    cpu.load_rr(C, N);
     8
 }
 
 // 'LD D,n' 16 8
 pub fn LD_D_n(cpu: &mut CPU) -> i32 {
-    cpu.load_rr(D, Immediate);
+    cpu.load_rr(D, N);
     8
 }
 
 // 'LD E,n' 1E 8
 pub fn LD_E_n(cpu: &mut CPU) -> i32 {
-    cpu.load_rr(E, Immediate);
+    cpu.load_rr(E, N);
     8
 }
 
 // 'LD H,n' 26 8
 pub fn LD_H_n(cpu: &mut CPU) -> i32 {
-    cpu.load_rr(H, Immediate);
+    cpu.load_rr(H, N);
     8
 }
 
 // 'LD L,n' 2E 8
 pub fn LD_L_n(cpu: &mut CPU) -> i32 {
-    cpu.load_rr(L, Immediate);
+    cpu.load_rr(L, N);
     8
 }
 
@@ -404,7 +404,7 @@ pub fn LD_HLm_l(cpu: &mut CPU) -> i32 {
 
 // 'LD (HL),n' 36 12
 pub fn LD_HLm_n(cpu: &mut CPU) -> i32 {
-    cpu.load_rr(RegisterAddress(HL), Immediate);
+    cpu.load_rr(RegisterAddress(HL), N);
     2
 }
 
@@ -434,13 +434,13 @@ pub fn LD_a_HLm(cpu: &mut CPU) -> i32 {
 
 // 'LD A,(nn)' FA 16
 pub fn LD_a_nnm(cpu: &mut CPU) -> i32 {
-    cpu.load_rr(A, RegisterAddress(Immediate16));
+    cpu.load_rr(A, RegisterAddress(NN));
     6
 }
 
 // 'LD A,n' 3E 8
 pub fn LD_a_n(cpu: &mut CPU) -> i32 {
-    cpu.load_rr(A, Immediate);
+    cpu.load_rr(A, N);
     8
 }
 
@@ -458,7 +458,7 @@ pub fn LD_DEm_A(cpu: &mut CPU) -> i32 {
 
 // 'LD (nn),A' EA 16
 pub fn LD_nnm_A(cpu: &mut CPU) -> i32 {
-    cpu.load_rr(RegisterAddress(Immediate16), A);
+    cpu.load_rr(RegisterAddress(NN), A);
     6
 }
 
@@ -506,14 +506,14 @@ pub fn LDI_HLm_a(cpu: &mut CPU) -> i32 {
 
 // 'LDH ($FF00+n),A' E0 12
 pub fn LDH_nm_a(cpu: &mut CPU) -> i32 {
-    let addr = 0xFF00 | (cpu.get8(Immediate) as u16);
+    let addr = 0xFF00 | (cpu.get8(N) as u16);
     cpu.load_rr(Address(addr), A);
     12
 }
 
 // 'LDH A,($FF00+n)' F0 12
 pub fn LDH_a_nm(cpu: &mut CPU) -> i32 {
-    let addr = 0xFF00 | (cpu.get8(Immediate) as u16);
+    let addr = 0xFF00 | (cpu.get8(N) as u16);
     cpu.load_rr(A, Address(addr));
     12
 }
@@ -522,25 +522,25 @@ pub fn LDH_a_nm(cpu: &mut CPU) -> i32 {
 
 // 'LD BC,nn' 01 12
 pub fn LD_bc_nn(cpu: &mut CPU) -> i32 {
-    cpu.load_rr16(BC, Immediate16);
+    cpu.load_rr16(BC, NN);
     12
 }
 
 // 'LD DE,nn' 11 12
 pub fn LD_de_nn(cpu: &mut CPU) -> i32 {
-    cpu.load_rr16(DE, Immediate16);
+    cpu.load_rr16(DE, NN);
     12
 }
 
 // 'LD HL,nn' 21 12
 pub fn LD_hl_nn(cpu: &mut CPU) -> i32 {
-    cpu.load_rr16(HL, Immediate16);
+    cpu.load_rr16(HL, NN);
     12
 }
 
 // 'LD SP,nn' 31 12
 pub fn LD_sp_nn(cpu: &mut CPU) -> i32 {
-    cpu.load_rr16(SP, Immediate16);
+    cpu.load_rr16(SP, NN);
     12
 }
 
@@ -552,7 +552,7 @@ pub fn LD_sp_hl(cpu: &mut CPU) -> i32 {
 
 // 'LD HL,SP+n' F8 12
 pub fn LDHL_sp_n(cpu: &mut CPU) -> i32 {
-    let spn = cpu.get16(SP).wrapping_add(cpu.get8(Immediate) as u16);
+    let spn = cpu.get16(SP).wrapping_add(cpu.get8(N) as u16);
     cpu.compute_add16(HL, Value16(spn));
     12
 }

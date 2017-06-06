@@ -156,13 +156,13 @@ pub enum Register8 {
     A, B, C, D, E, H, L,
     RegisterAddress(Register16),
     Address(u16),
-    Immediate,
+    N,
     Value8(u8)
 }
 
 pub enum Register16 {
     AF, BC, DE, HL, SP, PC,
-    Immediate16,
+    NN,
     Value16(u16)
 }
 ```
@@ -199,7 +199,7 @@ pub fn get8(&mut self, reg: Register8) -> u8 {
             self.mem.read_b(addr)
         },
         Register8::Address(addr) => self.mem.read_b(addr),
-        Register8::Immediate => self.get_immediate8(),
+        Register8::N => self.get_immediate8(),
         Register8::Value8(n) => n,
     }
 }
