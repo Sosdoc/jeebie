@@ -39,6 +39,11 @@ impl MMU {
         }
     }
 
+    /// Emulates the behaviour of the system for a certain amount of cycles (`delta`)
+    pub fn emulate(&mut self, delta: u32) {
+        self.gpu.emulate(delta);
+    }
+
     /// Creates a memory controller with the specified cartridge loaded.
     pub fn new_with_rom(cart: &Cartridge) -> Self {
         let mut mmu = MMU::new();

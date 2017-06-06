@@ -24,7 +24,7 @@ impl CPU {
             reg: Registers::new(),
             mem: Box::new(MMU::new()),
             cycles: 0,
-            interrupts_enabled: false,
+            interrupts_enabled: true,
         }
     }
 
@@ -67,7 +67,7 @@ impl CPU {
 
         while self.cycles < target {
             let cycles = self.exec();
-            self.mem.gpu.emulate(cycles);
+            self.mem.emulate(cycles);
         }
 
         // frame is ready
