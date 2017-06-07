@@ -84,6 +84,34 @@ impl CPU {
         self.mem.gpu.get_framebuffer()
     }
 
+    pub fn check_interrupts(&mut self) {
+        if !self.interrupts_enabled {
+            return;
+        }
+
+        for i in 0..5 {
+            let mut int_flag = self.mem.read_b(0xFF0F);
+        
+            if is_set(int_flag, i) {
+                int_flag &= 0xFF - (1 << i);
+                self.mem.write_b(0xFF0F, int_flag);
+                self.interrupts_enabled = false;
+
+                match i {
+                    0 => self.restart(0x40), // VBLANK
+                    1 => self.restart(0x48), // LCDC
+                    2 => self.restart(0x50), // TIMER
+                    3 => self.restart(0x58), // SERIAL
+                    4 => self.restart(0x60), // HILO
+                    _ => {}
+                }
+
+                self.cycles += 20;
+                break;
+            }
+        }
+    }
+
     pub fn get8(&mut self, reg: Register8) -> u8 {
         match reg {
             Register8::A => self.reg.a,
