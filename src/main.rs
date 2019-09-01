@@ -19,10 +19,10 @@ use sdl2::keyboard::Keycode;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    run_emulator(&args[1]).expect("error during execution");
+    run_emulator(&args[1]).expect("An error occurred when running the emulator");
 }
 
-pub fn run_emulator(path: &str) -> Result<(), Box<Error>> {
+pub fn run_emulator(path: &str) -> Result<(), Box<dyn Error>> {
     let mut emulator = CPU::new_with_path(path)?;
     let sdl_context = sdl2::init()?;
     let video_subsystem = sdl_context.video()?;
@@ -64,7 +64,7 @@ pub fn run_emulator(path: &str) -> Result<(), Box<Error>> {
     Ok(())
 }
 
-fn draw_step(canvas: &mut Canvas<sdl2::video::Window>, texture: &mut Texture, framebuffer: &[(u8, u8, u8)]) -> Result<(), Box<Error>> {
+fn draw_step(canvas: &mut Canvas<sdl2::video::Window>, texture: &mut Texture, framebuffer: &[(u8, u8, u8)]) -> Result<(), Box<dyn Error>> {
     canvas.clear();
 
     let (width, height) = (160, 144);

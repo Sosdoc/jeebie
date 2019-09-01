@@ -13,7 +13,6 @@ pub struct CPU {
     pub reg: Registers,
     pub mem: Box<MMU>,
     pub interrupts_enabled: bool,
-
     // amount of machine cycles (as reported in timing tables) elapsed.
     cycles: u64,
 }
@@ -37,7 +36,7 @@ impl CPU {
         CPU { reg: r, mem: Box::new(mmu), cycles: 0, interrupts_enabled: false}
     }
 
-    pub fn new_with_path(path: &str) -> Result<CPU, Box<Error>>{
+    pub fn new_with_path(path: &str) -> Result<CPU, Box<dyn Error>>{
         let cart = Cartridge::new_with_path(path)?;
         let mmu = MMU::new_with_rom(&cart);
 

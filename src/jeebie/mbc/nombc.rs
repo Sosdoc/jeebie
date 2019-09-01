@@ -31,18 +31,18 @@ impl MemoryBankController for RomOnly {
 
     fn read(&self, addr: u16) -> u8 {
         match addr {
-            0...0x7FFF => self.data[addr as usize],
-            0xA000...0xBFFF => self.ram[(addr - 0xA000) as usize],
+            0..=0x7FFF => self.data[addr as usize],
+            0xA000..=0xBFFF => self.ram[(addr - 0xA000) as usize],
             _ => panic!("RomOnly MBC attempted read at ${:04x}", addr),
         }
     }
 
     fn write(&mut self, addr: u16, data: u8) {
         match addr {
-            0...0x7FFF => {
+            0..=0x7FFF => {
                 // nothing happens when writing to ROM
             },
-            0xA000...0xBFFF => self.ram[(addr - 0xA000) as usize] = data,
+            0xA000..=0xBFFF => self.ram[(addr - 0xA000) as usize] = data,
             _ => panic!("RomOnly MBC attempted write at ${:04x}", addr),
         };
     }

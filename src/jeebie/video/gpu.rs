@@ -166,7 +166,7 @@ impl GPU {
         // continue rendering only if wx/wy are in range (0 to 160 and 0 to 144)
         // also, the current line being rendered must be inside the window (line < wy)
         match (wx, wy) {
-            (0...159, 0...143) if self.line < wy => {}
+            (0..=159, 0..=143) if self.line < wy => {}
             (_, _) => { return; }
         };
 

@@ -29,13 +29,13 @@ impl MemoryBankController for MBC1 {
 
     fn read(&self, addr: u16) -> u8 {
         match addr {
-            0...0x3FFF => self.data[addr as usize], // bank 0
-            0x4000...0x7FFF => {
+            0..=0x3FFF => self.data[addr as usize], // bank 0
+            0x4000..=0x7FFF => {
                 // the selected bank data (banks 1 to 0x7F)
                 let base_address = self.selected_rom_bank as u16 * 0x4000;
                 self.data[(base_address + addr) as usize]
             },
-            0xA000...0xBFFF => {
+            0xA000..=0xBFFF => {
                 // the selected RAM bank data (banks 0 to 3)
                 self.ram[(addr - 0xA000) as usize]
             }
