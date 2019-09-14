@@ -10,3 +10,14 @@ sdl2 = "0.30"
 
 [features]
 default=[]
+
+# Disable overflow checks - the emulator makes ample use of overflowing
+# operations everywhere and checked operations only when needed.
+[profile.release]
+overflow-checks = false
+
+[profile.dev]
+overflow-checks = false
+
+[profile.test]
+overflow-checks = false
