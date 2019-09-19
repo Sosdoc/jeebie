@@ -21,15 +21,29 @@ pub enum Flags {
 
 #[derive(Clone, Copy)]
 pub enum Register8 {
-    A, B, C, D, E, H, L,
+    A,
+    B,
+    C,
+    D,
+    E,
+    H,
+    L,
     RegisterAddress(Register16),
-    Address(u16), N, Value8(u8)
+    Address(u16),
+    N,
+    Value8(u8),
 }
 
 #[derive(Clone, Copy)]
 pub enum Register16 {
-    AF, BC, DE, HL, SP, PC,
-    NN, Value16(u16)
+    AF,
+    BC,
+    DE,
+    HL,
+    SP,
+    PC,
+    NN,
+    Value16(u16),
 }
 
 /// The main registers in a gameboy CPU.
@@ -38,30 +52,38 @@ pub enum Register16 {
 /// This struct also offers convenience methods to get and set individual flags.
 #[derive(Debug)]
 pub struct Registers {
-    pub a: u8, pub f: u8,
-    pub b: u8, pub c: u8,
-    pub d: u8, pub e: u8,
-    pub h: u8, pub l: u8,
+    pub a: u8,
+    pub f: u8,
+    pub b: u8,
+    pub c: u8,
+    pub d: u8,
+    pub e: u8,
+    pub h: u8,
+    pub l: u8,
 
     pub pc: u16, // program counter
     pub sp: u16, // stack pointer
 }
 
 impl Registers {
-
     pub fn new() -> Registers {
         Registers {
-            a: 0, f: 0,
-            b: 0, c: 0,
-            d: 0, e: 0,
-            h: 0, l: 0,
-            pc: 0, sp: 0
+            a: 0,
+            f: 0,
+            b: 0,
+            c: 0,
+            d: 0,
+            e: 0,
+            h: 0,
+            l: 0,
+            pc: 0,
+            sp: 0,
         }
     }
 
     /// Clears all flag values by resetting the F register to 0.
     pub fn clear_all_flags(&mut self) {
-       self.f = 0;
+        self.f = 0;
     }
 
     /// Sets the selected flag to 1.
@@ -88,4 +110,3 @@ impl Registers {
         (self.f & flag_value) == flag_value
     }
 }
-
