@@ -1,5 +1,3 @@
-pub type OpcodeFn = fn() -> ();
-
 pub fn opcode_00() {
     unimplemented!();
 }

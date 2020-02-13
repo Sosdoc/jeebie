@@ -1,6 +1,4 @@
 mod emulator;
-mod cpu;
-mod bit;
 
 use sdl2::render::{Canvas, Texture};
 use sdl2::pixels::PixelFormatEnum;
@@ -8,6 +6,7 @@ use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
 use std::error::Error;
+use emulator::Emulator;
 
 fn main() {
     main_loop().expect("An error occurred when running the emulator");
@@ -31,8 +30,9 @@ fn main_loop() -> Result<(), Box<dyn std::error::Error>> {
                     .build()?;
 
     let tc = canvas.texture_creator();
-    let mut texture = tc.create_texture_streaming(PixelFormatEnum::RGB888, width, height)?;
-    let mut fb: Vec<(u8,u8,u8)> = vec![];
+    let mut texture = tc.create_texture_streaming(PixelFormatEnum::RGB24, width, height)?;
+
+    let mut emulator = Emulator::new();
 
     'running: loop {
         // Handle inputs
@@ -43,11 +43,10 @@ fn main_loop() -> Result<(), Box<dyn std::error::Error>> {
             };
         }
 
-        fb.clear();
-        for i in 0..=width*height {
-            let color = if i % 3 == 0 { (17, 70, 30) } else { (50, 0, 50) };
-            fb.push(color);
-        }
+        // TODO: send input to emulator
+
+        // Run one frame
+        let fb = emulator.run_until_frame();
 
         // Draw
         draw_step(&mut canvas, &mut texture, &fb)?;

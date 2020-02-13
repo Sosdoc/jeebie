@@ -1,19 +1,14 @@
 mod opcodes;
+mod cpu;
+
+pub use cpu::CPU;
 
 use opcodes::*;
 
-pub struct CPU {
+type OpcodeFn = fn() -> ();
 
-}
-
-impl CPU {
-    pub fn exec(&mut self, opcode: u8) {
-        let instruction = OPCODES[opcode as usize];
-        instruction()
-    }
-}
-
-pub static OPCODES: [OpcodeFn; 256] = [
+#[allow(dead_code)]
+static OPCODES: [OpcodeFn; 256] = [
     opcode_00, opcode_01, opcode_02, opcode_03, opcode_04, opcode_05, opcode_06, opcode_07, opcode_08, opcode_09, opcode_0a, opcode_0b, opcode_0c, opcode_0d, opcode_0e, opcode_0f,
 	opcode_10, opcode_11, opcode_12, opcode_13, opcode_14, opcode_15, opcode_16, opcode_17, opcode_18, opcode_19, opcode_1a, opcode_1b, opcode_1c, opcode_1d, opcode_1e, opcode_1f,
 	opcode_20, opcode_21, opcode_22, opcode_23, opcode_24, opcode_25, opcode_26, opcode_27, opcode_28, opcode_29, opcode_2a, opcode_2b, opcode_2c, opcode_2d, opcode_2e, opcode_2f,
@@ -32,7 +27,8 @@ pub static OPCODES: [OpcodeFn; 256] = [
 	opcode_f0, opcode_f1, opcode_f2, opcode_f3, opcode_f4, opcode_f5, opcode_f6, opcode_f7, opcode_f8, opcode_f9, opcode_fa, opcode_fb, opcode_fc, opcode_fd, opcode_fe, opcode_ff,
 ];
 
-pub static OPCODES_CB: [OpcodeFn; 256] = [
+#[allow(dead_code)]
+static OPCODES_CB: [OpcodeFn; 256] = [
 	opcode_cb00, opcode_cb01, opcode_cb02, opcode_cb03, opcode_cb04, opcode_cb05, opcode_cb06, opcode_cb07, opcode_cb08, opcode_cb09, opcode_cb0a, opcode_cb0b, opcode_cb0c, opcode_cb0d, opcode_cb0e, opcode_cb0f,
 	opcode_cb10, opcode_cb11, opcode_cb12, opcode_cb13, opcode_cb14, opcode_cb15, opcode_cb16, opcode_cb17, opcode_cb18, opcode_cb19, opcode_cb1a, opcode_cb1b, opcode_cb1c, opcode_cb1d, opcode_cb1e, opcode_cb1f,
 	opcode_cb20, opcode_cb21, opcode_cb22, opcode_cb23, opcode_cb24, opcode_cb25, opcode_cb26, opcode_cb27, opcode_cb28, opcode_cb29, opcode_cb2a, opcode_cb2b, opcode_cb2c, opcode_cb2d, opcode_cb2e, opcode_cb2f,
